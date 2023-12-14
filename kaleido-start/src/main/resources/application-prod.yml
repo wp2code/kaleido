@@ -1,0 +1,10 @@
+# 端口号
+server:
+  port: 10272
+spring:
+  datasource:
+    # 配置自带数据库的相对路径
+    url: jdbc:sqlite:~/.kaleido/db/prod
+    driver-class-name: org.sqlite.JDBC
+
+

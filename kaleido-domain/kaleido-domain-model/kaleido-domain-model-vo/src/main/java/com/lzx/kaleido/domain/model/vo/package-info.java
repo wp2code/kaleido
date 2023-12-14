@@ -1,0 +1,1 @@
+package com.lzx.kaleido.domain.model.vo;

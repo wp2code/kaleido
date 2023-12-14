@@ -1,0 +1,38 @@
+spring:
+  profiles:
+    active: @environment@
+  main:
+    allow-bean-definition-overriding: true
+  servlet:
+    multipart:
+      max-file-size: -1
+      max-request-size: -1
+  jpa:
+    # 展示sql
+    show-sql: true
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    fallbackToSystemLocale: true
+  jmx:
+    enabled: false
+  jackson:
+    serialization:
+      write-dates-as-timestamps: true
+  #  用于数据库表结构版本管理
+  flyway:
+    enabled: true
+    encoding: UTF-8
+    locations: classpath:db/migration
+    sql-migration-prefix: V
+#日志级别
+logging:
+  level:
+    com:
+      devbox:
+        server:
+          domain:
+            repository:
+              mapper: debug
+
+

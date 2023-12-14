@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>kaleido</artifactId>
+        <groupId>com.lzx</groupId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>kaleido-plugins</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>kaleido-plugins-postgresql</module>
+        <module>kaleido-plugins-mysql</module>
+        <module>kaleido-plugins-mapstruct</module>
+        <module>kaleido-plugins-mp</module>
+    </modules>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.devbox</groupId>
+                <artifactId>kaleido-plugins-mysql</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.devbox</groupId>
+                <artifactId>kaleido-plugins-postgresql</artifactId>
+                <version>${revision}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.lzx</groupId>
+  <artifactId>kaleido-plugins-mp</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <description>kaleido</description>
+  <url>https://liuzixi.top/kaleido/kaleido/kaleido-plugins/kaleido-plugins-mp</url>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>wp2code</name>
+      <email>liu_weipinglove@163.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:https://github.com/wp2code/kaleido.git/kaleido/kaleido-plugins/kaleido-plugins-mp</connection>
+    <developerConnection>scm:git:https://github.com/wp2code/kaleido.git/kaleido/kaleido-plugins/kaleido-plugins-mp</developerConnection>
+    <url>https://github.com/wp2code/kaleido/kaleido/kaleido-plugins/kaleido-plugins-mp</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>com.baomidou</groupId>
+      <artifactId>mybatis-plus-boot-starter</artifactId>
+      <version>3.5.4.1</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.mybatis</groupId>
+          <artifactId>mybatis-spring</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.mybatis</groupId>
+      <artifactId>mybatis-spring</artifactId>
+      <version>3.0.3</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.lzx</groupId>
+      <artifactId>kaleido-infra-base</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+  </dependencies>
+</project>
