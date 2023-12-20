@@ -27,7 +27,7 @@ public class BaseDBManager implements IDBManager {
      */
     @Override
     public Connection getConnection(final ConnectionInfo connectionInfo) throws CommonException {
-        Connection connection = connectionInfo.getConnection();
+        Connection connection = connectionInfo.getConnectionNotReset();
         try {
             if (connection != null && !connection.isClosed()) {
                 return connection;
@@ -40,6 +40,7 @@ public class BaseDBManager implements IDBManager {
             if (StrUtil.isNotBlank(connectionInfo.getDatabaseName()) || StrUtil.isNotBlank(connectionInfo.getSchemaName())) {
                 connectDatabase(connection, connectionInfo.getSchemaName(), connectionInfo.getDatabaseName());
             }
+            connectionInfo.setResetConnection(false);
             connectionInfo.setConnection(connection);
         } catch (SQLException | CommonException e) {
             DriverManager.close(connection);

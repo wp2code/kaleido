@@ -1,5 +1,6 @@
 package com.lzx.kaleido.spi.db.model;
 
+import com.lzx.kaleido.spi.db.utils.JdbcUtil;
 import lombok.Data;
 
 import java.sql.Connection;
@@ -35,6 +36,10 @@ public class ConnectionInfo {
     
     private transient Connection connection;
     
+    /**
+     * 是否重置连接
+     */
+    private boolean resetConnection;
     
     /**
      * 数据库属性配置
@@ -54,5 +59,18 @@ public class ConnectionInfo {
         connectionInfo.setPassword(password);
         connectionInfo.setExtend(extend);
         return connectionInfo;
+    }
+    
+    /**
+     * @return
+     */
+    public Connection getConnectionNotReset() {
+        if (resetConnection) {
+            if (connection != null) {
+                JdbcUtil.closeConnection(connection);
+            }
+            return null;
+        }
+        return connection;
     }
 }

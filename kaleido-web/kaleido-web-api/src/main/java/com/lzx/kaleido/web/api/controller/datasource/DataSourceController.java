@@ -27,7 +27,7 @@ import java.util.List;
  * @date 2023-11-10
  **/
 @RestController
-@RequestMapping("/datasource")
+@RequestMapping("/v1/datasource")
 public class DataSourceController {
     
     @Resource
@@ -39,7 +39,7 @@ public class DataSourceController {
      * @param param
      * @return
      */
-    @PostMapping("/create")
+    @PostMapping("/add")
     public R<Long> createDataSource(@RequestBody DataSourceParam param) {
         final Long id = dataSourceService.createDataSource(param);
         return R.result(id != null, ErrorCode.SAVE_FAILED, id);
@@ -52,7 +52,7 @@ public class DataSourceController {
      * @param param
      * @return
      */
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}/update")
     public R<Boolean> updateDataSource(@PathVariable("id") Long id, @RequestBody DataSourceParam param) {
         final boolean isSuccess = dataSourceService.updateById(id, param);
         return R.result(isSuccess, ErrorCode.UPDATE_FAILED);
@@ -64,7 +64,7 @@ public class DataSourceController {
      * @param id
      * @return
      */
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}/delete")
     public R<Boolean> deleteDataSource(@PathVariable("id") Long id) {
         final boolean isSuccess = dataSourceService.deleteById(id);
         return R.result(isSuccess, ErrorCode.DELETED_FAILED);
@@ -76,7 +76,7 @@ public class DataSourceController {
      * @param id
      * @return
      */
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}/get")
     public R<DataSourceVO> getDataSource(@PathVariable("id") Long id) {
         return R.success(dataSourceService.getDetailById(id));
     }
@@ -87,9 +87,10 @@ public class DataSourceController {
      * @param param
      * @return
      */
-    @PostMapping("/query")
+    @PostMapping("/list")
     public R<List<DataSourceVO>> queryDataSource(@RequestBody DataSourceQueryParam param) {
-        return R.success(dataSourceService.queryByParam(param));
+        final List<DataSourceVO> list = dataSourceService.queryByParam(param);
+        return R.success(list);
     }
     
     
@@ -99,7 +100,7 @@ public class DataSourceController {
      * @param param
      * @return
      */
-    @PostMapping("/connect/test")
+    @PostMapping("/test/connect")
     public R<Boolean> connectTestDataSource(@RequestBody DataSourceConnectParam param) {
         final boolean isSuccess = dataSourceService.connectTestDataSource(param);
         return R.result(isSuccess, ErrorCode.CONNECTION_FAILED);
@@ -111,7 +112,7 @@ public class DataSourceController {
      * @param id
      * @return
      */
-    @GetMapping("/metaInfo/{id}")
+    @GetMapping("/meta/{id}/info")
     public R<DataSourceMetaVO> getDataSourceMeta(@PathVariable("id") Long id) {
         final DataSourceMetaVO dataSourceMeta = dataSourceService.getDataSourceMeta(id, false);
         return R.success(dataSourceMeta);
@@ -123,9 +124,10 @@ public class DataSourceController {
      * @param id
      * @return
      */
-    @GetMapping("/metaInfo/deep/{id}")
-    public R<DataSourceMetaVO> getDataSourceMetaDeep(@PathVariable("id") Long id) {
+    @GetMapping("/meta/{id}/all/info")
+    public R<DataSourceMetaVO> getDataSourceMetaAll(@PathVariable("id") Long id) {
         final DataSourceMetaVO dataSourceMeta = dataSourceService.getDataSourceMeta(id, true);
         return R.success(dataSourceMeta);
     }
+  
 }

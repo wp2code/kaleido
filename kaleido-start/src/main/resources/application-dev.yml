@@ -5,5 +5,7 @@ spring:
   datasource:
     url: jdbc:sqlite:~/.kaleido/db/dev
     driver-class-name: org.sqlite.JDBC
-
+logging:
+  level:
+    com.lzx.kaleido.domain.repository: debug
 

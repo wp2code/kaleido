@@ -1,3 +1,4 @@
+
 spring:
   profiles:
     active: @environment@
@@ -34,5 +35,7 @@ logging:
           domain:
             repository:
               mapper: debug
-
+server:
+  servlet:
+    context-path: /ks
 

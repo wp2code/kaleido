@@ -1,5 +1,6 @@
 package com.lzx.kaleido.infra.base.pojo;
 
+import cn.hutool.core.util.StrUtil;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.enums.IBaseEnum;
 import lombok.Data;
@@ -38,9 +39,13 @@ public class R<T> implements Serializable {
      * @return
      */
     public static <T> R<T> fail(String message) {
+        return fail(ErrorCode.FAILED,message);
+    }
+    
+    public static <T> R<T> fail(ErrorCode errorCode, String message) {
         final R<T> r = new R<>();
-        r.setCode(ErrorCode.FAILED.getCode());
-        r.setMessage(message);
+        r.setCode(errorCode.getCode());
+        r.setMessage(StrUtil.isNotBlank(message) ? message : errorCode.getName());
         return r;
     }
     

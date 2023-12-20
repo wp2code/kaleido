@@ -20,6 +20,7 @@ import java.sql.Types;
 @UtilityClass
 public class JdbcUtil {
     
+    
     /**
      * @param rs
      */

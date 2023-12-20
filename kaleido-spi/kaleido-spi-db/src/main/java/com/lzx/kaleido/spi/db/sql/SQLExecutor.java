@@ -80,7 +80,7 @@ public class SQLExecutor {
         try (Statement stmt = connection.createStatement();) {
             boolean query = stmt.execute(sql);
             if (query) {
-                try (ResultSet rs = stmt.getResultSet();) {
+                try (ResultSet rs = stmt.getResultSet()) {
                     return function.apply(rs);
                 }
             }

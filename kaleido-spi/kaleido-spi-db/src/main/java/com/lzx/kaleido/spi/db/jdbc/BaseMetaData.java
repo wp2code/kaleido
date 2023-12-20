@@ -49,7 +49,7 @@ public class BaseMetaData implements IMetaData {
      * @return
      */
     @Override
-    public List<Schema> schemas(final Connection connection, final String databaseName) {
+    public List<Schema> schemas(final Connection connection, final String databaseName,final String currConnectionDatabase) {
         return SQLExecutor.getInstance().schemas(connection, null, databaseName);
     }
     

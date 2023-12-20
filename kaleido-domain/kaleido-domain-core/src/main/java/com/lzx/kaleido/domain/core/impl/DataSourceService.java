@@ -15,6 +15,7 @@ import com.lzx.kaleido.domain.model.vo.datasource.DataSourceMetaVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceVO;
 import com.lzx.kaleido.domain.repository.mapper.IDataSourceMapper;
 import com.lzx.kaleido.infra.base.excption.CommonException;
+import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
 import com.lzx.kaleido.infra.base.utils.PojoConvertUtil;
 import com.lzx.kaleido.plugins.mp.BaseServiceImpl;
 import com.lzx.kaleido.spi.db.model.ConnectionInfo;
@@ -124,6 +125,7 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
                         .dateBaseList(ConvertUtil.convertDataBaseList(dateBaseList, connectionInfo, deepQuery, false)).build();
             } catch (CommonException e) {
                 log.error("getDataSource is failed! {}", e.getMessage());
+                throw new CommonRuntimeException(e.getErrorCode());
             } finally {
                 DataSourceFactory.getInstance().closeConnection(connection);
             }

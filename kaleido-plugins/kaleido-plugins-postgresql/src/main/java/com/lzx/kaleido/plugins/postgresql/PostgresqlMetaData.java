@@ -58,11 +58,12 @@ public class PostgresqlMetaData extends BaseMetaData {
     /**
      * @param connection
      * @param databaseName
+     * @param currConnectionDatabase
      * @return
      */
     @Override
-    public List<Schema> schemas(Connection connection, String databaseName) {
-        List<Schema> schemas = SQLExecutor.getInstance()
+    public List<Schema> schemas(Connection connection, String databaseName, String currConnectionDatabase) {
+        final List<Schema> schemas = SQLExecutor.getInstance()
                 .execute(connection, "SELECT catalog_name, schema_name FROM information_schema.schemata;", (resultSet) -> {
                     final List<Schema> databases = new ArrayList<>();
                     while (resultSet.next()) {

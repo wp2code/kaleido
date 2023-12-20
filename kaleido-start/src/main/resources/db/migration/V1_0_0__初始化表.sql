@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS `data_source` (
                                "password" varchar(100),
                                "db_name" varchar(50),
                                "extend" text,
+                               "creator_id" varchar(20),
                                "deleted" integer DEFAULT 0,
                                "create_time" timestamp DEFAULT CURRENT_TIMESTAMP,
                                "update_time" timestamp DEFAULT CURRENT_TIMESTAMP

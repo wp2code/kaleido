@@ -7,6 +7,7 @@ import com.lzx.kaleido.domain.model.vo.datasource.DataSourceVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DatabaseVO;
 import com.lzx.kaleido.domain.model.vo.datasource.SchemaVO;
 import com.lzx.kaleido.domain.model.vo.datasource.TableVO;
+import com.lzx.kaleido.infra.base.excption.CommonException;
 import com.lzx.kaleido.spi.db.model.ConnectionInfo;
 import com.lzx.kaleido.spi.db.model.DBConfig;
 import com.lzx.kaleido.spi.db.model.metaData.Database;
@@ -53,15 +54,15 @@ public class ConvertUtil {
      * @return
      */
     public List<DatabaseVO> convertDataBaseList(List<Database> dateBaseList, ConnectionInfo connectionInfo, boolean deepQuery,
-            boolean queryTableDetailMore) {
+            boolean queryTableDetailMore) throws CommonException {
         final List<DatabaseVO> list = new ArrayList<>();
         for (final Database database : dateBaseList) {
             final DatabaseVO vo = new DatabaseVO();
             vo.setName(database.getName());
             if (deepQuery) {
                 final DBConfig propertiesConfig = connectionInfo.getPropertiesConfig();
-                if (propertiesConfig != null && propertiesConfig.isSupportSchema()) {
-                    vo.setSupportSchema(true);
+                vo.setSupportSchema(propertiesConfig.isSupportSchema());
+                if (propertiesConfig.isSupportSchema()) {
                     final List<Schema> schemasList = DataSourceFactory.getInstance().getSchemasList(connectionInfo, vo.getName());
                     final List<SchemaVO> schemaVOList = convertSchemaList(schemasList, (schemaName) -> {
                         final List<Table> tableList = DataSourceFactory.getInstance()

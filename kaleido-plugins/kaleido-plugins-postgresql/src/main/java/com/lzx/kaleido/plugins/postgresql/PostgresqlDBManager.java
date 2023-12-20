@@ -23,18 +23,18 @@ public class PostgresqlDBManager extends BaseDBManager {
      * @return
      */
     @Override
-    public boolean connectDatabase(Connection connection, final String schemaName, String database) throws CommonException {
+    public boolean connectDatabase(Connection connection, final String schemaName, final String database) throws CommonException {
         if (StrUtil.isNotBlank(schemaName)) {
             try {
                 SQLExecutor.getInstance().execute(connection, "SET search_path TO \"" + schemaName + "\"");
+                return true;
             } catch (SQLException e) {
                 throw new CommonException("connectDatabase 异常", e);
             }
-            return true;
         }
-        return super.connectDatabase(connection, schemaName, database);
+        return  super.connectDatabase(connection, schemaName, database);
     }
-    
+
     /**
      * @param fmtUrl
      * @param connectionInfo

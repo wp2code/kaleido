@@ -1,6 +1,7 @@
 package com.lzx.kaleido.domain.core;
 
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.excption.CommonException;
 import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
@@ -55,7 +56,7 @@ public class DataSourceFactory {
      */
     public Connection getConnection(final ConnectionInfo connectionInfo) throws CommonException {
         Assert.notNull(connectionInfo);
-        Connection connection = connectionInfo.getConnection();
+        Connection connection = connectionInfo.getConnectionNotReset();
         if (connection != null) {
             return connection;
         }
@@ -64,7 +65,9 @@ public class DataSourceFactory {
         final IDBManager dbManager = dataSource.getDBManager();
         if (dbManager != null) {
             connection = dbManager.getConnection(connectionInfo);
-            return connection;
+            if (connection != null) {
+                return connection;
+            }
         }
         throw new CommonException(ErrorCode.CONNECTION_FAILED);
     }
@@ -87,11 +90,17 @@ public class DataSourceFactory {
      * @param databaseName
      * @return
      */
-    public List<Schema> getSchemasList(final ConnectionInfo connectionInfo, final String databaseName) {
+    public List<Schema> getSchemasList(final ConnectionInfo connectionInfo, final String databaseName) throws CommonException {
         final IDBPlugin dataSource = getDataSource(connectionInfo.getDbType());
         final IMetaData metaData = dataSource.getMetaData();
         if (metaData != null) {
-            return metaData.schemas(connectionInfo.getConnection(), databaseName);
+            // 数据库不一致，切换数据库连接
+            if (StrUtil.isNotBlank(databaseName) && !databaseName.equals(connectionInfo.getDatabaseName())) {
+                connectionInfo.setResetConnection(true);
+                connectionInfo.setDatabaseName(databaseName);
+                getConnection(connectionInfo);
+            }
+            return metaData.schemas(connectionInfo.getConnection(), databaseName, connectionInfo.getDatabaseName());
         }
         return null;
     }

@@ -38,9 +38,10 @@ public interface IMetaData {
      *
      * @param connection
      * @param databaseName
+     * @param currConnectionDatabase
      * @return
      */
-    List<Schema> schemas(Connection connection, String databaseName);
+    List<Schema> schemas(Connection connection, String databaseName, String currConnectionDatabase);
     
     /**
      * 获取数据库表
