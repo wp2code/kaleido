@@ -42,7 +42,7 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
      * @return
      */
     @Override
-    public Long createDataSource(final DataSourceParam param) {
+    public Long addDataSource(final DataSourceParam param) {
         final String name = param.getName();
         if (StrUtil.isBlank(name)) {
             param.setName(param.getDefaultName());

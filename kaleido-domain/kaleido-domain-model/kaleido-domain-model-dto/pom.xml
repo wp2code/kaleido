@@ -14,5 +14,9 @@
             <groupId>com.lzx</groupId>
             <artifactId>kaleido-domain-model-entity</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.lzx</groupId>
+            <artifactId>kaleido-domain-model-vo</artifactId>
+        </dependency>
     </dependencies>
 </project>

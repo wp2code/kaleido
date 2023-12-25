@@ -12,7 +12,18 @@ import java.time.LocalDateTime;
 @Data
 public class BaseVO implements Serializable {
     
+    /**
+     * 更新时间
+     */
     private LocalDateTime updateTime;
     
+    /**
+     * 创建时间
+     */
     private LocalDateTime createTime;
+    
+    /**
+     * 创建人
+     */
+    private String creatorId;
 }

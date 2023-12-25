@@ -1,0 +1,132 @@
+package com.lzx.kaleido.domain.core.impl;
+
+import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateConfigService;
+import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateService;
+import com.lzx.kaleido.domain.model.entity.code.CodeGenerationTemplateEntity;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
+import com.lzx.kaleido.domain.repository.mapper.ICodeGenerationTemplateMapper;
+import com.lzx.kaleido.infra.base.enums.ErrorCode;
+import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
+import com.lzx.kaleido.infra.base.utils.PojoConvertUtil;
+import com.lzx.kaleido.plugins.mp.BaseServiceImpl;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.List;
+
+/**
+ * @author lwp
+ **/
+@Service
+public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerationTemplateMapper, CodeGenerationTemplateEntity>
+        implements ICodeGenerationTemplateService {
+    
+    @Resource
+    private ICodeGenerationTemplateConfigService codeGenerationTemplateConfigService;
+    
+    
+    /**
+     * 新增代码模板
+     *
+     * @param vo
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long addCodeGenerationTemplate(final CodeGenerationTemplateVO vo) {
+        final CodeGenerationTemplateEntity entity = PojoConvertUtil.vo2Entity(vo, CodeGenerationTemplateEntity.class);
+        if (!this.exists(Wrappers.<CodeGenerationTemplateEntity>lambdaQuery()
+                .eq(CodeGenerationTemplateEntity::getTemplateName, vo.getTemplateName()))) {
+            final List<CodeGenerationTemplateConfigVO> templateConfigList = vo.getTemplateConfigList();
+            if (this.save(entity)) {
+                final Long id = entity.getId();
+                if (CollUtil.isNotEmpty(templateConfigList)) {
+                    templateConfigList.forEach(v -> v.setTemplateId(id));
+                    codeGenerationTemplateConfigService.addCodeGenerationTemplateConfigBatch(templateConfigList);
+                }
+                return id;
+            }
+        }
+        throw new CommonRuntimeException(ErrorCode.SAVE_FAILED);
+    }
+    
+    /**
+     * 更新代码模板
+     *
+     * @param id
+     * @param vo
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateById(final Long id, final CodeGenerationTemplateVO vo) {
+        vo.setId(id);
+        final CodeGenerationTemplateEntity entity = PojoConvertUtil.vo2Entity(vo, CodeGenerationTemplateEntity.class);
+        if (this.updateById(entity)) {
+            if (CollUtil.isNotEmpty(vo.getTemplateConfigList())) {
+                vo.getTemplateConfigList().forEach(v -> v.setTemplateId(id));
+                if (codeGenerationTemplateConfigService.updateByIdBatch(vo.getTemplateConfigList())) {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+        throw new CommonRuntimeException(ErrorCode.UPDATE_FAILED);
+    }
+    
+    /**
+     * 更新模板名称
+     *
+     * @param id
+     * @param templateName
+     * @return
+     */
+    @Override
+    public boolean updateTemplateNameById(final Long id, final String templateName) {
+        final LambdaUpdateWrapper<CodeGenerationTemplateEntity> updateWrapper = Wrappers.<CodeGenerationTemplateEntity>lambdaUpdate()
+                .set(CodeGenerationTemplateEntity::getId, id).set(CodeGenerationTemplateEntity::getTemplateName, templateName);
+        return this.update(updateWrapper);
+    }
+    
+    /**
+     * 获取代码模板详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public CodeGenerationTemplateVO getDetailById(final Long id) {
+        final CodeGenerationTemplateEntity entity = this.getById(id);
+        if (entity != null) {
+            final CodeGenerationTemplateVO vo = PojoConvertUtil.entity2Vo(entity, CodeGenerationTemplateVO.class);
+            final List<CodeGenerationTemplateConfigVO> templateConfigList = codeGenerationTemplateConfigService.getByTemplateId(vo.getId());
+            vo.setTemplateConfigList(templateConfigList);
+            return vo;
+        }
+        return null;
+    }
+    
+    /**
+     * 删除代码模板
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteById(final Long id) {
+        final CodeGenerationTemplateEntity entity = this.getById(id);
+        if (entity != null) {
+            if (this.removeById(entity.getId()) && codeGenerationTemplateConfigService.deleteByTemplateId(entity.getId())) {
+                return true;
+            }
+        }
+        throw new CommonRuntimeException(ErrorCode.DELETED_FAILED);
+    }
+}

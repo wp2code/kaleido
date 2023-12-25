@@ -40,8 +40,8 @@ public class DataSourceController {
      * @return
      */
     @PostMapping("/add")
-    public R<Long> createDataSource(@RequestBody DataSourceParam param) {
-        final Long id = dataSourceService.createDataSource(param);
+    public R<Long> addDataSource(@RequestBody DataSourceParam param) {
+        final Long id = dataSourceService.addDataSource(param);
         return R.result(id != null, ErrorCode.SAVE_FAILED, id);
     }
     
@@ -129,5 +129,5 @@ public class DataSourceController {
         final DataSourceMetaVO dataSourceMeta = dataSourceService.getDataSourceMeta(id, true);
         return R.success(dataSourceMeta);
     }
-  
+    
 }

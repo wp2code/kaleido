@@ -20,7 +20,7 @@ public interface IDataSourceService {
      * @param param
      * @return
      */
-    Long createDataSource(final DataSourceParam param);
+    Long addDataSource(final DataSourceParam param);
     
     /**
      * 更新数据源连接
