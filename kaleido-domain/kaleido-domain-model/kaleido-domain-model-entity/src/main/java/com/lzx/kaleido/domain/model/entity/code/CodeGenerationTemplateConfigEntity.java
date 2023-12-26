@@ -29,16 +29,16 @@ public class CodeGenerationTemplateConfigEntity extends BaseEntity {
     private Long templateId;
     
     /**
-     * 类型
+     * 模板配置名称
      */
-    @TableField("type")
-    private String type;
+    @TableField("name")
+    private String name;
     
     /**
-     * 配置参数
+     * 模板配置别名
      */
-    @TableField("config_params")
-    private String configParams;
+    @TableField("alias")
+    private String alias;
     
     /**
      * 代码模板

@@ -6,6 +6,7 @@ import com.lzx.kaleido.domain.model.dto.param.datasource.DataSourceParam;
 import com.lzx.kaleido.domain.model.dto.param.datasource.DataSourceQueryParam;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceMetaVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceVO;
+import com.lzx.kaleido.infra.base.constant.Constants;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.pojo.R;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,13 +22,13 @@ import javax.annotation.Resource;
 import java.util.List;
 
 /**
- * 数据源控制类
+ * 数据源管理接口
  *
  * @author lwp
  * @date 2023-11-10
  **/
 @RestController
-@RequestMapping("/v1/datasource")
+@RequestMapping(Constants.API_VERSION + "/datasource")
 public class DataSourceController {
     
     @Resource

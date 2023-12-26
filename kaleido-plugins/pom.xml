@@ -16,6 +16,7 @@
         <module>kaleido-plugins-mysql</module>
         <module>kaleido-plugins-mapstruct</module>
         <module>kaleido-plugins-mp</module>
+        <module>kaleido-plugins-template</module>
     </modules>
     <dependencyManagement>
         <dependencies>

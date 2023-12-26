@@ -12,5 +12,7 @@ public interface Constants {
     String DEFAULT_USER_ID = "LZX1027";
     
     int MAX_PAGE_SIZE = 1000;
-
+    
+    String API_VERSION = "v1";
+    
 }

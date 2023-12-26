@@ -5,6 +5,7 @@ import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateService;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
 import com.lzx.kaleido.infra.base.annotations.validation.AddGroup;
 import com.lzx.kaleido.infra.base.annotations.validation.UpdateGroup;
+import com.lzx.kaleido.infra.base.constant.Constants;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.pojo.R;
 import org.springframework.validation.annotation.Validated;
@@ -20,13 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 
 /**
- * 代码模板管理
+ * 代码模板管理接口
  *
  * @author lwp
  * @date 2023-12-15
  **/
 @RestController
-@RequestMapping("/v1/code-tp")
+@RequestMapping(Constants.API_VERSION + "/code-tp")
 public class CodeGenerationTemplateController {
     
     @Resource

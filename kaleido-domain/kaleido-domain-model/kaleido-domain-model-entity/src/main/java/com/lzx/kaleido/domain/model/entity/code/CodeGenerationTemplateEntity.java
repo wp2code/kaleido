@@ -35,6 +35,12 @@ public class CodeGenerationTemplateEntity extends BaseEntity {
     private String language;
     
     /**
+     * 模板基本配置
+     */
+    @TableField("basic_config")
+    private String basicConfig;
+    
+    /**
      * 是否为内部分组
      */
     @TableField("is_internal")

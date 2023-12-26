@@ -31,18 +31,19 @@ public class CodeGenerationTemplateConfigVO extends BaseVO {
     private Long templateId;
     
     /**
-     * 类型
+     * 模板配置名称
      */
     @NotNull(groups = {AddGroup.class, UpdateGroup.class})
-    private String type;
+    private String name;
     
     /**
-     * 配置参数
+     * 模板配置别名
      */
-    private String configParams;
+    @NotNull(groups = {AddGroup.class, UpdateGroup.class})
+    private String alias;
     
     /**
-     * 代码模板
+     * 模板内容
      */
     private String templateContent;
     

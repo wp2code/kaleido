@@ -39,6 +39,11 @@ public class CodeGenerationTemplateVO extends BaseVO {
     private String language;
     
     /**
+     * 模板基本配置
+     */
+    private String basicConfig;
+    
+    /**
      * 是否为内部模板 （0-不是；1-是）
      */
     private Integer isInternal = 0;

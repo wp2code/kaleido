@@ -19,6 +19,7 @@ CREATE TABLE "code_generation_template" (
                                             "id" integer NOT NULL,
                                             "template_name" varchar NOT NULL,
                                             "language" varchar NOT NULL,
+                                            "basic_config" TEXT,
                                             "is_internal" integer NOT NULL DEFAULT 0,
                                             "creator_id" varchar,
                                             "deleted" integer DEFAULT 0,
@@ -29,14 +30,15 @@ CREATE TABLE "code_generation_template" (
 
 
 CREATE TABLE "code_generation_template_config" (
-                                                   "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+                                                   "id" integer NOT NULL,
                                                    "template_id" integer NOT NULL,
-                                                   "type_id" integer NOT NULL,
+                                                   "name" varchar NOT NULL,
+                                                   "alias" varchar,
                                                    "template_content" TEXT,
-                                                   "config_params" TEXT,
                                                    "hide_status" integer NOT NULL DEFAULT 0,
                                                    "creator_id" varchar,
                                                    "deleted" integer DEFAULT 0,
                                                    "create_time" timestamp DEFAULT CURRENT_TIMESTAMP,
-                                                   "update_time" timestamp DEFAULT CURRENT_TIMESTAMP
+                                                   "update_time" timestamp DEFAULT CURRENT_TIMESTAMP,
+                                                   PRIMARY KEY ("id")
 );

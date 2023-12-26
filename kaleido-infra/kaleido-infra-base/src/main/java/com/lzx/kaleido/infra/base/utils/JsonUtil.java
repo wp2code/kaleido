@@ -25,9 +25,10 @@ import java.util.Map;
 @Slf4j
 @UtilityClass
 public class JsonUtil {
+    
     @Setter
     private static ObjectMapper objectMapper;
-
+    
     /**
      * 是否为json
      *
@@ -37,7 +38,7 @@ public class JsonUtil {
     public boolean isJson(String jsonStr) {
         return JSONUtil.isTypeJSON(jsonStr);
     }
-
+    
     /**
      * json转 bean
      *
@@ -49,14 +50,14 @@ public class JsonUtil {
     public <T> T toBean(String jsonStr, Class<T> cls) {
         if (StrUtil.isNotBlank(jsonStr)) {
             try {
-                return objectMapper.readValue(jsonStr, cls);
+                return getObjectMapperIfAbsent().readValue(jsonStr, cls);
             } catch (Exception e) {
                 log.error("json error:" + e.getMessage(), e);
             }
         }
         return null;
     }
-
+    
     /**
      * json 转对象
      *
@@ -67,30 +68,30 @@ public class JsonUtil {
     public Object toObject(String jsonStr, Class<?> cls) {
         if (StrUtil.isNotBlank(jsonStr)) {
             try {
-                return objectMapper.readValue(jsonStr, cls);
+                return getObjectMapperIfAbsent().readValue(jsonStr, cls);
             } catch (Exception e) {
                 log.error("json error:" + e.getMessage(), e);
             }
         }
         return null;
     }
-
+    
     /**
      * 对象转 map
      *
      * @param data 参数
      * @return
      */
-    public Map toMap(Object data) {
-        if (data instanceof Map) {
-            return (Map) data;
+    public Map<?, ?> toMap(Object data) {
+        if (data instanceof Map map) {
+            return map;
         }
-        if (data instanceof String) {
-            return JsonUtil.toBean((String) data, Map.class);
+        if (data instanceof String json) {
+            return JsonUtil.toBean(json, Map.class);
         }
         return JsonUtil.toBean(JsonUtil.toJson(data), Map.class);
     }
-
+    
     /**
      * Map 转 bean
      *
@@ -99,10 +100,10 @@ public class JsonUtil {
      * @param <T> Class<T>
      * @return
      */
-    public <T> T mapToBean(Map map, Class<T> cls) {
+    public <T> T mapToBean(Map<?, ?> map, Class<T> cls) {
         return JsonUtil.toBean(JsonUtil.toJson(map), cls);
     }
-
+    
     /**
      * json转 bean
      *
@@ -114,14 +115,14 @@ public class JsonUtil {
     public <T> T toBean(String jsonStr, TypeReference<T> typeReference) {
         if (StrUtil.isNotBlank(jsonStr)) {
             try {
-                return (T) objectMapper.readValue(jsonStr, typeReference);
+                return (T) getObjectMapperIfAbsent().readValue(jsonStr, typeReference);
             } catch (Exception e) {
                 log.error("json error:" + e.getMessage(), e);
             }
         }
         return null;
     }
-
+    
     /**
      * json转 bean (List)
      *
@@ -133,14 +134,14 @@ public class JsonUtil {
     public <T> List<T> toBeanList(String jsonStr, Class<T> cls) {
         if (StrUtil.isNotBlank(jsonStr)) {
             try {
-                return objectMapper.readValue(jsonStr, getCollectionType(List.class, cls));
+                return getObjectMapperIfAbsent().readValue(jsonStr, getCollectionType(List.class, cls));
             } catch (Exception e) {
                 log.error("json error:" + e.getMessage(), e);
             }
         }
         return null;
     }
-
+    
     /**
      * 对象转Json
      *
@@ -150,7 +151,7 @@ public class JsonUtil {
     public String toJson(Object object) {
         return toJson(object, false);
     }
-
+    
     /**
      * 对象转Json
      *
@@ -162,9 +163,9 @@ public class JsonUtil {
         if (object != null) {
             try {
                 if (pretty) {
-                    return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+                    return getObjectMapperIfAbsent().writerWithDefaultPrettyPrinter().writeValueAsString(object);
                 } else {
-                    return objectMapper.writeValueAsString(object);
+                    return getObjectMapperIfAbsent().writeValueAsString(object);
                 }
             } catch (Exception e) {
                 log.error("json error:" + e.getMessage());
@@ -172,7 +173,7 @@ public class JsonUtil {
         }
         return null;
     }
-
+    
     /**
      * 拼接Json字符串
      *
@@ -195,7 +196,7 @@ public class JsonUtil {
         }
         return appendJson(args);
     }
-
+    
     /**
      * 拼接Json字符串
      *
@@ -227,8 +228,18 @@ public class JsonUtil {
         }
         return null;
     }
-
+    
     public JavaType getCollectionType(Class<?> collectionClass, Class<?>... elementClasses) {
-        return objectMapper.getTypeFactory().constructParametricType(collectionClass, elementClasses);
+        return getObjectMapperIfAbsent().getTypeFactory().constructParametricType(collectionClass, elementClasses);
+    }
+    
+    /**
+     * @return
+     */
+    private ObjectMapper getObjectMapperIfAbsent() {
+        if (JsonUtil.objectMapper == null) {
+            JsonUtil.objectMapper = new ObjectMapper();
+        }
+        return JsonUtil.objectMapper;
     }
 }
