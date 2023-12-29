@@ -1,10 +1,14 @@
 package com.lzx.kaleido.domain.model.vo.code;
 
 import com.lzx.kaleido.domain.model.entity.code.CodeGenerationTemplateConfigEntity;
+import com.lzx.kaleido.domain.model.vo.code.template.JavaConfigVO;
+import com.lzx.kaleido.domain.model.vo.conversion.JavaConfigVOConversion;
 import com.lzx.kaleido.infra.base.annotations.validation.AddGroup;
 import com.lzx.kaleido.infra.base.annotations.validation.UpdateGroup;
 import com.lzx.kaleido.infra.base.pojo.BaseVO;
+import com.lzx.kaleido.plugins.mapstruct.annotations.json.JsonConvert;
 import io.github.zhaord.mapstruct.plus.annotations.AutoMap;
+import io.github.zhaord.mapstruct.plus.annotations.AutoMapField;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,7 +19,7 @@ import lombok.EqualsAndHashCode;
  **/
 @Data
 @EqualsAndHashCode(callSuper = true)
-@AutoMap(targetType = CodeGenerationTemplateConfigEntity.class)
+@AutoMap(targetType = CodeGenerationTemplateConfigEntity.class, uses = JavaConfigVOConversion.class)
 public class CodeGenerationTemplateConfigVO extends BaseVO {
     
     /**
@@ -43,7 +47,7 @@ public class CodeGenerationTemplateConfigVO extends BaseVO {
     private String alias;
     
     /**
-     * 模板内容
+     * 模板内容（json）
      */
     private String templateContent;
     
@@ -51,5 +55,11 @@ public class CodeGenerationTemplateConfigVO extends BaseVO {
      * 隐藏状态：0-显示；1-隐藏
      */
     private Integer hideStatus;
+    
+    /**
+     * java 开发配置
+     */
+    @AutoMapField(source = "templateParams", target = "templateParams", qualifiedBy = JsonConvert.class)
+    private JavaConfigVO templateParams;
     
 }

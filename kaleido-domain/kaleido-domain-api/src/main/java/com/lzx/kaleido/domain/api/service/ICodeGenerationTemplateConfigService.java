@@ -40,9 +40,11 @@ public interface ICodeGenerationTemplateConfigService {
      * 根据模板ID获取配置信息
      *
      * @param templateId
+     * @param hideStatus
+     * @param needParseTemplate
      * @return
      */
-    List<CodeGenerationTemplateConfigVO> getByTemplateId(@NotNull final Long templateId);
+    List<CodeGenerationTemplateConfigVO> getByTemplateId(@NotNull final Long templateId, final Integer hideStatus);
     
     /**
      * 删除代码配置

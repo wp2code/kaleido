@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.lzx.kaleido.domain.api.enums.CodeTemplateHideStatus;
 import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateConfigService;
 import com.lzx.kaleido.domain.model.entity.code.CodeGenerationTemplateConfigEntity;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
@@ -81,14 +80,18 @@ public class CodeGenerationTemplateConfigService
      * 根据模板ID获取配置信息
      *
      * @param templateId
+     * @param hideStatus
+     * @param needParseTemplate
      * @return
      */
     @Override
-    public List<CodeGenerationTemplateConfigVO> getByTemplateId(final Long templateId) {
+    public List<CodeGenerationTemplateConfigVO> getByTemplateId(final Long templateId, final Integer hideStatus) {
         final LambdaQueryWrapper<CodeGenerationTemplateConfigEntity> wrapper = Wrappers.<CodeGenerationTemplateConfigEntity>lambdaQuery()
                 .eq(CodeGenerationTemplateConfigEntity::getTemplateId, templateId)
-                .eq(CodeGenerationTemplateConfigEntity::getHideStatus, CodeTemplateHideStatus.SHOW.getCode());
-        return PojoConvertUtil.entity2VoList(this.list(wrapper), CodeGenerationTemplateConfigVO.class);
+                .eq(hideStatus != null, CodeGenerationTemplateConfigEntity::getHideStatus, hideStatus);
+        final List<CodeGenerationTemplateConfigVO> templateConfigList = PojoConvertUtil.entity2VoList(this.list(wrapper),
+                CodeGenerationTemplateConfigVO.class);
+        return templateConfigList;
     }
     
     /**

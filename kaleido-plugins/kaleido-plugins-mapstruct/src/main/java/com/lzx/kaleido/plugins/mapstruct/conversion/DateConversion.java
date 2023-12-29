@@ -1,8 +1,9 @@
 package com.lzx.kaleido.plugins.mapstruct.conversion;
 
 
-import com.lzx.kaleido.plugins.mapstruct.annotations.DateConvert;
-import com.lzx.kaleido.plugins.mapstruct.annotations.DateToStr;
+import com.lzx.kaleido.plugins.mapstruct.annotations.date.DateConvert;
+import com.lzx.kaleido.plugins.mapstruct.annotations.date.DateToStr;
+import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ import java.util.Objects;
  */
 
 @DateConvert
+@Component
 public class DateConversion {
     /**
      * @param dateStr

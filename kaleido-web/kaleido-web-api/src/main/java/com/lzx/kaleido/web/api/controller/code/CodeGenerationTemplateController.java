@@ -2,6 +2,7 @@ package com.lzx.kaleido.web.api.controller.code;
 
 import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateConfigService;
 import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateService;
+import com.lzx.kaleido.domain.model.dto.param.code.CodeGenerationTemplateQueryParam;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
 import com.lzx.kaleido.infra.base.annotations.validation.AddGroup;
 import com.lzx.kaleido.infra.base.annotations.validation.UpdateGroup;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 代码模板管理接口
@@ -46,6 +48,17 @@ public class CodeGenerationTemplateController {
     public R<Long> addCodeGenerationTemplate(@RequestBody @Validated(AddGroup.class) CodeGenerationTemplateVO vo) {
         Long id = codeGenerationGroupService.addCodeGenerationTemplate(vo);
         return R.result(id != null, ErrorCode.SAVE_FAILED, id);
+    }
+    
+    /**
+     * 查询
+     *
+     * @param param
+     * @return
+     */
+    @PostMapping("/list")
+    public R<List<CodeGenerationTemplateVO>> queryCodeGenerationTemplate(@RequestBody CodeGenerationTemplateQueryParam param) {
+        return R.success(codeGenerationGroupService.queryByParam(param));
     }
     
     /**

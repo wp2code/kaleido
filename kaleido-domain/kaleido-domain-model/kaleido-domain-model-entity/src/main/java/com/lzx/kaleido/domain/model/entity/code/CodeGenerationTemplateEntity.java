@@ -41,8 +41,14 @@ public class CodeGenerationTemplateEntity extends BaseEntity {
     private String basicConfig;
     
     /**
-     * 是否为内部分组
+     * 是否为内部模板 （0-不是；1-是）
      */
     @TableField("is_internal")
     private Integer isInternal;
+    
+    /**
+     * 是否为默认模板（0-不是；1-是）
+     */
+    @TableField("is_default")
+    private Integer isDefault;
 }

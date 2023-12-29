@@ -26,4 +26,9 @@ public class BaseVO implements Serializable {
      * 创建人
      */
     private String creatorId;
+    
+    /**
+     *
+     */
+    private Integer deleted;
 }

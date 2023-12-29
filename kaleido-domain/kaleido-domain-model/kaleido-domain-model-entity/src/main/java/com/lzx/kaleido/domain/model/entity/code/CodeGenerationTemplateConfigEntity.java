@@ -41,10 +41,16 @@ public class CodeGenerationTemplateConfigEntity extends BaseEntity {
     private String alias;
     
     /**
-     * 代码模板
+     * 代码模板（json）
      */
     @TableField("template_content")
     private String templateContent;
+    
+    /**
+     * 模板参数变量（json）
+     */
+    @TableField("template_params")
+    private String templateParams;
     
     /**
      * 隐藏状态：0-显示；1-隐藏

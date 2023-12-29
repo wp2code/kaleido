@@ -48,7 +48,7 @@ public class JsonUtil {
      * @return
      */
     public <T> T toBean(String jsonStr, Class<T> cls) {
-        if (StrUtil.isNotBlank(jsonStr)) {
+        if (StrUtil.isNotBlank(jsonStr) && cls != null) {
             try {
                 return getObjectMapperIfAbsent().readValue(jsonStr, cls);
             } catch (Exception e) {

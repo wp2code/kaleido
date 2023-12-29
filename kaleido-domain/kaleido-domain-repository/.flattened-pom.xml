@@ -33,6 +33,12 @@
     </dependency>
     <dependency>
       <groupId>com.lzx</groupId>
+      <artifactId>kaleido-domain-model-dto</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.lzx</groupId>
       <artifactId>kaleido-plugins-mp</artifactId>
       <version>1.0.0-SNAPSHOT</version>
       <scope>compile</scope>

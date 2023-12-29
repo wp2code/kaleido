@@ -1,7 +1,10 @@
 package com.lzx.kaleido.domain.api.service;
 
+import com.lzx.kaleido.domain.model.dto.param.code.CodeGenerationTemplateQueryParam;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 
 /**
  * @author lwp
@@ -38,6 +41,14 @@ public interface ICodeGenerationTemplateService {
     boolean updateTemplateNameById(@NotNull final Long id, String templateName);
     
     /**
+     * 查询模板列表
+     *
+     * @param param
+     * @return
+     */
+    List<CodeGenerationTemplateVO> queryByParam(final CodeGenerationTemplateQueryParam param);
+    
+    /**
      * 获取代码模板详情
      *
      * @param id
@@ -54,5 +65,5 @@ public interface ICodeGenerationTemplateService {
      */
     boolean deleteById(@NotNull final Long id);
     
-
+    
 }

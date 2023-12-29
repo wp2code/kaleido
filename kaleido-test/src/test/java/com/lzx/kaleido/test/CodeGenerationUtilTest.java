@@ -1,5 +1,6 @@
 package com.lzx.kaleido.test;
 
+import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.infra.base.utils.JsonUtil;
 import com.lzx.kaleido.plugins.template.code.impl.DefaultCodeTemplateProcessor;
 import com.lzx.kaleido.plugins.template.engine.impl.FreemarkerTemplateEngineImpl;
@@ -43,5 +44,12 @@ class CodeGenerationUtilTest {
         log.info("输出地址：{}", outFullPath);
         Assertions.assertNotNull(outFullPath);
     }
-    
+    @Test
+    void mockBasicConfig(){
+        final BasicConfigVO basicConfigVO = new BasicConfigVO();
+        basicConfigVO.setCodePath("C:\\user");
+        basicConfigVO.setAuthor("刘伟平");
+        basicConfigVO.setLicense("C:\\user");
+        log.info(JsonUtil.toJson(basicConfigVO));
+    }
 }

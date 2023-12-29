@@ -1,10 +1,13 @@
 package com.lzx.kaleido.domain.core.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateConfigService;
 import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateService;
+import com.lzx.kaleido.domain.model.dto.param.code.CodeGenerationTemplateQueryParam;
 import com.lzx.kaleido.domain.model.entity.code.CodeGenerationTemplateEntity;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
@@ -95,6 +98,32 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
     }
     
     /**
+     * 查询模板列表
+     *
+     * @param param
+     * @return
+     */
+    @Override
+    public List<CodeGenerationTemplateVO> queryByParam(final CodeGenerationTemplateQueryParam param) {
+        final LambdaQueryWrapper<CodeGenerationTemplateEntity> queryWrapper = Wrappers.<CodeGenerationTemplateEntity>lambdaQuery()
+                .eq(StrUtil.isNotBlank(param.getTemplateName()), CodeGenerationTemplateEntity::getTemplateName, param.getTemplateName())
+                .eq(CodeGenerationTemplateEntity::getLanguage, param.getLanguage()).exists(param.getHideStatus() != null,
+                        "SELECT id FROM code_generation_template_config WHERE template_id=code_generation_template.id "
+                                + "AND  hide_status = {0}", param.getHideStatus()).orderByDesc(CodeGenerationTemplateEntity::getIsInternal);
+        final List<CodeGenerationTemplateEntity> entities = this.getBaseMapper().selectList(queryWrapper);
+        if (CollUtil.isNotEmpty(entities)) {
+            final List<CodeGenerationTemplateVO> voList = PojoConvertUtil.entity2VoList(entities, CodeGenerationTemplateVO.class);
+            for (final CodeGenerationTemplateVO vo : voList) {
+                final List<CodeGenerationTemplateConfigVO> templateConfigList = codeGenerationTemplateConfigService.getByTemplateId(
+                        vo.getId(), param.getHideStatus());
+                vo.setTemplateConfigList(templateConfigList);
+            }
+            return voList;
+        }
+        return null;
+    }
+    
+    /**
      * 获取代码模板详情
      *
      * @param id
@@ -105,7 +134,8 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
         final CodeGenerationTemplateEntity entity = this.getById(id);
         if (entity != null) {
             final CodeGenerationTemplateVO vo = PojoConvertUtil.entity2Vo(entity, CodeGenerationTemplateVO.class);
-            final List<CodeGenerationTemplateConfigVO> templateConfigList = codeGenerationTemplateConfigService.getByTemplateId(vo.getId());
+            final List<CodeGenerationTemplateConfigVO> templateConfigList = codeGenerationTemplateConfigService.getByTemplateId(vo.getId(),
+                    null);
             vo.setTemplateConfigList(templateConfigList);
             return vo;
         }

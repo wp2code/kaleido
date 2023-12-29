@@ -13,6 +13,6 @@ public interface Constants {
     
     int MAX_PAGE_SIZE = 1000;
     
-    String API_VERSION = "v1";
+    String API_VERSION = "/v1";
     
 }

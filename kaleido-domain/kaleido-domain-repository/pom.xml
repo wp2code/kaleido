@@ -16,6 +16,10 @@
         </dependency>
         <dependency>
             <groupId>com.lzx</groupId>
+            <artifactId>kaleido-domain-model-dto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.lzx</groupId>
             <artifactId>kaleido-plugins-mp</artifactId>
         </dependency>
     </dependencies>

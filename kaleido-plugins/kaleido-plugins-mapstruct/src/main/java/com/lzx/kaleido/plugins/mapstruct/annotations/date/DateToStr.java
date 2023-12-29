@@ -1,4 +1,4 @@
-package com.lzx.kaleido.plugins.mapstruct.annotations;
+package com.lzx.kaleido.plugins.mapstruct.annotations.date;
 
 import org.mapstruct.Qualifier;
 

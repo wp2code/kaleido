@@ -1,8 +1,9 @@
-package com.lzx.kaleido.plugins.mapstruct.annotations;
+package com.lzx.kaleido.plugins.mapstruct.annotations.date;
 
 import org.mapstruct.Qualifier;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -12,7 +13,8 @@ import java.lang.annotation.Target;
  * @date 2022-07-05
  */
 @Qualifier
-@Target(ElementType.METHOD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-public @interface StrToDate {
+@Inherited
+public @interface DateConvert {
 }
