@@ -1,5 +1,6 @@
 package com.lzx.kaleido.plugins.template.utils;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.template.TemplateException;
 import com.lzx.kaleido.plugins.template.code.ICodeTemplateProcessor;
 import com.lzx.kaleido.plugins.template.enums.ResourceMode;
@@ -17,6 +18,8 @@ import java.util.Optional;
  **/
 @UtilityClass
 public class CodeGenerationUtil {
+    
+    private static final String TEMPLATE_PATH = "/templates/";
     
     private static ICodeTemplateProcessor codeTemplateProcessor;
     
@@ -38,6 +41,14 @@ public class CodeGenerationUtil {
     
     /**
      * @param templateContext
+     * @return
+     */
+    public String processToStr(final TemplateContext templateContext) {
+        return codeTemplateProcessor.processToStr(templateContext);
+    }
+    
+    /**
+     * @param templateContext
      * @param outputStream
      */
     public void process(final TemplateContext templateContext, final OutputStream outputStream) {
@@ -54,15 +65,38 @@ public class CodeGenerationUtil {
      * @param templateParams
      * @param engineName
      * @param templateName
+     * @param templatePath
+     * @param resourceMode
      * @return
      */
     public String processTemplate(final String templateContent, final String outDirPath, final String outFileName,
-            final Map<?, ?> templateParams, final String engineName, final String templateName) {
+            final Map<?, ?> templateParams, final String engineName, final String templateName, final String templatePath,
+            final ResourceMode resourceMode) {
         final TemplateContext templateContext = TemplateContext.builder().templateName(templateName).templateParams(templateParams)
                 .outDirPath(outDirPath).engineName(engineName).outFileName(outFileName).templateConfig(
-                        TemplateConfigInfo.builder().templateContent(templateContent).resourceMode(ResourceMode.STRING).templatePath(null)
-                                .build()).build();
+                        TemplateConfigInfo.builder().templateContent(templateContent).resourceMode(resourceMode)
+                                .templatePath(StrUtil.isNotBlank(templatePath) ? templatePath : TEMPLATE_PATH).build()).build();
         return process(templateContext);
+    }
+    
+    /**
+     * 动态模板解析处理
+     *
+     * @param templateContent
+     * @param templateParams
+     * @param engineName
+     * @param templateName
+     * @param templatePath
+     * @param resourceMode
+     * @return
+     */
+    public String processTemplateToStr(final String templateContent, final Map<?, ?> templateParams, final String engineName,
+            final String templateName, final String templatePath, final ResourceMode resourceMode) {
+        final TemplateContext templateContext = TemplateContext.builder().templateName(templateName).templateParams(templateParams)
+                .engineName(engineName).templateConfig(
+                        TemplateConfigInfo.builder().templateContent(templateContent).resourceMode(resourceMode)
+                                .templatePath(StrUtil.isNotBlank(templatePath) ? templatePath : TEMPLATE_PATH).build()).build();
+        return processToStr(templateContext);
     }
     
     /**

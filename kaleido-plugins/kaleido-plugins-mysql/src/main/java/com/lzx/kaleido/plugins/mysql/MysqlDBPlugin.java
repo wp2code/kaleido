@@ -18,7 +18,7 @@ import java.util.Properties;
  **/
 public class MysqlDBPlugin implements IDBPlugin {
     
-    private static final String DB_TYPE = "MYSQL";
+    private static final String DB_TYPE = "MySQL";
     
     /**
      * @return

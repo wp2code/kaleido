@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${namespace!}">
+    <!--
+        @author ${author!}
+        @date Created in ${createTime}
+    -->
+    <resultMap id="BaseResultMap" type="${resultMapType!}">
+        <#if tableFieldColumnList??><#list tableFieldColumnList as model>
+          <#if model.primaryKey>
+        <id column="${(model.column)!}" property="${(model.property)!}" jdbcType="${(model.xmlJdbcType)!}"/>
+          <#else>
+        <result column="${(model.column)!}" property="${(model.property)!}" jdbcType="${(model.xmlJdbcType)!}"/>
+          </#if>
+        </#list>
+        </#if>
+    </resultMap>
+<#if  (apiList?? && apiList?size>0)>
+  <#if tableFieldColumnList??>
+    <sql id="Base_Table_Column">
+        <#list tableFieldColumnList as model>${(model.column)!}<#if model_has_next>,</#if></#list>
+    </sql>
+  </#if>
+  <#list apiList as methodModel>
+    <#if methodModel.apiId=="selectByEntity">
+    <select id="selectByEntity" resultMap="BaseResultMap" parameterType="${resultMapType!}">
+        select
+        <include refid="Base_Table_Column"/>
+        from ${tableName}
+        <where>
+            <#list tableFieldColumnList as model>
+                <#if model.javaType=="java.lang.String">
+              <if test="${model.property} != null and ${model.property} != ''">
+                <#else>
+              <if test="${model.property} != null">
+                </#if>
+                and ${model.column} = ${r"#"}{${(model.property)!}},
+            </if>
+            </#list>
+        </where>
+    </select>
+    </#if>
+    <#if tablePK??>
+      <#if methodModel.apiId=="selectByPrimaryKey">
+     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="${tablePK.javaType}">
+         select
+         <include refid="Base_Table_Column"/>
+         from ${tableName}
+         where ${tablePK.column} = ${r"#"}{${(tablePK.property)!}}
+     </select>
+      </#if>
+      <#if methodModel.apiId=="deleteByPrimaryKey">
+     <delete id="deleteByPrimaryKey" parameterType="${tablePK.javaType}">
+       delete
+       from ${tableName} where ${tablePK.column} = ${r"#"}{${(tablePK.property)!}}
+     </delete>
+      </#if>
+      <#if methodModel.apiId=="updateByPrimaryKey">
+      <update id="updateByPrimaryKey" parameterType="${resultMapType!}">
+          update ${tableName}
+          <set>
+          <#list tableFieldColumnList as model>
+            ${model.column} = ${r"#"}{${(model.property)!}},
+          </#list>
+          </set>
+          where ${tablePK.column} = ${r"#"}{${(tablePK.property)!}}
+      </update>
+      </#if>
+      <#if methodModel.apiId=="updateByPrimaryKeySelective">
+    <update id="updateByPrimaryKeySelective!}" parameterType="${resultMapType!}">
+        update ${tableName}
+        <set>
+         <#list tableFieldColumnList as model>
+           <#if model.javaType=="java.lang.String">
+          <if test="${model.property} != null and ${model.property} != ''">
+           <#else>
+          <if test="${model.property} != null">
+           </#if>
+           ${model.column} = ${r"#"}{${(model.property)!}},
+         </if>
+         </#list>
+        </set>
+        where ${tablePK.column} = ${r"#"}{${(tablePK.property)!}}
+    </update>
+      </#if>
+      <#if methodModel.apiId=="insertSelective">
+    <insert id="insertSelective" parameterType="${resultMapType!}">
+        <selectKey resultType="${tablePK.javaType}" keyProperty="${tablePK.column}" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into ${tableName}
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <#list tableFieldColumnList as model>
+                <#if model.javaType=="java.lang.String">
+              <if test="${model.property} != null and ${model.property} != ''">
+                <#else>
+              <if test="${model.property} != null">
+                </#if>
+              ${(model.column)!},
+            </if>
+            </#list>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <#list tableFieldColumnList as model>
+                <#if model.javaType=="java.lang.String">
+              <if test="${model.property} != null and ${model.property} != ''">
+                <#else>
+              <if test="${model.property} != null">
+                </#if>
+              ${r"#"}{${(model.property)!}},
+            </if>
+            </#list>
+        </trim>
+    </insert>
+      </#if>
+      <#if methodModel.apiId=="insertOrUpdateSelective">
+    <insert id="insertOrUpdateSelective" parameterType="${resultMapType!}">
+        <selectKey resultType="${tablePK.javaType}" keyProperty="${tablePK.column}" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into ${tableName}
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <#list tableFieldColumnList as model>
+                <#if model.javaType=="java.lang.String">
+              <if test="${model.property} != null and ${model.property} != ''">
+                <#else>
+              <if test="${model.property} != null">
+                </#if>
+              ${(model.column)!},
+            </if>
+            </#list>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <#list tableFieldColumnList as model>
+                <#if model.javaType=="java.lang.String">
+              <if test="${model.property} != null and ${model.property} != ''">
+                <#else>
+              <if test="${model.property} != null">
+                </#if>
+              ${r"#"}{${(model.property)!}},
+            </if>
+            </#list>
+        </trim>
+        ON DUPLICATE KEY UPDATE
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <#list tableFieldColumnList as model>
+                <#if model.javaType=="java.lang.String">
+              <if test="${model.property} != null and ${model.property} != ''">
+                <#else>
+              <if test="${model.property} != null">
+                </#if>
+              ${(model.column)!}=VALUES(${(model.column)!}),
+            </if>
+            </#list>
+        </trim>
+    </insert>
+      </#if>
+    </#if>
+  </#list>
+</#if>
+</mapper>

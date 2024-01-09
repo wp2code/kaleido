@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.lzx.kaleido.domain.api.service.IDataSourceService;
 import com.lzx.kaleido.domain.core.DataSourceFactory;
-import com.lzx.kaleido.domain.core.utils.ConvertUtil;
+import com.lzx.kaleido.domain.core.utils.DataSourceConvertUtil;
 import com.lzx.kaleido.domain.model.dto.param.datasource.DataSourceConnectParam;
 import com.lzx.kaleido.domain.model.dto.param.datasource.DataSourceParam;
 import com.lzx.kaleido.domain.model.dto.param.datasource.DataSourceQueryParam;
@@ -116,13 +116,13 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
     public DataSourceMetaVO getDataSourceMeta(final Long id, final boolean deepQuery) {
         final DataSourceVO dataSourceVO = this.getDetailById(id);
         if (dataSourceVO != null) {
-            final ConnectionInfo connectionInfo = ConvertUtil.convertConnectionInfo(dataSourceVO);
+            final ConnectionInfo connectionInfo = DataSourceConvertUtil.convertConnectionInfo(dataSourceVO);
             Connection connection = null;
             try {
                 connection = DataSourceFactory.getInstance().getConnection(connectionInfo);
                 final List<Database> dateBaseList = DataSourceFactory.getInstance().getDateBaseList(connectionInfo);
                 return DataSourceMetaVO.builder().dataSource(dataSourceVO)
-                        .dateBaseList(ConvertUtil.convertDataBaseList(dateBaseList, connectionInfo, deepQuery, false)).build();
+                        .dateBaseList(DataSourceConvertUtil.convertDataBaseList(dateBaseList, connectionInfo, deepQuery, false)).build();
             } catch (CommonException e) {
                 log.error("getDataSource is failed! {}", e.getMessage());
                 throw new CommonRuntimeException(e.getErrorCode());
@@ -144,7 +144,7 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
         if (param != null) {
             Connection connection = null;
             try {
-                connection = DataSourceFactory.getInstance().getConnection(ConvertUtil.convertConnectionInfo(param));
+                connection = DataSourceFactory.getInstance().getConnection(DataSourceConvertUtil.convertConnectionInfo(param));
                 return connection != null;
             } catch (CommonException e) {
                 log.error("connect test is failed! {}", e.getMessage());

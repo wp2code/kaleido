@@ -1,0 +1,18 @@
+${license!}
+package ${packageName};
+<#if packages??><#list packages as pak >
+import ${pak!};
+</#list></#if>
+/**
+ * ${comment!}
+ *
+ * @author ${author!}
+ * @date Created in ${createTime!}
+ */
+<#if superclassName??>
+public interface ${name!} extends ${superclassName}<#if genericsClass??>
+<${genericsClass}></#if>{
+<#else>
+public interface ${name!}{
+</#if>
+}

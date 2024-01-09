@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.SimpleCache;
 import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.util.ClassUtil;
+import cn.hutool.http.HttpUtil;
 import com.lzx.kaleido.plugins.template.engine.ITemplateEngine;
 import com.lzx.kaleido.plugins.template.exception.TemplateParseException;
 import com.lzx.kaleido.plugins.template.model.TemplateConfigInfo;
@@ -11,13 +12,18 @@ import com.lzx.kaleido.plugins.template.template.ITemplate;
 import com.lzx.kaleido.plugins.template.template.impl.FreemarkerTemplate;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
+import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.template.Configuration;
+import freemarker.template.TemplateExceptionHandler;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -93,6 +99,7 @@ public class FreemarkerTemplateEngineImpl implements ITemplateEngine {
         final Configuration configuration = new Configuration(Configuration.VERSION_2_3_32);
         configuration.setLocalizedLookup(false);
         configuration.setDefaultEncoding(templateConfigInfo.getEncoding());
+        configuration.setTemplateExceptionHandler(TemplateExceptionHandler.IGNORE_HANDLER);
         switch (templateConfigInfo.getResourceMode()) {
             case CLASSPATH:
                 configuration.setTemplateLoader(new ClassTemplateLoader(ClassUtil.getClassLoader(), templateConfigInfo.getTemplatePath()));
@@ -112,6 +119,8 @@ public class FreemarkerTemplateEngineImpl implements ITemplateEngine {
             case REMOTE:
                 configuration.setTemplateLoader(new RemoteURLTemplateLoader(templateConfigInfo.getTemplatePath()));
                 break;
+            case COMPOSITE:
+                configuration.setTemplateLoader(new CustomMultiTemplateLoader(templateConfigInfo.getTemplatePath()));
             default:
                 break;
         }
@@ -132,6 +141,33 @@ public class FreemarkerTemplateEngineImpl implements ITemplateEngine {
         @Override
         protected URL getURL(final String name) {
             return UrlBuilder.of(url).toURL();
+        }
+    }
+    
+    /**
+     * 自定义混合加载器 本地文件->远程文件->classPath
+     */
+    static class CustomMultiTemplateLoader extends MultiTemplateLoader {
+        
+        public CustomMultiTemplateLoader(final String templatePath) {
+            super(Objects.requireNonNull(createTemplateLoader(templatePath)));
+        }
+        
+        public static TemplateLoader[] createTemplateLoader(String templatePath) {
+            final List<TemplateLoader> loaders = new ArrayList<>();
+            try {
+                final FileTemplateLoader fileTemplateLoader = new FileTemplateLoader(FileUtil.file(templatePath));
+                loaders.add(fileTemplateLoader);
+            } catch (IOException e) {
+                //IG
+            }
+            if (HttpUtil.isHttp(templatePath) || HttpUtil.isHttps(templatePath)) {
+                final RemoteURLTemplateLoader remoteURLTemplateLoader = new RemoteURLTemplateLoader(templatePath);
+                loaders.add(remoteURLTemplateLoader);
+            }
+            final ClassTemplateLoader classTemplateLoader = new ClassTemplateLoader(ClassUtil.getClassLoader(), templatePath);
+            loaders.add(classTemplateLoader);
+            return loaders.toArray(TemplateLoader[]::new);
         }
     }
 }

@@ -56,7 +56,6 @@ public interface IDataSourceService {
     List<DataSourceVO> queryByParam(final DataSourceQueryParam param);
     
     
-    
     /**
      * 获取数量连接信息
      *
@@ -64,7 +63,7 @@ public interface IDataSourceService {
      * @param deepQuery
      * @return
      */
-    DataSourceMetaVO getDataSourceMeta(@NotNull final Long id,final boolean deepQuery);
+    DataSourceMetaVO getDataSourceMeta(@NotNull final Long id, final boolean deepQuery);
     
     /**
      * 测试连接数据库

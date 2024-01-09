@@ -5,6 +5,7 @@ import cn.hutool.core.io.IoUtil;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.StringWriter;
 import java.util.Map;
 
 /**
@@ -43,5 +44,19 @@ public abstract class AbsTemplate implements ITemplate {
         } finally {
             IoUtil.close(out);
         }
+    }
+    
+    /**
+     * 写出到字符串
+     *
+     * @param bindingMap
+     * @return
+     */
+    @Override
+    public String render(final Map<?, ?> bindingMap) {
+        final StringWriter writer = new StringWriter();
+        render(bindingMap, writer);
+        return writer.toString();
+        
     }
 }

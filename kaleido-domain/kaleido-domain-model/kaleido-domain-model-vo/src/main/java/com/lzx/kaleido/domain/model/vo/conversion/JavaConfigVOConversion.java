@@ -1,10 +1,12 @@
 package com.lzx.kaleido.domain.model.vo.conversion;
 
+import cn.hutool.core.util.StrUtil;
 import com.lzx.kaleido.domain.model.vo.code.template.JavaConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaControllerConfigVO;
+import com.lzx.kaleido.domain.model.vo.code.template.java.JavaEntityConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaMapperConfigVO;
-import com.lzx.kaleido.domain.model.vo.code.template.java.JavaModelConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaServiceConfigVO;
+import com.lzx.kaleido.domain.model.vo.code.template.java.JavaVoConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaXmlConfigVO;
 import com.lzx.kaleido.infra.base.utils.JsonUtil;
 import com.lzx.kaleido.plugins.mapstruct.annotations.json.JsonConvert;
@@ -29,7 +31,8 @@ public class JavaConfigVOConversion implements JsonConversion<JavaConfigVO> {
     static {
         MAP.put(JavaControllerConfigVO.NAME, JavaControllerConfigVO.class);
         MAP.put(JavaMapperConfigVO.NAME, JavaMapperConfigVO.class);
-        MAP.put(JavaModelConfigVO.NAME, JavaModelConfigVO.class);
+        MAP.put(JavaVoConfigVO.NAME, JavaVoConfigVO.class);
+        MAP.put(JavaEntityConfigVO.NAME, JavaEntityConfigVO.class);
         MAP.put(JavaServiceConfigVO.NAME, JavaServiceConfigVO.class);
         MAP.put(JavaXmlConfigVO.NAME, JavaXmlConfigVO.class);
     }
@@ -40,10 +43,12 @@ public class JavaConfigVOConversion implements JsonConversion<JavaConfigVO> {
      */
     @Override
     public JavaConfigVO jsonToBean(final String json) {
-        final Map<?, ?> map = JsonUtil.toMap(json);
-        Object configName = null;
-        if (map.containsKey(MAP_KEY) && (configName = map.get(MAP_KEY)) != null) {
-            return JsonUtil.toBean(json, MAP.get(configName.toString()));
+        if (StrUtil.isNotBlank(json)) {
+            final Map<?, ?> map = JsonUtil.toMap(json);
+            Object configName = null;
+            if (map.containsKey(MAP_KEY) && (configName = map.get(MAP_KEY)) != null) {
+                return JsonUtil.toBean(json, MAP.get(configName.toString()));
+            }
         }
         return null;
     }

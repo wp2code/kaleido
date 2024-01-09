@@ -26,7 +26,7 @@ import java.util.function.Function;
  **/
 @Slf4j
 @UtilityClass
-public class ConvertUtil {
+public class DataSourceConvertUtil {
     
     /**
      * @param dataSourceInfo

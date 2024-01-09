@@ -1,5 +1,6 @@
 package com.lzx.kaleido.web.api.controller.code;
 
+import com.lzx.kaleido.domain.api.annotations.LogRecord;
 import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateConfigService;
 import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateService;
 import com.lzx.kaleido.domain.model.dto.param.code.CodeGenerationTemplateQueryParam;
@@ -44,6 +45,7 @@ public class CodeGenerationTemplateController {
      * @param vo
      * @return
      */
+    @LogRecord
     @PostMapping("/add")
     public R<Long> addCodeGenerationTemplate(@RequestBody @Validated(AddGroup.class) CodeGenerationTemplateVO vo) {
         Long id = codeGenerationGroupService.addCodeGenerationTemplate(vo);
@@ -69,7 +71,7 @@ public class CodeGenerationTemplateController {
      * @return
      */
     @PutMapping("/{id}/update")
-    public R<Long> updateCodeGenerationTemplate(@PathVariable("id") Long id,
+    public R<Boolean> updateCodeGenerationTemplate(@PathVariable("id") Long id,
             @RequestBody @Validated(UpdateGroup.class) CodeGenerationTemplateVO vo) {
         final boolean isSuccess = codeGenerationGroupService.updateById(id, vo);
         return R.result(isSuccess, ErrorCode.UPDATE_FAILED);
@@ -83,8 +85,21 @@ public class CodeGenerationTemplateController {
      * @return
      */
     @PutMapping("/{id}/{templateName}/update")
-    public R<Long> updateTemplateNameById(@PathVariable("id") Long id, @PathVariable("templateName") String templateName) {
+    public R<Boolean> updateTemplateNameById(@PathVariable("id") Long id, @PathVariable("templateName") String templateName) {
         final boolean isSuccess = codeGenerationGroupService.updateTemplateNameById(id, templateName);
+        return R.result(isSuccess, ErrorCode.UPDATE_FAILED);
+    }
+    
+    /**
+     * 更新为默认模板
+     *
+     * @param id
+     * @return
+     */
+    @LogRecord
+    @PutMapping("/default/{id}/update")
+    public R<Boolean> updateDefaultTemplate(@PathVariable("id") Long id) {
+        final boolean isSuccess = codeGenerationGroupService.updateDefaultTemplate(id);
         return R.result(isSuccess, ErrorCode.UPDATE_FAILED);
     }
     
@@ -96,7 +111,7 @@ public class CodeGenerationTemplateController {
      */
     @GetMapping("/{id}/get")
     public R<CodeGenerationTemplateVO> getCodeGenerationTemplate(@PathVariable("id") Long id) {
-        return R.success(codeGenerationGroupService.getDetailById(id));
+        return R.success(codeGenerationGroupService.getDetailById(id, null));
     }
     
     /**

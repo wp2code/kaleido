@@ -20,12 +20,13 @@ public class Schema implements Serializable {
     /**
      * databaseName
      */
-    @JsonAlias({"TABLE_CATALOG","table_catalog"})
+    @JsonAlias({"TABLE_CATALOG", "table_catalog"})
     private String databaseName;
+    
     /**
      * 数据名字
      */
-    @JsonAlias({"TABLE_SCHEM","table_schem"})
+    @JsonAlias({"TABLE_SCHEM", "table_schem"})
     private String name;
     
     

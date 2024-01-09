@@ -1,5 +1,6 @@
 package com.lzx.kaleido.domain.model.vo.code.template;
 
+import cn.hutool.crypto.digest.DigestUtil;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -10,11 +11,6 @@ import java.io.Serializable;
  **/
 @Data
 public class JavaConfigVO implements Serializable {
-    
-    /**
-     * 生成代码名称: 例如：xxx.java
-     */
-    protected String name;
     
     /**
      * 源文件夹 src/main/java
@@ -36,4 +32,12 @@ public class JavaConfigVO implements Serializable {
      */
     protected String configName;
     
+    public String getDigestValue() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(sourceFolder);
+        sb.append(codePath);
+        sb.append(packageName);
+        sb.append(configName);
+        return DigestUtil.md5Hex(sb.toString());
+    }
 }

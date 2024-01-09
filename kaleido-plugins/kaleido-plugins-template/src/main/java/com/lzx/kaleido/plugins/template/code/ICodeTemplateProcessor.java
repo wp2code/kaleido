@@ -11,13 +11,20 @@ import java.io.OutputStream;
 public interface ICodeTemplateProcessor {
     
     /**
+     * 代码模板处理
      *
-     *  代码模板处理
-     */
-    /**
-     *
+     * @param templateContext
+     * @return 代码路径
      */
     String process(final TemplateContext templateContext);
+    
+    /**
+     * 代码模板处理
+     *
+     * @param templateContext
+     * @return 代码字符串
+     */
+    String processToStr(final TemplateContext templateContext);
     
     /**
      * 代码模板处理

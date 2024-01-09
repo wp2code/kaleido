@@ -32,9 +32,9 @@ public class PostgresqlDBManager extends BaseDBManager {
                 throw new CommonException("connectDatabase 异常", e);
             }
         }
-        return  super.connectDatabase(connection, schemaName, database);
+        return super.connectDatabase(connection, schemaName, database);
     }
-
+    
     /**
      * @param fmtUrl
      * @param connectionInfo

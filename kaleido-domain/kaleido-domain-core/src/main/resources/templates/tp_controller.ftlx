@@ -1,0 +1,43 @@
+${license!}
+package ${packageName};
+<#if packages??><#list packages as pak >
+import ${pak!};
+</#list></#if>
+/**
+ * ${comment!}
+ *
+ * @author ${author!}
+ * @date Created in ${createTime!}
+ */
+<#if useSwagger==true>
+@Api(tags = "${comment!}")
+</#if>
+@RestController
+@RequestMapping("${rootPath!}")
+<#if superclassName??>
+public class ${name} extends ${superclassName}{
+<#else>
+public class ${name}{
+</#if>
+
+<#if (serviceApiName)??>
+    @Resource
+    private ${serviceApiName} ${serviceApiName?uncap_first};
+</#if>
+
+<#if (apiList)??>
+  <#list apiList as model>
+    /**
+     * ${model.describe}
+     *
+     */
+    <#if useSwagger==true>
+    @ApiOperation(value = "${model.describe!}")
+    </#if>
+    @RequestMapping(value = "${model.path!}",method = ${model.method!})
+    public ${model.returnType?no_esc}  ${model.apiId}(${(model.parameterType?no_esc)!}){
+        return null;
+    }
+  </#list>
+</#if>
+}

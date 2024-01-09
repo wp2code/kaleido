@@ -55,7 +55,7 @@ public class WebAutoConfig {
             }
             return FileUtil.getAbsolutePath(url + suffix);
         }
-    
+        
         /**
          * @param fileName
          */

@@ -18,6 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Database implements Serializable {
+    
     @JsonAlias({"TABLE_CAT"})
     private String name;
     

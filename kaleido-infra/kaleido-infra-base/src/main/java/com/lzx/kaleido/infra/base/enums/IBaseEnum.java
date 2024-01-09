@@ -25,7 +25,6 @@ public interface IBaseEnum<T> extends Serializable {
     default String getName() {
         return Optional.ofNullable(EasyEnumUtil.getEnum(this)).map(EnumBean::getName).orElse(null);
     }
-
     
     
     /**

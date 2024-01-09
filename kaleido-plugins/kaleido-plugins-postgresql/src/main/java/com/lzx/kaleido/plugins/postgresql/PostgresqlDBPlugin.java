@@ -18,7 +18,7 @@ import java.util.Properties;
  **/
 public class PostgresqlDBPlugin implements IDBPlugin {
     
-    private static final String DB_TYPE = "PGSQL";
+    private static final String DB_TYPE = "PostgreSQL";
     
     
     /**

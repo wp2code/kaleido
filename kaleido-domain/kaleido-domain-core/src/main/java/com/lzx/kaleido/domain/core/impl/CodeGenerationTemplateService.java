@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.lzx.kaleido.domain.api.enums.CodeTemplateDefaultStatus;
 import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateConfigService;
 import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateService;
 import com.lzx.kaleido.domain.model.dto.param.code.CodeGenerationTemplateQueryParam;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author lwp
@@ -98,6 +100,39 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
     }
     
     /**
+     * 更新为默认模板
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateDefaultTemplate(final Long id) {
+        final LambdaQueryWrapper<CodeGenerationTemplateEntity> queryWrapper = Wrappers.<CodeGenerationTemplateEntity>lambdaQuery()
+                .eq(CodeGenerationTemplateEntity::getIsDefault, CodeTemplateDefaultStatus.DEFAULT.getCode())
+                .select(CodeGenerationTemplateEntity::getId);
+        final List<CodeGenerationTemplateEntity> list = this.list(queryWrapper);
+        boolean isDefault = false;
+        if (CollUtil.isNotEmpty(list) && (isDefault = list.stream().anyMatch(v -> !Objects.equals(v.getId(), id)))) {
+            final LambdaUpdateWrapper<CodeGenerationTemplateEntity> updateWrapper = Wrappers.<CodeGenerationTemplateEntity>lambdaUpdate()
+                    .eq(CodeGenerationTemplateEntity::getIsDefault, CodeTemplateDefaultStatus.DEFAULT.getCode())
+                    .set(CodeGenerationTemplateEntity::getIsDefault, CodeTemplateDefaultStatus.NORMAL.getCode());
+            if (!this.update(updateWrapper)) {
+                throw new CommonRuntimeException(ErrorCode.UPDATE_FAILED);
+            }
+        }
+        if (!isDefault) {
+            final CodeGenerationTemplateEntity entity = new CodeGenerationTemplateEntity();
+            entity.setId(id);
+            entity.setIsDefault(CodeTemplateDefaultStatus.DEFAULT.getCode());
+            if (!this.updateById(entity)) {
+                throw new CommonRuntimeException(ErrorCode.UPDATE_FAILED);
+            }
+        }
+        return true;
+    }
+    
+    /**
      * 查询模板列表
      *
      * @param param
@@ -127,15 +162,16 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
      * 获取代码模板详情
      *
      * @param id
+     * @param hideStatus
      * @return
      */
     @Override
-    public CodeGenerationTemplateVO getDetailById(final Long id) {
+    public CodeGenerationTemplateVO getDetailById(final Long id, final Integer hideStatus) {
         final CodeGenerationTemplateEntity entity = this.getById(id);
         if (entity != null) {
             final CodeGenerationTemplateVO vo = PojoConvertUtil.entity2Vo(entity, CodeGenerationTemplateVO.class);
             final List<CodeGenerationTemplateConfigVO> templateConfigList = codeGenerationTemplateConfigService.getByTemplateId(vo.getId(),
-                    null);
+                    hideStatus);
             vo.setTemplateConfigList(templateConfigList);
             return vo;
         }

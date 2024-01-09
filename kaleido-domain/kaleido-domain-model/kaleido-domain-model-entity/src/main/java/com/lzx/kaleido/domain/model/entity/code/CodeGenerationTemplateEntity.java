@@ -51,4 +51,5 @@ public class CodeGenerationTemplateEntity extends BaseEntity {
      */
     @TableField("is_default")
     private Integer isDefault;
+    
 }

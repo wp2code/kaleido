@@ -1,22 +1,31 @@
 package com.lzx.kaleido.domain.core.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import com.lzx.kaleido.domain.api.enums.CodeTemplateHideStatus;
 import com.lzx.kaleido.domain.api.service.ICodeGeneration;
 import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateConfigService;
+import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateService;
+import com.lzx.kaleido.domain.core.enums.TemplateParserEnum;
+import com.lzx.kaleido.domain.model.dto.param.code.CodeGenerationFullParam;
 import com.lzx.kaleido.domain.model.dto.param.code.CodeGenerationParam;
+import com.lzx.kaleido.domain.model.dto.param.code.CodeGenerationTableParam;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationResultVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
 import com.lzx.kaleido.infra.base.utils.JsonUtil;
+import com.lzx.kaleido.plugins.template.enums.ResourceMode;
 import com.lzx.kaleido.plugins.template.model.TemplateContext;
 import com.lzx.kaleido.plugins.template.utils.CodeGenerationUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author lwp
@@ -27,6 +36,51 @@ public class CodeGenerationService implements ICodeGeneration {
     
     @Resource
     private ICodeGenerationTemplateConfigService codeGenerationTemplateConfigService;
+    
+    @Resource
+    private ICodeGenerationTemplateService codeGenerationTemplateService;
+    
+    /**
+     * 代码生成或预览
+     *
+     * @param codeGenerationTableParam
+     * @param isPreview
+     */
+    @Override
+    public CodeGenerationResultVO generationOrPreview(final CodeGenerationFullParam codeGenerationTableParam, final boolean isPreview) {
+        final List<CodeGenerationTableParam> codeGenerationList = codeGenerationTableParam.getCodeGenerationList();
+        if (CollUtil.isNotEmpty(codeGenerationList)) {
+            final CodeGenerationTemplateVO templateVO = codeGenerationTemplateService.getDetailById(
+                    codeGenerationTableParam.getTemplateId(), CodeTemplateHideStatus.SHOW.getCode());
+            if (templateVO != null) {
+                final List<CodeGenerationTemplateConfigVO> templateConfigList = templateVO.getTemplateConfigList();
+                final List<CodeGenerationViewVO> codeGenerationViewVOS = new ArrayList<>();
+                codeGenerationList.sort((o1, o2) -> {
+                    final TemplateParserEnum instance1 = TemplateParserEnum.getInstance(o1.getConfigName());
+                    final TemplateParserEnum instance2 = TemplateParserEnum.getInstance(o2.getConfigName());
+                    return instance1.getPriority() - instance2.getPriority();
+                });
+                for (final CodeGenerationTableParam generationTableParam : codeGenerationList) {
+                    final CodeGenerationTemplateConfigVO configVO = templateConfigList.stream()
+                            .filter(v -> v.getName().equals(generationTableParam.getConfigName())).findFirst().orElse(null);
+                    if (configVO != null) {
+                        final TemplateParserEnum instance = TemplateParserEnum.getInstance(configVO.getName());
+                        if (instance != null) {
+                            CodeGenerationViewVO codeGenerationViewVO = instance.getTemplateParser()
+                                    .parser(configVO, templateVO.getBasicConfig(), !isPreview, generationTableParam,
+                                            ResourceMode.getInstance(generationTableParam.getTemplateResourceMode()),
+                                            codeGenerationViewVOS);
+                            if (codeGenerationViewVO != null) {
+                                codeGenerationViewVOS.add(codeGenerationViewVO);
+                            }
+                        }
+                    }
+                }
+                return new CodeGenerationResultVO(templateVO, codeGenerationViewVOS);
+            }
+        }
+        return null;
+    }
     
     /**
      * 代码生成-预览
@@ -41,33 +95,6 @@ public class CodeGenerationService implements ICodeGeneration {
                 JsonUtil.toMap(configParam.getTemplateParams()), configParam.getEngineNameIfAbsent(TemplateContext.DEFAULT_ENGINE),
                 config.getName());
     }
-    
-    /**
-     * 代码生成
-     *
-     * @param configParam
-     * @return
-     */
-    @Override
-    public CodeGenerationResultVO generation(final CodeGenerationParam configParam) {
-        final CodeGenerationTemplateConfigVO config = getCodeGenerationTemplateConfig(configParam);
-        final String path = CodeGenerationUtil.processTemplate(config.getTemplateContent(), configParam.getOutDirPath(),
-                configParam.getOutFileName(), JsonUtil.toMap(configParam.getTemplateParams()),
-                configParam.getEngineNameIfAbsent(TemplateContext.DEFAULT_ENGINE), config.getName());
-        return new CodeGenerationResultVO().setPath(path).setCodeAlias(config.getAlias());
-    }
-    
-    /**
-     * 代码生成-批量
-     *
-     * @param codeGenerationParams
-     * @return
-     */
-    @Override
-    public List<CodeGenerationResultVO> generation(final List<CodeGenerationParam> codeGenerationParams) {
-        return codeGenerationParams.stream().map(this::generation).collect(Collectors.toList());
-    }
-    
     
     /**
      * @param configParam

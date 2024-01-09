@@ -40,6 +40,15 @@ public interface ICodeGenerationTemplateService {
      */
     boolean updateTemplateNameById(@NotNull final Long id, String templateName);
     
+    
+    /**
+     * 更新为默认模板
+     *
+     * @param id
+     * @return
+     */
+    boolean updateDefaultTemplate(@NotNull final Long id);
+    
     /**
      * 查询模板列表
      *
@@ -52,9 +61,10 @@ public interface ICodeGenerationTemplateService {
      * 获取代码模板详情
      *
      * @param id
+     * @param hideStatus
      * @return
      */
-    CodeGenerationTemplateVO getDetailById(@NotNull final Long id);
+    CodeGenerationTemplateVO getDetailById(@NotNull final Long id, Integer hideStatus);
     
     
     /**

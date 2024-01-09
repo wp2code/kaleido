@@ -22,7 +22,7 @@ public class MysqlDBManager extends BaseDBManager {
      * @return
      */
     @Override
-    public boolean connectDatabase(final Connection connection,  final String schemaName,final String database) {
+    public boolean connectDatabase(final Connection connection, final String schemaName, final String database) {
         if (database != null && database.length() > 0) {
             try {
                 SQLExecutor.getInstance().execute(connection, "use `" + database + "`;");

@@ -30,5 +30,7 @@ public interface ITemplateEngine {
      *
      * @return
      */
-    List<String> supportTemplateSuffix();
+    default List<String> supportTemplateSuffix() {
+        return null;
+    }
 }

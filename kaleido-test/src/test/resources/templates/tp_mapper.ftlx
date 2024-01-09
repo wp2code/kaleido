@@ -1,0 +1,39 @@
+${license!}
+package ${packageName};
+<#if packages??><#list packages as pak >
+import ${pak!};
+</#list></#if>
+/**
+ * ${comment!}
+ *
+ * @author ${author!}
+ * @date Created in ${createTime}
+ */
+<#if superclassName??>
+public interface ${name!} extends ${superclassName}<#if genericsClass??>
+<${genericsClass}></#if>{
+<#else>
+public interface ${name!}{
+</#if>
+
+<#if (apiList)??>
+  <#list apiList as model>
+ /**
+  * ${model.describe?no_esc}
+  *
+  * @return  ${model.returnType?no_esc}
+  */
+    <#if model.parameterIsList>
+      ${model.returnType?no_esc} ${model.apiId}(List
+    <${(model.parameterType)!}> conditionList);
+    <#else>
+      <#if model.returnIsList>
+ List
+      <${model.returnType?no_esc}> ${model.apiId}(${(model.parameterType)!} condition);
+      <#else>
+        ${model.returnType?no_esc} ${model.apiId}(${(model.parameterType)!} condition);
+      </#if>
+    </#if>
+  </#list>
+</#if>
+}

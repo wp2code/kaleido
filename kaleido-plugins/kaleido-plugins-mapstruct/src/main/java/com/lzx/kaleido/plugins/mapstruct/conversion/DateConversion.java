@@ -20,6 +20,7 @@ import java.util.Objects;
 @DateConvert
 @Component
 public class DateConversion {
+    
     /**
      * @param dateStr
      * @return
@@ -30,12 +31,13 @@ public class DateConversion {
             return null;
         }
         try {
-            return Date.from(LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).atZone(ZoneId.systemDefault()).toInstant());
+            return Date.from(LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).atZone(ZoneId.systemDefault())
+                    .toInstant());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
+    
     @DateToStr
     public String strToDate(Date date) {
         if (date == null) {

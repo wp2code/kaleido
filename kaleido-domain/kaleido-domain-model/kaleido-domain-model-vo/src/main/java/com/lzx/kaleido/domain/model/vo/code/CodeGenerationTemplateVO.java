@@ -1,5 +1,7 @@
 package com.lzx.kaleido.domain.model.vo.code;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import com.lzx.kaleido.domain.model.entity.code.CodeGenerationTemplateEntity;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.domain.model.vo.conversion.BasicConfigVOConversion;
@@ -22,7 +24,7 @@ import java.util.List;
  **/
 @Data
 @EqualsAndHashCode(callSuper = true)
-@AutoMap(targetType = CodeGenerationTemplateEntity.class,uses = BasicConfigVOConversion.class)
+@AutoMap(targetType = CodeGenerationTemplateEntity.class, uses = BasicConfigVOConversion.class)
 public class CodeGenerationTemplateVO extends BaseVO {
     
     /**
@@ -60,8 +62,43 @@ public class CodeGenerationTemplateVO extends BaseVO {
     private Integer isDefault = 0;
     
     /**
+     * 模板摘要信息
+     */
+    private String digestValue;
+    
+    /**
      * 模板信息
      */
     @Valid
     private List<CodeGenerationTemplateConfigVO> templateConfigList;
+    
+    /**
+     * @return
+     */
+    public String getDigestValue() {
+        return DigestUtil.md5Hex(this.toString());
+    }
+    
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        if (id != null) {
+            sb.append(id);
+        }
+        sb.append(templateName);
+        sb.append(language);
+        if (basicConfig != null) {
+            sb.append(basicConfig);
+        }
+        sb.append(isInternal);
+        sb.append(isDefault);
+        if (CollUtil.isNotEmpty(templateConfigList)) {
+            for (final CodeGenerationTemplateConfigVO vo : templateConfigList) {
+                sb.append(vo.toString());
+            }
+        }
+        return sb.toString();
+    }
+    
+    
 }

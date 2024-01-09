@@ -34,6 +34,22 @@ public record DefaultCodeTemplateProcessor(List<ITemplateEngine> templateEngines
     }
     
     /**
+     * 代码模板处理
+     *
+     * @param templateContext
+     * @return 代码字符串
+     */
+    @Override
+    public String processToStr(final TemplateContext templateContext) {
+        try {
+            return this.getTemplate(templateContext).render(templateContext.getTemplateParams());
+        } catch (Exception e) {
+            log.error("模板处理失败！", e);
+            throw new TemplateParseException("代码模板处理异常", e);
+        }
+    }
+    
+    /**
      * @param templateContext
      * @param outputStream
      */

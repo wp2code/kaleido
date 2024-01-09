@@ -1,0 +1,63 @@
+${license!}
+package ${packageName};
+<#if packages??><#list packages as pak >
+import ${pak!};
+</#list></#if>
+/**
+ * ${comment!}
+ *
+ * @author ${author!}
+ * @date Created in ${createTime!}
+ */
+<#if useLombok==true>
+@Data
+@Accessors(chain = true)
+@EqualsAndHashCode(callSuper = true)
+</#if>
+<#if useSwagger==true>
+@ApiModel(value = "${comment!}")
+</#if>
+<#if useMybatisPlus==true>
+  <#if schemaName??>
+@TableName(value= "${tableName!}",schema="${schemaName!}")
+  <#else>
+@TableName(value= "${tableName!}")
+  </#if>
+</#if>
+<#if superclassName??>
+public class ${name} extends ${superclassName}{
+<#else>
+public class ${name}{
+</#if>
+<#list tableFieldColumnList as model >
+    /**
+     *${model.comment!}
+     */
+  <#if useSwagger==true>
+    @ApiModelProperty(value = "${model.comment!}")
+  </#if>
+  <#if useMybatisPlus==true>
+    <#if primaryKey??&&primaryKey==model.column>
+    @TableId(value="${model.column!}",type = IdType.NONE)
+    <#else>
+    @TableField(value="${model.column!}")
+    </#if>
+  </#if>
+    private ${model.javaTypeSimpleName!} ${model.property!};
+</#list>
+
+<#if useLombok==false>
+  <#list tableFieldColumnList as model >
+    <#if model.javaTypeSimpleName=="boolean">
+    public ${model.javaTypeSimpleName!} is${model.property?cap_first}() {
+    <#else>
+    public ${model.javaTypeSimpleName!} get${model.property?cap_first}() {
+    </#if>
+        return ${model.property!};
+    }
+    public void set${model.property?cap_first}(final ${model.javaTypeSimpleName!} ${model.property!}) {
+        this.${model.property!} = ${model.property!};
+    }
+  </#list>
+</#if>
+}

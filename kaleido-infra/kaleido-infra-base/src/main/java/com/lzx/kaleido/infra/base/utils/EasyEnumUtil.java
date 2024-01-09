@@ -1,7 +1,7 @@
 package com.lzx.kaleido.infra.base.utils;
 
-import com.lzx.kaleido.infra.base.model.EnumBean;
 import com.lzx.kaleido.infra.base.enums.IBaseEnum;
+import com.lzx.kaleido.infra.base.model.EnumBean;
 import lombok.experimental.UtilityClass;
 
 import java.util.Map;
@@ -45,8 +45,8 @@ public class EasyEnumUtil {
     /**
      * @param key
      * @param <E>
-     * @return
      * @param <T>
+     * @return
      */
     public <E extends IBaseEnum<T>, T> EnumBean<T> getEnum(E key) {
         final EnumBean<?> enumBean = ENUM_BEAN_MAP.get(key);

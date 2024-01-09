@@ -4,6 +4,7 @@ import com.lzx.kaleido.infra.base.enums.ErrorCode;
 
 /**
  * 代码生成配置
+ *
  * @author lwp
  * @date 2023-11-18
  **/

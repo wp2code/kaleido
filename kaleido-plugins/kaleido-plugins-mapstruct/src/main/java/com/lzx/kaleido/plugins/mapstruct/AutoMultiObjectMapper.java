@@ -32,8 +32,8 @@ public record AutoMultiObjectMapper(AutoMapperFactory factory) implements IObjec
         }
         
         throw new RuntimeException(
-                "no mapping from " + source.getClass().getName() + " to " + destinationCls.getName() + ". check @AutoMap on " + source.getClass().getName()
-                        + " or " + destinationCls.getName());
+                "no mapping from " + source.getClass().getName() + " to " + destinationCls.getName() + ". check @AutoMap on "
+                        + source.getClass().getName() + " or " + destinationCls.getName());
     }
     
     @Override
@@ -53,8 +53,8 @@ public record AutoMultiObjectMapper(AutoMapperFactory factory) implements IObjec
         }
         
         throw new RuntimeException(
-                "no mapping from " + source.getClass().getName() + " to " + destination.getClass().getName() + ". check @AutoMap on " + source.getClass().getName()
-                        + " or " + destination.getClass().getName());
+                "no mapping from " + source.getClass().getName() + " to " + destination.getClass().getName() + ". check @AutoMap on "
+                        + source.getClass().getName() + " or " + destination.getClass().getName());
         
     }
     

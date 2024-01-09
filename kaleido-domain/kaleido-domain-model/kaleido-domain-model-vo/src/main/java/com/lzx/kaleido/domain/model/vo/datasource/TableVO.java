@@ -14,7 +14,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TableVO implements Serializable {
-
+    
     private String tableName;
     
     private String dataBaseName;

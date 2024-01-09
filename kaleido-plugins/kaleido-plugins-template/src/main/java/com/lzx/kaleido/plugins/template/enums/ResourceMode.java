@@ -1,5 +1,7 @@
 package com.lzx.kaleido.plugins.template.enums;
 
+import java.util.Arrays;
+
 /**
  * @author lwp
  * @date 2023-12-18
@@ -20,13 +22,13 @@ public enum ResourceMode {
     /**
      * 远程地址加载模板
      */
-    REMOTE;
-    
+    REMOTE,
     /**
-     * @param resourceMode
-     * @return
+     *
      */
-    public static boolean isSupportDynamic(ResourceMode resourceMode) {
-        return STRING == resourceMode;
+    COMPOSITE;
+    
+    public static ResourceMode getInstance(String name) {
+        return Arrays.stream(values()).filter(v -> v.name().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
 }

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Map;
 
 /**
@@ -26,6 +27,21 @@ public class FreemarkerTemplate extends AbsTemplate {
      */
     public static FreemarkerTemplate wrap(Template template) {
         return (null == template) ? null : new FreemarkerTemplate(template);
+    }
+    
+    /**
+     * 将模板与绑定参数融合后输出到Writer
+     *
+     * @param bindingMap 绑定的参数，此Map中的参数会替换模板中的变量
+     * @param writer     输出
+     */
+    @Override
+    public void render(final Map<?, ?> bindingMap, final Writer writer) {
+        try {
+            template.process(bindingMap, writer);
+        } catch (TemplateException | IOException e) {
+            throw new TemplateParseException("模板处理异常！", e);
+        }
     }
     
     /**

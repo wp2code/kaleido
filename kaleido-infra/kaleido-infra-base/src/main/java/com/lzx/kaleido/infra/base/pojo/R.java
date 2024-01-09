@@ -39,7 +39,7 @@ public class R<T> implements Serializable {
      * @return
      */
     public static <T> R<T> fail(String message) {
-        return fail(ErrorCode.FAILED,message);
+        return fail(ErrorCode.FAILED, message);
     }
     
     public static <T> R<T> fail(ErrorCode errorCode, String message) {

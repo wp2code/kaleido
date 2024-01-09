@@ -1,26 +1,28 @@
 package com.lzx.kaleido.domain.model.vo.code;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.experimental.Accessors;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
- * 多个
- *
  * @author lwp
- * @date 2023-12-18
+ * @date 2024-01-18
  **/
 @Data
-@Accessors(chain = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class CodeGenerationResultVO {
     
     /**
-     * 生成代码地址
+     * 模板基本信息
      */
-    private String path;
-    
+    private CodeGenerationTemplateVO templateInfo;
     
     /**
-     *
+     * 模板代码信息
      */
-    private String codeAlias;
+    private List<CodeGenerationViewVO> codeList;
+    
 }

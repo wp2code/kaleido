@@ -1,7 +1,7 @@
 package com.lzx.kaleido.spi.db.model.metaData;
 
-import com.lzx.kaleido.spi.db.enums.DataType;
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.lzx.kaleido.spi.db.enums.DataType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,6 +39,7 @@ public class TableColumn implements Serializable {
      */
     @JsonAlias({"TABLE_CAT", "table_cat"})
     private String databaseName;
+    
     /**
      * 表名
      */
@@ -73,8 +74,10 @@ public class TableColumn implements Serializable {
     
     @JsonAlias({"COLUMN_SIZE", "column_size"})
     private Integer columnSize;
-    @JsonAlias({"ORDINAL_POSITION","ordinal_position"})
+    
+    @JsonAlias({"ORDINAL_POSITION", "ordinal_position"})
     private Integer ordinalPosition;
+    
     private Boolean primaryKey;
     
     private Boolean autoIncrement;
@@ -84,7 +87,9 @@ public class TableColumn implements Serializable {
      *
      */
     private DataType dataTypeEnum;
+    
     private String charSetName;
+    
     private String collationName;
     
     //Mysql

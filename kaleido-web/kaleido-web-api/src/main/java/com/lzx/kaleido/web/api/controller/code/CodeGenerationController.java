@@ -2,6 +2,7 @@ package com.lzx.kaleido.web.api.controller.code;
 
 import cn.hutool.http.ContentType;
 import com.lzx.kaleido.domain.api.service.ICodeGeneration;
+import com.lzx.kaleido.domain.model.dto.param.code.CodeGenerationFullParam;
 import com.lzx.kaleido.domain.model.dto.param.code.CodeGenerationParam;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationResultVO;
 import com.lzx.kaleido.infra.base.constant.Constants;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
 
 /**
  * 代码生成管理接口
@@ -35,12 +35,36 @@ public class CodeGenerationController {
     private ICodeGeneration codeGeneration;
     
     /**
-     * 代码生成-预览
+     * 代码预览
+     *
+     * @param codeGenerationFullParam
+     * @return
+     */
+    @PostMapping("/preview")
+    public @ResponseBody R<CodeGenerationResultVO> preview(@RequestBody CodeGenerationFullParam codeGenerationFullParam) {
+        final CodeGenerationResultVO codeGenerationResultVO = codeGeneration.generationOrPreview(codeGenerationFullParam, true);
+        return R.success(codeGenerationResultVO);
+    }
+    
+    /**
+     * 代码生成
+     *
+     * @param codeGenerationFullParam
+     * @return
+     */
+    @PostMapping("/generation")
+    public @ResponseBody R<CodeGenerationResultVO> generation(@RequestBody CodeGenerationFullParam codeGenerationFullParam) {
+        final CodeGenerationResultVO codeGenerationResultVO = codeGeneration.generationOrPreview(codeGenerationFullParam, false);
+        return R.success(codeGenerationResultVO);
+    }
+    
+    /**
+     * 代码生成-预览(响应流)
      *
      * @param vo
      * @return
      */
-    @PostMapping("/preview")
+    @PostMapping("/preview/stream")
     public void preview(HttpServletResponse response, @RequestBody CodeGenerationParam vo) {
         OutputStream out = null;
         try {
@@ -52,28 +76,5 @@ public class CodeGenerationController {
         } finally {
             IOUtils.closeQuietly(out);
         }
-    }
-    
-    /**
-     * 代码生成
-     *
-     * @param vo
-     * @return
-     */
-    
-    @PostMapping("/generation")
-    public @ResponseBody R<CodeGenerationResultVO> generation(@RequestBody CodeGenerationParam vo) {
-        return R.success(codeGeneration.generation(vo));
-    }
-    
-    /**
-     * 代码生成-批量
-     *
-     * @param paramList
-     * @return
-     */
-    @PostMapping("/generation/batch")
-    public @ResponseBody R<List<CodeGenerationResultVO>> generationBatch(@RequestBody List<CodeGenerationParam> paramList) {
-        return R.success(codeGeneration.generation(paramList));
     }
 }

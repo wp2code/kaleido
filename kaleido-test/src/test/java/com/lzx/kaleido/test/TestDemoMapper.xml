@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lzx.kaleido.test.ITestDemoMapper">
+    <!--
+        @author 欧冶子
+        @date Created in 2024-01-09
+    -->
+    <resultMap id="BaseResultMap" type="com.lzx.kaleido.test.pojo.TestDemoEntity">
+        <id column="device_id" property="deviceId" jdbcType="VARCHAR"/>
+        <result column="factory_id" property="factoryId" jdbcType="BIGINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="Base_Table_Column">
+        device_id
+        ,
+                factory_id,
+                create_time
+    </sql>
+    <insert id="insertSelective" parameterType="com.lzx.kaleido.test.pojo.TestDemoEntity">
+        <selectKey resultType="java.lang.String" keyProperty="device_id" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into test_demo
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="deviceId != null and deviceId != ''">
+                device_id,
+            </if>
+            <if test="factoryId != null">
+                factory_id,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="deviceId != null and deviceId != ''">
+                #{deviceId},
+            </if>
+            <if test="factoryId != null">
+                #{factoryId},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+        </trim>
+    </insert>
+    <insert id="insertOrUpdateSelective" parameterType="com.lzx.kaleido.test.pojo.TestDemoEntity">
+        <selectKey resultType="java.lang.String" keyProperty="device_id" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into test_demo
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="deviceId != null and deviceId != ''">
+                device_id,
+            </if>
+            <if test="factoryId != null">
+                factory_id,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="deviceId != null and deviceId != ''">
+                #{deviceId},
+            </if>
+            <if test="factoryId != null">
+                #{factoryId},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+        </trim>
+        ON DUPLICATE KEY UPDATE
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="deviceId != null and deviceId != ''">
+                device_id=VALUES(device_id),
+            </if>
+            <if test="factoryId != null">
+                factory_id=VALUES(factory_id),
+            </if>
+            <if test="createTime != null">
+                create_time=VALUES(create_time),
+            </if>
+        </trim>
+    </insert>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete
+        from test_demo
+        where device_id = #{deviceId}
+    </delete>
+    <update id="updateByPrimaryKey" parameterType="com.lzx.kaleido.test.pojo.TestDemoEntity">
+        update test_demo
+        <set>
+            device_id = #{deviceId},
+            factory_id = #{factoryId},
+            create_time = #{createTime},
+        </set>
+        where device_id = #{deviceId}
+    </update>
+    <update id="updateByPrimaryKeySelective!}" parameterType="com.lzx.kaleido.test.pojo.TestDemoEntity">
+        update test_demo
+        <set>
+            <if test="deviceId != null and deviceId != ''">
+                device_id = #{deviceId},
+            </if>
+            <if test="factoryId != null">
+                factory_id = #{factoryId},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+        </set>
+        where device_id = #{deviceId}
+    </update>
+    <select id="selectByEntity" resultMap="BaseResultMap" parameterType="com.lzx.kaleido.test.pojo.TestDemoEntity">
+        select
+        <include refid="Base_Table_Column"/>
+        from test_demo
+        <where>
+            <if test="deviceId != null and deviceId != ''">
+                and device_id = #{deviceId},
+            </if>
+            <if test="factoryId != null">
+                and factory_id = #{factoryId},
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime},
+            </if>
+        </where>
+    </select>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select
+        <include refid="Base_Table_Column"/>
+        from test_demo
+        where device_id = #{deviceId}
+    </select>
+</mapper>

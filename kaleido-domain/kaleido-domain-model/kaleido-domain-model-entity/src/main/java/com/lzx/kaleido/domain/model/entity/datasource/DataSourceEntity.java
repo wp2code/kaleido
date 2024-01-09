@@ -15,6 +15,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @TableName("data_source")
 public class DataSourceEntity extends BaseEntity {
+    
     @TableId(value = "id")
     private Long id;
     

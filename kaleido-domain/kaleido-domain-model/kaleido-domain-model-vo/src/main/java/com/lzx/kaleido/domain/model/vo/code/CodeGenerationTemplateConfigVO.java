@@ -62,4 +62,24 @@ public class CodeGenerationTemplateConfigVO extends BaseVO {
     @AutoMapField(source = "templateParams", target = "templateParams", qualifiedBy = JsonConvert.class)
     private JavaConfigVO templateParams;
     
+    
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        if (id != null) {
+            sb.append(id);
+        }
+        if (templateId != null) {
+            sb.append(templateId);
+        }
+        sb.append(name);
+        sb.append(alias);
+        sb.append(templateContent);
+        sb.append(hideStatus);
+        if (templateParams != null) {
+            sb.append(templateParams.getDigestValue());
+        }
+        return sb.toString();
+    }
+    
 }

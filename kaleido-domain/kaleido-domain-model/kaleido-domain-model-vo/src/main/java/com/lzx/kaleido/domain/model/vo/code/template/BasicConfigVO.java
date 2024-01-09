@@ -25,4 +25,13 @@ public class BasicConfigVO implements Serializable {
      * 代码license
      */
     private String license;
+    
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(author);
+        sb.append(codePath);
+        sb.append(license);
+        return sb.toString();
+    }
 }

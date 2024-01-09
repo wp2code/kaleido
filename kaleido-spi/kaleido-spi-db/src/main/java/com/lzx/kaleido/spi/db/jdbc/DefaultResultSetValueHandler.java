@@ -18,7 +18,9 @@ import java.sql.SQLException;
  **/
 @Slf4j
 public class DefaultResultSetValueHandler implements IResultSetValueHandler {
+    
     private static final long MAX_RESULT_SIZE = 256 * 1024;
+    
     /**
      * @param rs
      * @param limitSize
@@ -69,9 +71,8 @@ public class DefaultResultSetValueHandler implements IResultSetValueHandler {
         String result = new String(data);
         
         if (length > MAX_RESULT_SIZE) {
-            return "[ " + DataSizeUtil.format(MAX_RESULT_SIZE) + " of " + DataSizeUtil.format(length)
-                    + " ,"
-                    + I18nUtil.getMessage("execute.exportCsv") + " ] " + result;
+            return "[ " + DataSizeUtil.format(MAX_RESULT_SIZE) + " of " + DataSizeUtil.format(length) + " ," + I18nUtil.getMessage(
+                    "execute.exportCsv") + " ] " + result;
         }
         return result;
     }
@@ -87,9 +88,8 @@ public class DefaultResultSetValueHandler implements IResultSetValueHandler {
         }
         
         if (result.length() > MAX_RESULT_SIZE) {
-            return "[ " + DataSizeUtil.format(MAX_RESULT_SIZE) + " of " + DataSizeUtil.format(result.length()) + " ,"
-                    + I18nUtil.getMessage("execute.exportCsv") + " ] " + result.substring(0,
-                    Math.toIntExact(MAX_RESULT_SIZE));
+            return "[ " + DataSizeUtil.format(MAX_RESULT_SIZE) + " of " + DataSizeUtil.format(result.length()) + " ," + I18nUtil.getMessage(
+                    "execute.exportCsv") + " ] " + result.substring(0, Math.toIntExact(MAX_RESULT_SIZE));
         }
         return result;
     }

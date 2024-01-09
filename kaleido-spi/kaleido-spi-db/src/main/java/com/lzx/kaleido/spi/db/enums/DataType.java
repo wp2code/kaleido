@@ -5,6 +5,7 @@ import com.lzx.kaleido.infra.base.enums.IBaseEnum;
 /**
  * @author lwp
  * @date 2023-11-14
+ * @see java.sql.Types
  **/
 public enum DataType implements IBaseEnum<Integer> {
     ARRAY(java.sql.Types.ARRAY), //
@@ -51,7 +52,7 @@ public enum DataType implements IBaseEnum<Integer> {
     
     
     DataType(Integer type) {
-        this.initEnum(type, null);
+        this.initEnum(type, this.name());
     }
     
 }
