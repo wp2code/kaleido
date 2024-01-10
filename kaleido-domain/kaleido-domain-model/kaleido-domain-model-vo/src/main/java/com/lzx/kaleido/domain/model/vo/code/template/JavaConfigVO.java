@@ -1,6 +1,10 @@
 package com.lzx.kaleido.domain.model.vo.code.template;
 
-import cn.hutool.crypto.digest.DigestUtil;
+import cn.hutool.core.util.StrUtil;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
+import com.lzx.kaleido.infra.base.enums.ErrorCode;
+import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
+import com.lzx.kaleido.infra.base.utils.JsonUtil;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -30,14 +34,38 @@ public class JavaConfigVO implements Serializable {
     /**
      * 配置名称
      */
-    protected String configName;
+    protected String name;
     
-    public String getDigestValue() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(sourceFolder);
-        sb.append(codePath);
-        sb.append(packageName);
-        sb.append(configName);
-        return DigestUtil.md5Hex(sb.toString());
+    /**
+     * 配置别名
+     */
+    protected String aliasName;
+    
+    public boolean validate() {
+        return StrUtil.isNotBlank(name) && StrUtil.isNotBlank(sourceFolder) && StrUtil.isNotBlank(packageName);
+    }
+    
+    @Override
+    public String toString() {
+        return sourceFolder + codePath + packageName + name + aliasName;
+    }
+    
+    /**
+     * @param templateId
+     * @param templateContent
+     * @return
+     */
+    public CodeGenerationTemplateConfigVO swapper(final Long templateId, final String templateContent) {
+        if (!validate()) {
+            throw new CommonRuntimeException(ErrorCode.CODE_TEMPLATE_CONFIG_ERROR, null);
+        }
+        final CodeGenerationTemplateConfigVO config = new CodeGenerationTemplateConfigVO();
+        config.setName(this.name);
+        config.setTemplateId(templateId);
+        config.setTemplateContent(templateContent);
+        config.setAlias(this.aliasName);
+        config.setHideStatus(0);
+        config.setTemplateParams(JsonUtil.toJson(this));
+        return config;
     }
 }

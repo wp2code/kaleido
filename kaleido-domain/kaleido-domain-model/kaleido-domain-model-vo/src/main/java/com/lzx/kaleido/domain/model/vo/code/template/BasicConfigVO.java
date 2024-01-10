@@ -28,10 +28,6 @@ public class BasicConfigVO implements Serializable {
     
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(author);
-        sb.append(codePath);
-        sb.append(license);
-        return sb.toString();
+        return author + codePath + license;
     }
 }

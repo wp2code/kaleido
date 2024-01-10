@@ -1,21 +1,25 @@
 package com.lzx.kaleido.test;
 
 import cn.hutool.core.util.StrUtil;
+import com.lzx.kaleido.domain.core.code.processor.impl.ControllerTemplateProcessorImpl;
+import com.lzx.kaleido.domain.core.code.processor.impl.EntityTemplateProcessorImpl;
+import com.lzx.kaleido.domain.core.code.processor.impl.MapperTemplateProcessorImpl;
+import com.lzx.kaleido.domain.core.code.processor.impl.ServiceApiTemplateProcessorImpl;
+import com.lzx.kaleido.domain.core.code.processor.impl.ServiceTemplateProcessorImpl;
+import com.lzx.kaleido.domain.core.code.processor.impl.VoTemplateProcessorImpl;
+import com.lzx.kaleido.domain.core.code.processor.impl.XmlTemplateProcessorImpl;
 import com.lzx.kaleido.domain.core.enums.ApiTemplateEnum;
 import com.lzx.kaleido.domain.core.enums.ControllerApiTemplateEnum;
 import com.lzx.kaleido.domain.core.enums.TemplateParserEnum;
-import com.lzx.kaleido.domain.core.resolver.impl.ControllerTemplateParserImpl;
-import com.lzx.kaleido.domain.core.resolver.impl.EntityTemplateParserImpl;
-import com.lzx.kaleido.domain.core.resolver.impl.MapperTemplateParserImpl;
-import com.lzx.kaleido.domain.core.resolver.impl.ServiceApiTemplateParserImpl;
-import com.lzx.kaleido.domain.core.resolver.impl.ServiceTemplateParserImpl;
-import com.lzx.kaleido.domain.core.resolver.impl.VoTemplateParserImpl;
-import com.lzx.kaleido.domain.core.resolver.impl.XmlTemplateParserImpl;
-import com.lzx.kaleido.domain.model.dto.param.code.CodeGenerationTableFieldParam;
-import com.lzx.kaleido.domain.model.dto.param.code.CodeGenerationTableParam;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableFieldParam;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableParam;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateViewConfigVO;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateViewVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
+import com.lzx.kaleido.domain.model.vo.code.template.JavaConfigVO;
+import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaControllerConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaEntityConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaMapperConfigVO;
@@ -23,7 +27,6 @@ import com.lzx.kaleido.domain.model.vo.code.template.java.JavaServiceApiConfigVO
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaServiceConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaVoConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaXmlConfigVO;
-import com.lzx.kaleido.domain.model.vo.code.template.java.common.SuperclassVO;
 import com.lzx.kaleido.infra.base.utils.JsonUtil;
 import com.lzx.kaleido.plugins.template.code.impl.DefaultCodeTemplateProcessor;
 import com.lzx.kaleido.plugins.template.engine.impl.FreemarkerTemplateEngineImpl;
@@ -32,14 +35,18 @@ import com.lzx.kaleido.plugins.template.utils.CodeGenerationUtil;
 import com.lzx.kaleido.spi.db.enums.DataType;
 import com.lzx.kaleido.spi.db.utils.JdbcUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,7 +57,9 @@ import java.util.stream.Stream;
 @Slf4j
 public class CodeGenerationUtilTest {
     
-    private final BasicConfigVO basicConfigVO = new BasicConfigVO();
+    private static final BasicConfigVO basicConfigVO = new BasicConfigVO();
+    
+    private static final Map<String, JavaConfigVO> configMap = new HashMap<>();
     
     @BeforeEach
     void initTemplate() {
@@ -70,6 +79,24 @@ public class CodeGenerationUtilTest {
         CodeGenerationUtil.setCodeTemplateProcessor(defaultCodeTemplateProcessor);
     }
     
+    @AfterAll
+    public static void genTemplateConfig() {
+        CodeGenerationTemplateViewVO vo = new CodeGenerationTemplateViewVO();
+        vo.setBasicConfig(basicConfigVO);
+        final List<CodeGenerationTemplateViewConfigVO> codeConfigList = configMap.entrySet().stream().map(v -> {
+            final CodeGenerationTemplateViewConfigVO configVO = new CodeGenerationTemplateViewConfigVO();
+            configVO.setName(v.getKey());
+            configVO.setConfig(JsonUtil.toJson(v.getValue()));
+            return configVO;
+        }).toList();
+        vo.setCodeConfigList(codeConfigList);
+        vo.setTemplateName("测试模板");
+        vo.setLanguage("java");
+        System.out.println("-------------------------------");
+        System.out.println(JsonUtil.toJson(vo));
+        System.out.println("-------------------------------");
+    }
+    
     @Test
     void VoTemplateParserImplTest() {
         boolean generateCodeFile = true;
@@ -81,7 +108,9 @@ public class CodeGenerationUtilTest {
         javaVoConfigVO.setUseSwagger(true);
         javaVoConfigVO.setUseLombok(true);
         javaVoConfigVO.setSuperclass(new SuperclassVO("com.lzx.kaleido.test.pojo.BaseVO"));
-        configVO.setTemplateParams(javaVoConfigVO);
+        final String json = JsonUtil.toJson(javaVoConfigVO);
+        configMap.put(javaVoConfigVO.getName(), javaVoConfigVO);
+        configVO.setTemplateParams(json);
         final CodeGenerationTableParam codeGenerationTableParam = new CodeGenerationTableParam();
         codeGenerationTableParam.setTemplateName("tp_vo.ftlx");
         codeGenerationTableParam.setTableName("test_demo");
@@ -89,7 +118,7 @@ public class CodeGenerationUtilTest {
         codeGenerationTableParam.setTableFieldColumnList(mockCodeGenerationTableFieldParams());
         codeGenerationTableParam.setUseSwagger(true);
         codeGenerationTableParam.setUseLombok(true);
-        final CodeGenerationViewVO result = new VoTemplateParserImpl().parser(configVO, basicConfigVO, generateCodeFile,
+        final CodeGenerationViewVO result = new VoTemplateProcessorImpl().generation(configVO, basicConfigVO, generateCodeFile,
                 codeGenerationTableParam, ResourceMode.CLASSPATH, null);
         final String templateCode = result.getTemplateCode();
         System.out.println(templateCode);
@@ -109,7 +138,9 @@ public class CodeGenerationUtilTest {
         javaEntityConfigVO.setUseLombok(true);
         javaEntityConfigVO.setUseMybatisPlus(true);
         javaEntityConfigVO.setSuperclass(new SuperclassVO("com.lzx.kaleido.test.pojo.BaseVO"));
-        configVO.setTemplateParams(javaEntityConfigVO);
+        final String json = JsonUtil.toJson(javaEntityConfigVO);
+        configMap.put(javaEntityConfigVO.getName(), javaEntityConfigVO);
+        configVO.setTemplateParams(json);
         final CodeGenerationTableParam codeGenerationTableParam = new CodeGenerationTableParam();
         codeGenerationTableParam.setTemplateName("tp_entity.ftlx");
         codeGenerationTableParam.setTableName("test_demo");
@@ -117,7 +148,7 @@ public class CodeGenerationUtilTest {
         codeGenerationTableParam.setTableFieldColumnList(mockCodeGenerationTableFieldParams());
         codeGenerationTableParam.setUseSwagger(false);
         codeGenerationTableParam.setUseLombok(true);
-        final CodeGenerationViewVO result = new EntityTemplateParserImpl().parser(configVO, basicConfigVO, generateCodeFile,
+        final CodeGenerationViewVO result = new EntityTemplateProcessorImpl().generation(configVO, basicConfigVO, generateCodeFile,
                 codeGenerationTableParam, ResourceMode.CLASSPATH, null);
         final String templateCode = result.getTemplateCode();
         System.out.println(templateCode);
@@ -135,16 +166,18 @@ public class CodeGenerationUtilTest {
         javaEntityConfigVO.setCodePath("D:\\opt\\gencode");
         javaEntityConfigVO.setUseMybatisPlus(true);
         javaEntityConfigVO.setSuperclass(new SuperclassVO("com.lzx.kaleido.test.IBaseMapper"));
-        configVO.setTemplateParams(javaEntityConfigVO);
+        final String json = JsonUtil.toJson(javaEntityConfigVO);
+        configMap.put(javaEntityConfigVO.getName(), javaEntityConfigVO);
+        configVO.setTemplateParams(json);
         final CodeGenerationTableParam codeGenerationTableParam = new CodeGenerationTableParam();
         codeGenerationTableParam.setTemplateName("tp_mapper.ftlx");
         codeGenerationTableParam.setTableName("test_demo");
         codeGenerationTableParam.setComment("设备信息表");
-        codeGenerationTableParam.setApiList(Arrays.stream(ApiTemplateEnum.values()).map(ApiTemplateEnum::getApiId).toList());
+        codeGenerationTableParam.setWebMethodList(Arrays.stream(ApiTemplateEnum.values()).map(ApiTemplateEnum::getApiId).toList());
         codeGenerationTableParam.setTableFieldColumnList(mockCodeGenerationTableFieldParams());
         final CodeGenerationViewVO testDemoEntity = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test")
                 .name("TestDemoEntity").codeType(TemplateParserEnum.ENTITY.getCodeType()).build();
-        final CodeGenerationViewVO result = new MapperTemplateParserImpl().parser(configVO, basicConfigVO, generateCodeFile,
+        final CodeGenerationViewVO result = new MapperTemplateProcessorImpl().generation(configVO, basicConfigVO, generateCodeFile,
                 codeGenerationTableParam, ResourceMode.CLASSPATH, Stream.of(testDemoEntity).collect(Collectors.toList()));
         final String templateCode = result.getTemplateCode();
         System.out.println(templateCode);
@@ -156,23 +189,26 @@ public class CodeGenerationUtilTest {
     void XmlTemplateParserImplTest() {
         boolean generateCodeFile = true;
         final CodeGenerationTemplateConfigVO configVO = new CodeGenerationTemplateConfigVO();
-        final JavaXmlConfigVO javaEntityConfigVO = new JavaXmlConfigVO();
-        javaEntityConfigVO.setPackageName("mapping");
-        javaEntityConfigVO.setSourceFolder("src/main/resources");
-        javaEntityConfigVO.setCodePath("D:\\opt\\gencode");
-        javaEntityConfigVO.setUseMybatisPlus(true);
-        configVO.setTemplateParams(javaEntityConfigVO);
+        final JavaXmlConfigVO javaXmlConfigVO = new JavaXmlConfigVO();
+        javaXmlConfigVO.setPackageName("mapping");
+        javaXmlConfigVO.setSourceFolder("src/main/resources");
+        javaXmlConfigVO.setCodePath("D:\\opt\\gencode");
+        javaXmlConfigVO.setUseMybatisPlus(true);
+        javaXmlConfigVO.setMethodList(Arrays.stream(ApiTemplateEnum.values()).map(ApiTemplateEnum::getApiId).toList());
+        final String json = JsonUtil.toJson(javaXmlConfigVO);
+        configMap.put(javaXmlConfigVO.getName(), javaXmlConfigVO);
+        configVO.setTemplateParams(json);
         final CodeGenerationTableParam codeGenerationTableParam = new CodeGenerationTableParam();
         codeGenerationTableParam.setTableFieldColumnList(mockCodeGenerationTableFieldParams());
         codeGenerationTableParam.setTemplateName("tp_xml.ftlx");
         codeGenerationTableParam.setTableName("test_demo");
         codeGenerationTableParam.setComment("设备信息表");
-        codeGenerationTableParam.setApiList(Arrays.stream(ApiTemplateEnum.values()).map(ApiTemplateEnum::getApiId).toList());
+        codeGenerationTableParam.setMethodList(new ArrayList<>());
         final CodeGenerationViewVO testDemoEntity = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test")
                 .name("TestDemoEntity").codeType(TemplateParserEnum.ENTITY.getCodeType()).build();
         final CodeGenerationViewVO testDemoMapper = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test")
                 .name("ITestDemoMapper").codeType(TemplateParserEnum.MAPPER.getCodeType()).build();
-        final CodeGenerationViewVO result = new XmlTemplateParserImpl().parser(configVO, basicConfigVO, generateCodeFile,
+        final CodeGenerationViewVO result = new XmlTemplateProcessorImpl().generation(configVO, basicConfigVO, generateCodeFile,
                 codeGenerationTableParam, ResourceMode.CLASSPATH, Stream.of(testDemoEntity, testDemoMapper).collect(Collectors.toList()));
         final String templateCode = result.getTemplateCode();
         System.out.println(templateCode);
@@ -192,20 +228,22 @@ public class CodeGenerationUtilTest {
         javaControllerConfigVO.setUseSwagger(true);
         javaControllerConfigVO.setUseMybatisPlus(true);
         javaControllerConfigVO.setResponseGenericClass("com.lzx.kaleido.test.pojo.R");
-        configVO.setTemplateParams(javaControllerConfigVO);
+        javaControllerConfigVO.setMethodList(
+                Arrays.stream(ControllerApiTemplateEnum.values()).map(ControllerApiTemplateEnum::getApiId).toList());
+        final String json = JsonUtil.toJson(javaControllerConfigVO);
+        configMap.put(javaControllerConfigVO.getName(), javaControllerConfigVO);
+        configVO.setTemplateParams(json);
         final CodeGenerationTableParam codeGenerationTableParam = new CodeGenerationTableParam();
         codeGenerationTableParam.setTableFieldColumnList(mockCodeGenerationTableFieldParams());
         codeGenerationTableParam.setTemplateName("tp_controller1.ftlx");
         codeGenerationTableParam.setTemplatePath("D:\\opt");
         codeGenerationTableParam.setTableName("test_demo");
         codeGenerationTableParam.setComment("设备信息表");
-        codeGenerationTableParam.setWebApiList(
-                Arrays.stream(ControllerApiTemplateEnum.values()).map(ControllerApiTemplateEnum::getApiId).toList());
         final CodeGenerationViewVO testDemoService = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test")
                 .name("ITestDemoService").codeType(TemplateParserEnum.SERVICE_API.getCodeType()).build();
         final CodeGenerationViewVO testDemoMapper = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test").name("TestDemoVO")
                 .codeType(TemplateParserEnum.VO.getCodeType()).build();
-        final CodeGenerationViewVO result = new ControllerTemplateParserImpl().parser(configVO, basicConfigVO, generateCodeFile,
+        final CodeGenerationViewVO result = new ControllerTemplateProcessorImpl().generation(configVO, basicConfigVO, generateCodeFile,
                 codeGenerationTableParam, ResourceMode.COMPOSITE, Stream.of(testDemoService, testDemoMapper).collect(Collectors.toList()));
         final String templateCode = result.getTemplateCode();
         System.out.println(templateCode);
@@ -217,22 +255,22 @@ public class CodeGenerationUtilTest {
     void ServiceApiTemplateParserImplTest() {
         boolean generateCodeFile = true;
         final CodeGenerationTemplateConfigVO configVO = new CodeGenerationTemplateConfigVO();
-        final JavaServiceApiConfigVO javaControllerConfigVO = new JavaServiceApiConfigVO();
-        javaControllerConfigVO.setPackageName("com.lzx.kaleido.test");
-        javaControllerConfigVO.setSourceFolder("src/main/java");
-        javaControllerConfigVO.setCodePath("D:\\opt\\gencode");
-        javaControllerConfigVO.setSuperclass(new SuperclassVO("com.baomidou.mybatisplus.extension.service.IService"));
-        configVO.setTemplateParams(javaControllerConfigVO);
+        final JavaServiceApiConfigVO javaServiceApiConfigVO = new JavaServiceApiConfigVO();
+        javaServiceApiConfigVO.setPackageName("com.lzx.kaleido.test");
+        javaServiceApiConfigVO.setSourceFolder("src/main/java");
+        javaServiceApiConfigVO.setCodePath("D:\\opt\\gencode");
+        javaServiceApiConfigVO.setSuperclass(new SuperclassVO("com.baomidou.mybatisplus.extension.service.IService"));
+        final String json = JsonUtil.toJson(javaServiceApiConfigVO);
+        configMap.put(javaServiceApiConfigVO.getName(), javaServiceApiConfigVO);
+        configVO.setTemplateParams(json);
         final CodeGenerationTableParam codeGenerationTableParam = new CodeGenerationTableParam();
         codeGenerationTableParam.setTableFieldColumnList(mockCodeGenerationTableFieldParams());
         codeGenerationTableParam.setTemplateName("tp_service_api.ftlx");
         codeGenerationTableParam.setTableName("test_demo");
         codeGenerationTableParam.setComment("设备信息表");
-        codeGenerationTableParam.setWebApiList(
-                Arrays.stream(ControllerApiTemplateEnum.values()).map(ControllerApiTemplateEnum::getApiId).toList());
         final CodeGenerationViewVO testDemoEntity = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test")
                 .name("TestDemoEntity").codeType(TemplateParserEnum.ENTITY.getCodeType()).build();
-        final CodeGenerationViewVO result = new ServiceApiTemplateParserImpl().parser(configVO, basicConfigVO, generateCodeFile,
+        final CodeGenerationViewVO result = new ServiceApiTemplateProcessorImpl().generation(configVO, basicConfigVO, generateCodeFile,
                 codeGenerationTableParam, ResourceMode.CLASSPATH, Stream.of(testDemoEntity).collect(Collectors.toList()));
         final String templateCode = result.getTemplateCode();
         System.out.println(templateCode);
@@ -250,21 +288,21 @@ public class CodeGenerationUtilTest {
         javaServiceConfigVO.setCodePath("D:\\opt\\gencode");
         javaServiceConfigVO.setSuperclass(new SuperclassVO("com.lzx.kaleido.test.BaseService"));
         javaServiceConfigVO.setUseMybatisPlus(true);
-        configVO.setTemplateParams(javaServiceConfigVO);
+        final String json = JsonUtil.toJson(javaServiceConfigVO);
+        configMap.put(javaServiceConfigVO.getName(), javaServiceConfigVO);
+        configVO.setTemplateParams(json);
         final CodeGenerationTableParam codeGenerationTableParam = new CodeGenerationTableParam();
         codeGenerationTableParam.setTableFieldColumnList(mockCodeGenerationTableFieldParams());
         codeGenerationTableParam.setTemplateName("tp_service.ftlx");
         codeGenerationTableParam.setTableName("test_demo");
         codeGenerationTableParam.setComment("设备信息表");
-        codeGenerationTableParam.setWebApiList(
-                Arrays.stream(ControllerApiTemplateEnum.values()).map(ControllerApiTemplateEnum::getApiId).toList());
         final CodeGenerationViewVO testDemoEntity = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test")
                 .name("TestDemoEntity").codeType(TemplateParserEnum.ENTITY.getCodeType()).build();
         final CodeGenerationViewVO testDemoMapper = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test")
                 .name("ITestDemoMapper").codeType(TemplateParserEnum.MAPPER.getCodeType()).build();
         final CodeGenerationViewVO testDemoService = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test")
                 .name("ITestDemoService").codeType(TemplateParserEnum.SERVICE_API.getCodeType()).build();
-        final CodeGenerationViewVO result = new ServiceTemplateParserImpl().parser(configVO, basicConfigVO, generateCodeFile,
+        final CodeGenerationViewVO result = new ServiceTemplateProcessorImpl().generation(configVO, basicConfigVO, generateCodeFile,
                 codeGenerationTableParam, ResourceMode.CLASSPATH,
                 Stream.of(testDemoEntity, testDemoMapper, testDemoService).collect(Collectors.toList()));
         final String templateCode = result.getTemplateCode();
@@ -272,7 +310,11 @@ public class CodeGenerationUtilTest {
         log.info("ServiceTemplateParserImplTest is {}", JsonUtil.toJson(result));
         Assertions.assertTrue(generateCodeFile ? StrUtil.isNotBlank(result.getCodePath()) : StrUtil.isNotBlank(templateCode));
     }
-    
+    @Test
+    void mockTableParams(){
+        final List<CodeGenerationTableFieldParam> codeGenerationTableFieldParams = mockCodeGenerationTableFieldParams();
+        System.out.println(JsonUtil.toJson(codeGenerationTableFieldParams));
+    }
     private List<CodeGenerationTableFieldParam> mockCodeGenerationTableFieldParams() {
         final CodeGenerationTableFieldParam v1 = new CodeGenerationTableFieldParam();
         v1.setComment("设备ID");

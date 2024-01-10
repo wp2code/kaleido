@@ -1,10 +1,11 @@
 package com.lzx.kaleido.web.api.controller.code;
 
 import com.lzx.kaleido.domain.api.annotations.LogRecord;
-import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateConfigService;
-import com.lzx.kaleido.domain.api.service.ICodeGenerationTemplateService;
-import com.lzx.kaleido.domain.model.dto.param.code.CodeGenerationTemplateQueryParam;
+import com.lzx.kaleido.domain.api.code.ICodeGenerationTemplateConfigService;
+import com.lzx.kaleido.domain.api.code.ICodeGenerationTemplateService;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateQueryParam;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateViewVO;
 import com.lzx.kaleido.infra.base.annotations.validation.AddGroup;
 import com.lzx.kaleido.infra.base.annotations.validation.UpdateGroup;
 import com.lzx.kaleido.infra.base.constant.Constants;
@@ -40,6 +41,19 @@ public class CodeGenerationTemplateController {
     private ICodeGenerationTemplateConfigService codeGenerationTemplateConfigService;
     
     /**
+     * 新增标准协议模板
+     *
+     * @param vo
+     * @return
+     */
+    @LogRecord
+    @PostMapping("/standard/add")
+    public R<Long> addStandardCodeGenerationTemplate(@RequestBody @Validated(AddGroup.class) CodeGenerationTemplateViewVO vo) {
+        final Long id = codeGenerationGroupService.addStandardCodeGenerationTemplate(vo);
+        return R.result(id != null, ErrorCode.SAVE_FAILED, id);
+    }
+    
+    /**
      * 新增代码模板
      *
      * @param vo
@@ -48,7 +62,7 @@ public class CodeGenerationTemplateController {
     @LogRecord
     @PostMapping("/add")
     public R<Long> addCodeGenerationTemplate(@RequestBody @Validated(AddGroup.class) CodeGenerationTemplateVO vo) {
-        Long id = codeGenerationGroupService.addCodeGenerationTemplate(vo);
+        final Long id = codeGenerationGroupService.addCodeGenerationTemplate(vo);
         return R.result(id != null, ErrorCode.SAVE_FAILED, id);
     }
     

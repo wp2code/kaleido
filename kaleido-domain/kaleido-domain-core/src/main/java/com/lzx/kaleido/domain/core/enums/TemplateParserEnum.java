@@ -1,14 +1,14 @@
 package com.lzx.kaleido.domain.core.enums;
 
 import cn.hutool.core.lang.Singleton;
-import com.lzx.kaleido.domain.core.resolver.ITemplateParser;
-import com.lzx.kaleido.domain.core.resolver.impl.ControllerTemplateParserImpl;
-import com.lzx.kaleido.domain.core.resolver.impl.EntityTemplateParserImpl;
-import com.lzx.kaleido.domain.core.resolver.impl.MapperTemplateParserImpl;
-import com.lzx.kaleido.domain.core.resolver.impl.ServiceApiTemplateParserImpl;
-import com.lzx.kaleido.domain.core.resolver.impl.ServiceTemplateParserImpl;
-import com.lzx.kaleido.domain.core.resolver.impl.VoTemplateParserImpl;
-import com.lzx.kaleido.domain.core.resolver.impl.XmlTemplateParserImpl;
+import com.lzx.kaleido.domain.core.code.processor.ITemplateProcessor;
+import com.lzx.kaleido.domain.core.code.processor.impl.ControllerTemplateProcessorImpl;
+import com.lzx.kaleido.domain.core.code.processor.impl.EntityTemplateProcessorImpl;
+import com.lzx.kaleido.domain.core.code.processor.impl.MapperTemplateProcessorImpl;
+import com.lzx.kaleido.domain.core.code.processor.impl.ServiceApiTemplateProcessorImpl;
+import com.lzx.kaleido.domain.core.code.processor.impl.ServiceTemplateProcessorImpl;
+import com.lzx.kaleido.domain.core.code.processor.impl.VoTemplateProcessorImpl;
+import com.lzx.kaleido.domain.core.code.processor.impl.XmlTemplateProcessorImpl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -22,29 +22,34 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum TemplateParserEnum {
     
-    ENTITY("entity", Singleton.get(EntityTemplateParserImpl.class), 1),
-    VO("vo", Singleton.get(VoTemplateParserImpl.class), 2),
-    MAPPER("mapper", Singleton.get(MapperTemplateParserImpl.class), 3),
-    XML("xml", Singleton.get(XmlTemplateParserImpl.class), 4),
-    SERVICE_API("serviceApi", Singleton.get(ServiceApiTemplateParserImpl.class), 5),
-    SERVICE("service", Singleton.get(ServiceTemplateParserImpl.class), 6),
-    CONTROLLER("controller", Singleton.get(ControllerTemplateParserImpl.class), 7);
+    ENTITY("Entity", Singleton.get(EntityTemplateProcessorImpl.class), 1, "tp_entity.ftlx"),
+    VO("VO", Singleton.get(VoTemplateProcessorImpl.class), 2, "tp_vo.ftlx"),
+    MAPPER("Mapper", Singleton.get(MapperTemplateProcessorImpl.class), 3, "tp_mapper.ftlx"),
+    XML("Xml", Singleton.get(XmlTemplateProcessorImpl.class), 4, "tp_xml.ftlx"),
+    SERVICE_API("ServiceApi", Singleton.get(ServiceApiTemplateProcessorImpl.class), 5, "tp_service_api.ftlx"),
+    SERVICE("Service", Singleton.get(ServiceTemplateProcessorImpl.class), 6, "tp_service.ftlx"),
+    CONTROLLER("Controller", Singleton.get(ControllerTemplateProcessorImpl.class), 7, "tp_controller.ftlx");
     
     private final String codeType;
     
-    private final ITemplateParser templateParser;
+    private final ITemplateProcessor templateParser;
     
     /**
      * 优先权重 -越小越优先执行
      */
     private final int priority;
     
+    /**
+     * 默认模板名称
+     */
+    private final String defaultTemplateName;
+    
     public static TemplateParserEnum getInstance(String codeType) {
-        return Arrays.stream(values()).filter(v -> v.getCodeType().equals(codeType)).findFirst().orElse(null);
+        return Arrays.stream(values()).filter(v -> v.getCodeType().equalsIgnoreCase(codeType)).findFirst().orElse(null);
     }
     
     public static boolean isEntity(String codeType) {
-        return ENTITY.getCodeType().equals(codeType);
+        return ENTITY.getCodeType().equalsIgnoreCase(codeType);
     }
     
     /**
@@ -52,7 +57,7 @@ public enum TemplateParserEnum {
      * @return
      */
     public static boolean isMapper(String codeType) {
-        return MAPPER.getCodeType().equals(codeType);
+        return MAPPER.getCodeType().equalsIgnoreCase(codeType);
     }
     
     /**
@@ -60,14 +65,10 @@ public enum TemplateParserEnum {
      * @return
      */
     public static boolean isVo(String codeType) {
-        return VO.getCodeType().equals(codeType);
-    }
-    
-    public static boolean isService(String codeType) {
-        return SERVICE.getCodeType().equals(codeType);
+        return VO.getCodeType().equalsIgnoreCase(codeType);
     }
     
     public static boolean isServiceApi(String codeType) {
-        return SERVICE_API.getCodeType().equals(codeType);
+        return SERVICE_API.getCodeType().equalsIgnoreCase(codeType);
     }
 }

@@ -1,9 +1,9 @@
 package com.lzx.kaleido.web.api.controller.code;
 
 import cn.hutool.http.ContentType;
-import com.lzx.kaleido.domain.api.service.ICodeGeneration;
-import com.lzx.kaleido.domain.model.dto.param.code.CodeGenerationFullParam;
-import com.lzx.kaleido.domain.model.dto.param.code.CodeGenerationParam;
+import com.lzx.kaleido.domain.api.code.ICodeGeneration;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationAllParam;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationParam;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationResultVO;
 import com.lzx.kaleido.infra.base.constant.Constants;
 import com.lzx.kaleido.infra.base.pojo.R;
@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,24 +38,24 @@ public class CodeGenerationController {
     /**
      * 代码预览
      *
-     * @param codeGenerationFullParam
+     * @param codeGenerationAllParam
      * @return
      */
     @PostMapping("/preview")
-    public @ResponseBody R<CodeGenerationResultVO> preview(@RequestBody CodeGenerationFullParam codeGenerationFullParam) {
-        final CodeGenerationResultVO codeGenerationResultVO = codeGeneration.generationOrPreview(codeGenerationFullParam, true);
+    public @ResponseBody R<CodeGenerationResultVO> preview(@Validated @RequestBody CodeGenerationAllParam codeGenerationAllParam) {
+        final CodeGenerationResultVO codeGenerationResultVO = codeGeneration.generationOrPreview(codeGenerationAllParam, true);
         return R.success(codeGenerationResultVO);
     }
     
     /**
      * 代码生成
      *
-     * @param codeGenerationFullParam
+     * @param codeGenerationAllParam
      * @return
      */
     @PostMapping("/generation")
-    public @ResponseBody R<CodeGenerationResultVO> generation(@RequestBody CodeGenerationFullParam codeGenerationFullParam) {
-        final CodeGenerationResultVO codeGenerationResultVO = codeGeneration.generationOrPreview(codeGenerationFullParam, false);
+    public @ResponseBody R<CodeGenerationResultVO> generation(@Validated @RequestBody CodeGenerationAllParam codeGenerationAllParam) {
+        final CodeGenerationResultVO codeGenerationResultVO = codeGeneration.generationOrPreview(codeGenerationAllParam, false);
         return R.success(codeGenerationResultVO);
     }
     
@@ -65,7 +66,7 @@ public class CodeGenerationController {
      * @return
      */
     @PostMapping("/preview/stream")
-    public void preview(HttpServletResponse response, @RequestBody CodeGenerationParam vo) {
+    public void preview(HttpServletResponse response, @Validated @RequestBody CodeGenerationParam vo) {
         OutputStream out = null;
         try {
             out = response.getOutputStream();

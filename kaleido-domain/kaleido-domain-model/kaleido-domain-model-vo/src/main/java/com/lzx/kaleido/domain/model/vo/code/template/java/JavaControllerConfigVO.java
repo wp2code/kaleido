@@ -1,11 +1,12 @@
 package com.lzx.kaleido.domain.model.vo.code.template.java;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.digest.DigestUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.lzx.kaleido.domain.model.vo.code.template.JavaConfigVO;
-import com.lzx.kaleido.domain.model.vo.code.template.java.common.SuperclassVO;
+import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.List;
 
 /**
  * @author lwp
@@ -31,24 +32,29 @@ public class JavaControllerConfigVO extends JavaConfigVO {
     
     private boolean useMybatisPlus;
     
+    /**
+     *
+     */
+    private List<String> methodList;
+    
     public JavaControllerConfigVO() {
-        this.configName = NAME;
+        this.name = NAME;
+        this.aliasName = NAME;
     }
     
     @Override
-    public String getDigestValue() {
+    public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append(sourceFolder);
-        sb.append(codePath);
-        sb.append(packageName);
+        sb.append(useSwagger);
+        sb.append(responseGenericClass);
         sb.append(useMybatisPlus);
-        sb.append(configName);
         if (superclass != null) {
             sb.append(superclass);
         }
-        if (StrUtil.isNotBlank(responseGenericClass)) {
-            sb.append(responseGenericClass);
+        if (CollUtil.isNotEmpty(methodList)) {
+            sb.append(String.join("", methodList));
         }
-        return DigestUtil.md5Hex(sb.toString());
+        sb.append(super.toString());
+        return sb.toString();
     }
 }

@@ -7,7 +7,7 @@ import com.lzx.kaleido.domain.model.vo.code.template.java.JavaMapperConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaServiceConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaVoConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaXmlConfigVO;
-import com.lzx.kaleido.domain.model.vo.code.template.java.common.SuperclassVO;
+import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
 import com.lzx.kaleido.infra.base.utils.JsonUtil;
 import com.lzx.kaleido.plugins.template.code.impl.DefaultCodeTemplateProcessor;
 import com.lzx.kaleido.plugins.template.engine.impl.FreemarkerTemplateEngineImpl;
@@ -98,13 +98,7 @@ class CodeTemplateUtilTest {
         final JavaXmlConfigVO javaXmlConfigVO = new JavaXmlConfigVO();
         javaXmlConfigVO.setSourceFolder("src/main/java");
         javaXmlConfigVO.setPackageName("com.lzx.kaleido.domain.repository.mapper");
-        javaXmlConfigVO.setNamespace("com.lzx.kaleido.domain.repository.mapper.DemoMapper");
         javaXmlConfigVO.setUseMybatisPlus(true);
-        if (!javaXmlConfigVO.isUseMybatisPlus()) {
-            javaXmlConfigVO.setSqlList(Stream.of(
-                            "insertSelective,insertOrUpdateSelective,updateByPrimaryKey,updateByPrimaryKeySelective,selectByEntity,selectByPrimaryKey,deleteByPrimaryKey")
-                    .collect(Collectors.toList()));
-        }
         javaXmlConfigVO.setCodePath("D:\\opt\\gencode");
         log.info(JsonUtil.toJson(javaXmlConfigVO));
     }

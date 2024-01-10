@@ -1,9 +1,8 @@
 package com.lzx.kaleido.domain.model.vo.code.template.java;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.crypto.digest.DigestUtil;
 import com.lzx.kaleido.domain.model.vo.code.template.JavaConfigVO;
-import com.lzx.kaleido.domain.model.vo.code.template.java.common.SuperclassVO;
+import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -35,16 +34,13 @@ public class JavaMapperConfigVO extends JavaConfigVO {
     private boolean useMybatisPlus;
     
     public JavaMapperConfigVO() {
-        this.configName = NAME;
+        this.name = NAME;
+        this.aliasName=NAME;
     }
     
     @Override
-    public String getDigestValue() {
+    public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append(sourceFolder);
-        sb.append(codePath);
-        sb.append(packageName);
-        sb.append(configName);
         sb.append(useMybatisPlus);
         if (superclass != null) {
             sb.append(superclass);
@@ -52,6 +48,7 @@ public class JavaMapperConfigVO extends JavaConfigVO {
         if (CollUtil.isNotEmpty(methodList)) {
             sb.append(String.join("", methodList));
         }
-        return DigestUtil.md5Hex(sb.toString());
+        sb.append(super.toString());
+        return sb.toString();
     }
 }

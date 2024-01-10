@@ -1,16 +1,11 @@
 package com.lzx.kaleido.domain.model.vo.code;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.crypto.digest.DigestUtil;
 import com.lzx.kaleido.domain.model.entity.code.CodeGenerationTemplateEntity;
-import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
-import com.lzx.kaleido.domain.model.vo.conversion.BasicConfigVOConversion;
 import com.lzx.kaleido.infra.base.annotations.validation.AddGroup;
 import com.lzx.kaleido.infra.base.annotations.validation.UpdateGroup;
 import com.lzx.kaleido.infra.base.pojo.BaseVO;
-import com.lzx.kaleido.plugins.mapstruct.annotations.json.JsonConvert;
 import io.github.zhaord.mapstruct.plus.annotations.AutoMap;
-import io.github.zhaord.mapstruct.plus.annotations.AutoMapField;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
@@ -24,7 +19,7 @@ import java.util.List;
  **/
 @Data
 @EqualsAndHashCode(callSuper = true)
-@AutoMap(targetType = CodeGenerationTemplateEntity.class, uses = BasicConfigVOConversion.class)
+@AutoMap(targetType = CodeGenerationTemplateEntity.class)
 public class CodeGenerationTemplateVO extends BaseVO {
     
     /**
@@ -47,8 +42,7 @@ public class CodeGenerationTemplateVO extends BaseVO {
     /**
      * 模板基本配置
      */
-    @AutoMapField(source = "basicConfig", target = "basicConfig", qualifiedBy = JsonConvert.class)
-    private BasicConfigVO basicConfig;
+    private String basicConfig;
     
     
     /**
@@ -72,13 +66,7 @@ public class CodeGenerationTemplateVO extends BaseVO {
     @Valid
     private List<CodeGenerationTemplateConfigVO> templateConfigList;
     
-    /**
-     * @return
-     */
-    public String getDigestValue() {
-        return DigestUtil.md5Hex(this.toString());
-    }
-    
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();

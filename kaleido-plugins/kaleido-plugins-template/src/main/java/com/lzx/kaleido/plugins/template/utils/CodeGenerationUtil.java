@@ -73,7 +73,8 @@ public class CodeGenerationUtil {
             final Map<?, ?> templateParams, final String engineName, final String templateName, final String templatePath,
             final ResourceMode resourceMode) {
         final TemplateContext templateContext = TemplateContext.builder().templateName(templateName).templateParams(templateParams)
-                .outDirPath(outDirPath).engineName(engineName).outFileName(outFileName).templateConfig(
+                .outDirPath(outDirPath).engineName(Optional.ofNullable(engineName).orElse(TemplateContext.DEFAULT_ENGINE))
+                .outFileName(outFileName).templateConfig(
                         TemplateConfigInfo.builder().templateContent(templateContent).resourceMode(resourceMode)
                                 .templatePath(StrUtil.isNotBlank(templatePath) ? templatePath : TEMPLATE_PATH).build()).build();
         return process(templateContext);
@@ -93,7 +94,7 @@ public class CodeGenerationUtil {
     public String processTemplateToStr(final String templateContent, final Map<?, ?> templateParams, final String engineName,
             final String templateName, final String templatePath, final ResourceMode resourceMode) {
         final TemplateContext templateContext = TemplateContext.builder().templateName(templateName).templateParams(templateParams)
-                .engineName(engineName).templateConfig(
+                .engineName(Optional.ofNullable(engineName).orElse(TemplateContext.DEFAULT_ENGINE)).templateConfig(
                         TemplateConfigInfo.builder().templateContent(templateContent).resourceMode(resourceMode)
                                 .templatePath(StrUtil.isNotBlank(templatePath) ? templatePath : TEMPLATE_PATH).build()).build();
         return processToStr(templateContext);
@@ -111,7 +112,7 @@ public class CodeGenerationUtil {
     public void processTemplateOutStream(final String templateContent, final OutputStream outputStream, final Map<?, ?> templateParams,
             final String engineName, final String templateName) {
         final TemplateContext templateContext = TemplateContext.builder().templateName(templateName).templateParams(templateParams)
-                .engineName(engineName).templateConfig(
+                .engineName(Optional.ofNullable(engineName).orElse(TemplateContext.DEFAULT_ENGINE)).templateConfig(
                         TemplateConfigInfo.builder().templateContent(templateContent).resourceMode(ResourceMode.STRING).templatePath(null)
                                 .build()).build();
         process(templateContext, outputStream);

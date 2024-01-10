@@ -1,8 +1,7 @@
 package com.lzx.kaleido.domain.model.vo.code.template.java;
 
-import cn.hutool.crypto.digest.DigestUtil;
 import com.lzx.kaleido.domain.model.vo.code.template.JavaConfigVO;
-import com.lzx.kaleido.domain.model.vo.code.template.java.common.SuperclassVO;
+import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -23,19 +22,12 @@ public class JavaServiceApiConfigVO extends JavaConfigVO {
     
     
     public JavaServiceApiConfigVO() {
-        this.configName = NAME;
+        this.name = NAME;
+        this.aliasName=NAME;
     }
     
     @Override
-    public String getDigestValue() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(sourceFolder);
-        sb.append(codePath);
-        sb.append(packageName);
-        sb.append(configName);
-        if (superclass != null) {
-            sb.append(superclass);
-        }
-        return DigestUtil.md5Hex(sb.toString());
+    public String toString() {
+        return superclass + super.toString();
     }
 }

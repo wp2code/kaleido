@@ -1,9 +1,9 @@
 package com.lzx.kaleido.web.api.controller.datasource;
 
-import com.lzx.kaleido.domain.api.service.IDataSourceService;
-import com.lzx.kaleido.domain.model.dto.param.datasource.DataSourceConnectParam;
-import com.lzx.kaleido.domain.model.dto.param.datasource.DataSourceParam;
-import com.lzx.kaleido.domain.model.dto.param.datasource.DataSourceQueryParam;
+import com.lzx.kaleido.domain.api.datasource.IDataSourceService;
+import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceConnectParam;
+import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceParam;
+import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceQueryParam;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceMetaVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceVO;
 import com.lzx.kaleido.infra.base.constant.Constants;

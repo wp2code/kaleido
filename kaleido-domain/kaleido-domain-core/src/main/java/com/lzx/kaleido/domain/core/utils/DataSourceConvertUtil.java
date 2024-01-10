@@ -1,8 +1,8 @@
 package com.lzx.kaleido.domain.core.utils;
 
 import cn.hutool.core.collection.CollUtil;
-import com.lzx.kaleido.domain.core.DataSourceFactory;
-import com.lzx.kaleido.domain.model.dto.param.datasource.DataSourceConnectParam;
+import com.lzx.kaleido.domain.core.datasource.DataSourceFactory;
+import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceConnectParam;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DatabaseVO;
 import com.lzx.kaleido.domain.model.vo.datasource.SchemaVO;

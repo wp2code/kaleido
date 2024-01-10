@@ -22,6 +22,7 @@ public class ${name} extends ${superclassName}{
 <#else>
 public class ${name}{
 </#if>
+<#if tableFieldColumnList??>
 <#list tableFieldColumnList as model >
     /**
      *${model.comment!}
@@ -45,5 +46,6 @@ public class ${name}{
         this.${model.property!} = ${model.property!};
     }
   </#list>
+</#if>
 </#if>
 }
