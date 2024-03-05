@@ -4,8 +4,10 @@ import com.lzx.kaleido.domain.api.datasource.IDataSourceService;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceConnectParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceQueryParam;
+import com.lzx.kaleido.domain.model.dto.datasource.param.TableFieldColumnParam;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceMetaVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceVO;
+import com.lzx.kaleido.domain.model.vo.datasource.TableFieldColumnVO;
 import com.lzx.kaleido.infra.base.constant.Constants;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.pojo.R;
@@ -115,7 +117,7 @@ public class DataSourceController {
      */
     @GetMapping("/meta/{id}/info")
     public R<DataSourceMetaVO> getDataSourceMeta(@PathVariable("id") Long id) {
-        final DataSourceMetaVO dataSourceMeta = dataSourceService.getDataSourceMeta(id, false);
+        final DataSourceMetaVO dataSourceMeta = dataSourceService.getDataSourceMeta(id, false, false);
         return R.success(dataSourceMeta);
     }
     
@@ -127,8 +129,19 @@ public class DataSourceController {
      */
     @GetMapping("/meta/{id}/all/info")
     public R<DataSourceMetaVO> getDataSourceMetaAll(@PathVariable("id") Long id) {
-        final DataSourceMetaVO dataSourceMeta = dataSourceService.getDataSourceMeta(id, true);
+        final DataSourceMetaVO dataSourceMeta = dataSourceService.getDataSourceMeta(id, true, false);
         return R.success(dataSourceMeta);
     }
     
+    /**
+     * 获取表字段信息列表
+     *
+     * @param param
+     * @return
+     */
+    @PostMapping("/table/column/fields")
+    public R<List<TableFieldColumnVO>> getTableFieldColumnList(@RequestBody TableFieldColumnParam param) {
+        final List<TableFieldColumnVO> tableFieldColumnList = dataSourceService.getTableFieldColumnList(param);
+        return R.success(tableFieldColumnList);
+    }
 }

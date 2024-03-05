@@ -6,6 +6,7 @@ import com.lzx.kaleido.domain.api.code.ICodeGeneration;
 import com.lzx.kaleido.domain.api.code.ICodeGenerationTemplateConfigService;
 import com.lzx.kaleido.domain.api.code.ICodeGenerationTemplateService;
 import com.lzx.kaleido.domain.api.enums.CodeTemplateHideEnum;
+import com.lzx.kaleido.domain.core.code.processor.ITemplateProcessor;
 import com.lzx.kaleido.domain.core.enums.TemplateParserEnum;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationAllParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationParam;
@@ -15,6 +16,7 @@ import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
+import com.lzx.kaleido.domain.model.vo.code.template.JavaConfigVO;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
 import com.lzx.kaleido.infra.base.utils.JsonUtil;
@@ -41,6 +43,41 @@ public class CodeGenerationService implements ICodeGeneration {
     
     @Resource
     private ICodeGenerationTemplateService codeGenerationTemplateService;
+    
+    /**
+     * 代码预览-根据模板Id
+     *
+     * @param templateId
+     * @param generationTableParam
+     * @return
+     */
+    @Override
+    public CodeGenerationResultVO preview(final Long templateId, final CodeGenerationTableParam generationTableParam) {
+        final CodeGenerationTemplateVO templateVO = codeGenerationTemplateService.getDetailById(templateId,
+                CodeTemplateHideEnum.SHOW.getCode());
+        if (templateVO != null) {
+            final String basicConfig = templateVO.getBasicConfig();
+            final BasicConfigVO basicConfigVO = JsonUtil.toBean(basicConfig, BasicConfigVO.class);
+            final List<CodeGenerationTemplateConfigVO> templateConfigList = templateVO.getTemplateConfigList();
+            final List<CodeGenerationViewVO> codeGenerationViewVOS = new ArrayList<>();
+            for (final CodeGenerationTemplateConfigVO configVO : templateConfigList) {
+                final TemplateParserEnum instance = TemplateParserEnum.getInstance(configVO.getName());
+                if (instance != null) {
+                    final ITemplateProcessor templateParser = instance.getTemplateParser();
+                    final JavaConfigVO javaConfigVO = templateParser.parser(configVO.getTemplateContent());
+                    templateParser.toCodeGenerationTableParam(javaConfigVO);
+                    CodeGenerationViewVO codeGenerationViewVO = instance.getTemplateParser()
+                            .generation(configVO, basicConfigVO, false, generationTableParam,
+                                    ResourceMode.getInstance(generationTableParam.getTemplateResourceMode()), codeGenerationViewVOS);
+                    if (codeGenerationViewVO != null) {
+                        codeGenerationViewVOS.add(codeGenerationViewVO);
+                    }
+                }
+            }
+            return new CodeGenerationResultVO(templateVO, codeGenerationViewVOS);
+        }
+        return null;
+    }
     
     /**
      * 代码生成或预览

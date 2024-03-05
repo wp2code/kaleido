@@ -54,6 +54,19 @@ public class VoTemplateProcessorImpl extends AbsTemplateProcessor<JavaVoConfigVO
         return StrUtil.isNotBlank(tableName) ? tableName : TemplateParserEnum.VO.getDefaultTemplateName();
     }
     
+    @Override
+    protected CodeGenerationTableParam convertCodeGenerationTableParam(final JavaVoConfigVO javaConfigVO) {
+        final CodeGenerationTableParam param = new CodeGenerationTableParam();
+        param.setCodePath(javaConfigVO.getCodePath());
+        param.setSourceFolder(javaConfigVO.getSourceFolder());
+        param.setConfigName(TemplateParserEnum.VO.getCodeType());
+        param.setPackageName(javaConfigVO.getPackageName());
+        if (javaConfigVO.getSuperclass() != null) {
+            param.setSuperclassName(javaConfigVO.getSuperclass().getName());
+        }
+        return param;
+    }
+    
     /**
      * @return
      */

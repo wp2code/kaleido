@@ -58,6 +58,26 @@ public class EntityTemplateProcessorImpl extends AbsTemplateProcessor<JavaEntity
     }
     
     /**
+     * @param javaConfigVO
+     * @return
+     */
+    @Override
+    protected CodeGenerationTableParam convertCodeGenerationTableParam(final JavaEntityConfigVO javaConfigVO) {
+        final CodeGenerationTableParam param = new CodeGenerationTableParam();
+        param.setCodePath(javaConfigVO.getCodePath());
+        param.setSourceFolder(javaConfigVO.getSourceFolder());
+        param.setConfigName(TemplateParserEnum.ENTITY.getCodeType());
+        param.setPackageName(javaConfigVO.getPackageName());
+        param.setUseLombok(javaConfigVO.isUseLombok());
+        param.setUseSwagger(javaConfigVO.isUseSwagger());
+        param.setUseMybatisPlus(javaConfigVO.isUseMybatisPlus());
+        if (javaConfigVO.getSuperclass() != null) {
+            param.setSuperclassName(javaConfigVO.getSuperclass().getName());
+        }
+        return param;
+    }
+    
+    /**
      * @return
      */
     @Override
@@ -120,4 +140,5 @@ public class EntityTemplateProcessorImpl extends AbsTemplateProcessor<JavaEntity
         params.put(CodeTemplateConstants.packages, packages);
         return params;
     }
+  
 }

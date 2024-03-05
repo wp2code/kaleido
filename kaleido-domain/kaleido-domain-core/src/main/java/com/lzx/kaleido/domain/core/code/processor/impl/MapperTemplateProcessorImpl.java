@@ -42,6 +42,19 @@ public class MapperTemplateProcessorImpl extends AbsTemplateProcessor<JavaMapper
     }
     
     
+    @Override
+    protected CodeGenerationTableParam convertCodeGenerationTableParam(final JavaMapperConfigVO javaConfigVO) {
+        final CodeGenerationTableParam param = new CodeGenerationTableParam();
+        param.setCodePath(javaConfigVO.getCodePath());
+        param.setSourceFolder(javaConfigVO.getSourceFolder());
+        param.setConfigName(TemplateParserEnum.MAPPER.getCodeType());
+        param.setPackageName(javaConfigVO.getPackageName());
+        if (javaConfigVO.getSuperclass() != null) {
+            param.setSuperclassName(javaConfigVO.getSuperclass().getName());
+        }
+        return param;
+    }
+    
     /**
      * @param name
      * @param tableName

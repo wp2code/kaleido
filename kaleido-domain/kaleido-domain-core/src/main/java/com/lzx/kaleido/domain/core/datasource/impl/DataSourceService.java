@@ -1,6 +1,7 @@
 package com.lzx.kaleido.domain.core.datasource.impl;
 
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -10,21 +11,26 @@ import com.lzx.kaleido.domain.core.utils.DataSourceConvertUtil;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceConnectParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceQueryParam;
+import com.lzx.kaleido.domain.model.dto.datasource.param.TableFieldColumnParam;
 import com.lzx.kaleido.domain.model.entity.datasource.DataSourceEntity;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceMetaVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceVO;
+import com.lzx.kaleido.domain.model.vo.datasource.TableFieldColumnVO;
 import com.lzx.kaleido.domain.repository.mapper.IDataSourceMapper;
+import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.excption.CommonException;
 import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
 import com.lzx.kaleido.infra.base.utils.PojoConvertUtil;
 import com.lzx.kaleido.plugins.mp.BaseServiceImpl;
 import com.lzx.kaleido.spi.db.model.ConnectionInfo;
+import com.lzx.kaleido.spi.db.model.TableColumnJavaMap;
 import com.lzx.kaleido.spi.db.model.metaData.Database;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -107,18 +113,45 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
     }
     
     /**
-     * 获取数量连接信息
-     *
-     * @param id
+     * @param tableFieldColumnParam
      * @return
      */
     @Override
-    public DataSourceMetaVO getDataSourceMeta(final Long id, final boolean deepQuery) {
+    public List<TableFieldColumnVO> getTableFieldColumnList(final TableFieldColumnParam tableFieldColumnParam) {
+        final List<TableColumnJavaMap> tableColumnJavaMapList = DataSourceFactory.getInstance()
+                .getTableColumnJavaMapList(tableFieldColumnParam.getSchemaName(), tableFieldColumnParam.getTableName());
+        if (CollUtil.isNotEmpty(tableColumnJavaMapList)) {
+            return tableColumnJavaMapList.stream().map(v -> {
+                final TableFieldColumnVO vo = new TableFieldColumnVO();
+                vo.setComment(v.getComment());
+                vo.setColumn(v.getColumn());
+                vo.setJavaType(v.getJavaType());
+                vo.setJavaTypeSimpleName(v.getJavaTypeSimpleName());
+                vo.setJdbcType(v.getJdbcType());
+                vo.setProperty(v.getProperty());
+                vo.setPrimaryKey(v.getPrimaryKey());
+                return vo;
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+    
+    /**
+     * 获取数量连接信息
+     *
+     * @param id
+     * @param deepQuery
+     * @param autoClose
+     * @return
+     */
+    @Override
+    public DataSourceMetaVO getDataSourceMeta(final Long id, final boolean deepQuery, final boolean autoClose) {
         final DataSourceVO dataSourceVO = this.getDetailById(id);
         if (dataSourceVO != null) {
             final ConnectionInfo connectionInfo = DataSourceConvertUtil.convertConnectionInfo(dataSourceVO);
             Connection connection = null;
             try {
+                DataSourceFactory.getInstance().clear();
                 connection = DataSourceFactory.getInstance().getConnection(connectionInfo);
                 final List<Database> dateBaseList = DataSourceFactory.getInstance().getDateBaseList(connectionInfo);
                 return DataSourceMetaVO.builder().dataSource(dataSourceVO)
@@ -127,10 +160,12 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
                 log.error("getDataSource is failed! {}", e.getMessage());
                 throw new CommonRuntimeException(e.getErrorCode());
             } finally {
-                DataSourceFactory.getInstance().closeConnection(connection);
+                if (autoClose) {
+                    DataSourceFactory.getInstance().closeConnection(connection);
+                }
             }
         }
-        return null;
+        throw new CommonRuntimeException(ErrorCode.CONNECTION_IS_NULL);
     }
     
     /**

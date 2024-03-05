@@ -48,7 +48,7 @@ public class DefaultResultSetValueHandler implements IResultSetValueHandler {
             }
             return rs.getString(tableColumn.getColumnIndex());
         } catch (Exception e) {
-            log.warn("解析数失败:{},{}", tableColumn.getColumnIndex(), obj, e);
+            log.warn("解析表字段结果失败:{},{}", tableColumn.getColumnIndex(), obj, e);
             return obj.toString();
         }
     }
@@ -81,12 +81,10 @@ public class DefaultResultSetValueHandler implements IResultSetValueHandler {
         String result = rs.getString(index);
         if (result == null) {
             return null;
-            
         }
         if (!limitSize) {
             return result;
         }
-        
         if (result.length() > MAX_RESULT_SIZE) {
             return "[ " + DataSizeUtil.format(MAX_RESULT_SIZE) + " of " + DataSizeUtil.format(result.length()) + " ," + I18nUtil.getMessage(
                     "execute.exportCsv") + " ] " + result.substring(0, Math.toIntExact(MAX_RESULT_SIZE));

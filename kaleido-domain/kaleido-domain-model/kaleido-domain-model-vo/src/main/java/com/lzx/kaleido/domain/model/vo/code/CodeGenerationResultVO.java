@@ -23,6 +23,6 @@ public class CodeGenerationResultVO {
     /**
      * 模板代码信息
      */
-    private List<CodeGenerationViewVO> codeList;
+    private List<CodeGenerationViewVO> codeGenerationList;
     
 }

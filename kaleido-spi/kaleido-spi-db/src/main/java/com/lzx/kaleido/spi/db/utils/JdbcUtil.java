@@ -55,6 +55,52 @@ public class JdbcUtil {
     }
     
     /**
+     * @param columnType
+     * @return
+     */
+    public static String toJavaType(String columnType) {
+        columnType = columnType.toUpperCase();
+        if ("TINYINT".equals(columnType)) {
+            columnType = "java.lang.Byte";
+        } else {
+            if ("CHAR".equals(columnType) || "TEXT".equals(columnType) || "VARCHAR".equals(columnType) || "TINYTEXT".equals(columnType)
+                    || "LONGTEXT".equals(columnType) || "JSON".equals(columnType) || "XML".equals(columnType)) {
+                columnType = "java.lang.String";
+            } else if ("BIGINT".equals(columnType) || "INT8".equals(columnType) || "BIGSERIAL".equals(columnType)) {
+                columnType = "java.lang.Long";
+            } else if ("INT".equals(columnType) || "INTEGER".equals(columnType) || "MEDIUMINT".equals(columnType) || "SMALLINT".equals(
+                    columnType) || "INT2".equals(columnType) || "INT4".equals(columnType)) {
+                columnType = "java.lang.Integer";
+            } else if ("FLOAT".equals(columnType) || "FLOAT4".equals(columnType)) {
+                columnType = "java.lang.Float";
+            } else if ("DOUBLE".equals(columnType) || "FLOAT8".equals(columnType) || "MONEY".equals(columnType)) {
+                columnType = "java.lang.Double";
+            } else if ("NUMERIC".equals(columnType) || "DECIMAL".equals(columnType) || "numeric".equals(columnType)) {
+                columnType = "java.math.BigDecimal";
+            } else if ("DATE".equals(columnType) || "YEAR".equals(columnType)) {
+                return "java.util.Date";
+            } else if ("TIMESTAMP".equals(columnType) || "DATETIME".equals(columnType)) {
+                return "java.time.LocalDateTime";
+            } else if ("BIT".equals(columnType) || "BOOL".equals(columnType)) {
+                return "java.lang.Boolean";
+            } else if ("BLOB".equals(columnType)) {
+                return "java.lang.byte[]";
+            } else if ("CLOB".equals(columnType)) {
+                columnType = "java.sql.Clob";
+            } else if ("TIME".equals(columnType)) {
+                columnType = "java.sql.Time";
+            } else if ("NCHAR".equals(columnType)) {
+                columnType = "java.lang.String";
+            } else if ("INT UNSIGNED".equals(columnType)) {
+                columnType = "java.lang.Integer";
+            } else {
+                columnType = "java.lang.Object";
+            }
+        }
+        return columnType;
+    }
+    
+    /**
      * @param typeName
      * @param type
      * @return

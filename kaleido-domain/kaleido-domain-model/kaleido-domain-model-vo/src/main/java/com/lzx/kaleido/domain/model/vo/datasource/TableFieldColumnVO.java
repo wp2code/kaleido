@@ -1,15 +1,19 @@
-package com.lzx.kaleido.spi.db.model;
+package com.lzx.kaleido.domain.model.vo.datasource;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
 /**
  * @author lwp
- * @date 2024-01-16
+ * @date 2024-02-18
  **/
 @Data
-public class TableColumnJavaMap implements Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+public class TableFieldColumnVO implements Serializable {
     private String comment;
     private String column;
     private String jdbcType;

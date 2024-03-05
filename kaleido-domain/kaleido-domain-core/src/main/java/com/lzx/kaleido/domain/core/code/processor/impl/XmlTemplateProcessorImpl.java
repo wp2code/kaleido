@@ -46,6 +46,16 @@ public class XmlTemplateProcessorImpl extends AbsTemplateProcessor<JavaXmlConfig
     }
     
     @Override
+    protected CodeGenerationTableParam convertCodeGenerationTableParam(final JavaXmlConfigVO javaConfigVO) {
+        final CodeGenerationTableParam param = new CodeGenerationTableParam();
+        param.setCodePath(javaConfigVO.getCodePath());
+        param.setSourceFolder(javaConfigVO.getSourceFolder());
+        param.setConfigName(TemplateParserEnum.XML.getCodeType());
+        param.setPackageName(javaConfigVO.getPackageName());
+        return param;
+    }
+    
+    @Override
     protected String getCodeName(String name, final String tableName) {
         return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.underlineToCamelFirstToUpper(tableName) + _SUFFIX;
     }

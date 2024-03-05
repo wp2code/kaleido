@@ -37,7 +37,7 @@ public class Table implements Serializable {
     private String schemaName;
     
     /**
-     * 列列表
+     * 列表
      */
     private List<TableColumn> columnList;
     

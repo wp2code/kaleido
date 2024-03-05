@@ -45,6 +45,17 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
     }
     
     /**
+     * @param javaConfigVO
+     * @return
+     */
+    @Override
+    public CodeGenerationTableParam toCodeGenerationTableParam(final JavaConfigVO javaConfigVO) {
+        return convertCodeGenerationTableParam((T)javaConfigVO);
+    }
+    
+    protected abstract CodeGenerationTableParam convertCodeGenerationTableParam(T javaConfigVO);
+    
+    /**
      * @param codeConfig
      * @return
      */

@@ -1,7 +1,6 @@
 package com.lzx.kaleido.spi.db.model;
 
 import com.lzx.kaleido.spi.db.model.metaData.Row;
-import com.lzx.kaleido.spi.db.model.metaData.TableColumn;
 import lombok.Data;
 
 import java.util.List;
@@ -18,7 +17,7 @@ public class JdbcResultInfo {
     /**
      *
      */
-    private List<TableColumn> tableColumnList;
+//    private List<TableColumn> tableColumnList;
     
     /**
      * 数据

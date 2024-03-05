@@ -40,4 +40,11 @@ public interface ITemplateProcessor {
      * @return
      */
     JavaConfigVO parser(final String codeConfig);
+    
+    
+    /**
+     * @param javaConfigVO
+     * @return
+     */
+    CodeGenerationTableParam toCodeGenerationTableParam(JavaConfigVO javaConfigVO);
 }

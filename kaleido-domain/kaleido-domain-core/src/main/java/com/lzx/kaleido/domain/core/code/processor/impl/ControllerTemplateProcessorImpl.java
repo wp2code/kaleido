@@ -185,4 +185,23 @@ public class ControllerTemplateProcessorImpl extends AbsTemplateProcessor<JavaCo
     }
     
     
+    /**
+     * @param javaControllerConfigVO
+     * @return
+     */
+    @Override
+    public CodeGenerationTableParam convertCodeGenerationTableParam(final JavaControllerConfigVO javaConfigVO) {
+        final CodeGenerationTableParam param = new CodeGenerationTableParam();
+        param.setCodePath(javaConfigVO.getCodePath());
+        param.setSourceFolder(javaConfigVO.getSourceFolder());
+        param.setConfigName(TemplateParserEnum.ENTITY.getCodeType());
+        param.setPackageName(javaConfigVO.getPackageName());
+        param.setUseSwagger(javaConfigVO.isUseSwagger());
+        param.setUseMybatisPlus(javaConfigVO.isUseMybatisPlus());
+        if (javaConfigVO.getSuperclass() != null) {
+            param.setSuperclassName(javaConfigVO.getSuperclass().getName());
+        }
+        param.setResponseGenericClass(javaConfigVO.getResponseGenericClass());
+        return param;
+    }
 }

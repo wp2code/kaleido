@@ -1,5 +1,6 @@
 package com.lzx.kaleido.spi.db;
 
+import com.lzx.kaleido.spi.db.model.TableColumnJavaMap;
 import com.lzx.kaleido.spi.db.model.metaData.Database;
 import com.lzx.kaleido.spi.db.model.metaData.Schema;
 import com.lzx.kaleido.spi.db.model.metaData.Table;
@@ -80,6 +81,14 @@ public interface IMetaData {
     List<TableColumn> columns(Connection connection, @NotEmpty String databaseName, String schemaName, @NotEmpty String tableName);
     
     /**
+     * 转换java属性
+     *
+     * @param columnList
+     * @return
+     */
+    List<TableColumnJavaMap> transformJavaProperty(List<TableColumn> columnList);
+    
+    /**
      * 获取表索引
      *
      * @param connection
@@ -90,5 +99,12 @@ public interface IMetaData {
      */
     List<TableIndex> indexes(Connection connection, @NotEmpty String databaseName, String schemaName, @NotEmpty String tableName);
     
-    
+    /**
+     * @param connection
+     * @param databaseName
+     * @param schemaName
+     * @param tableName
+     * @return
+     */
+    List<String> primaryKeys(Connection connection, @NotEmpty String databaseName, String schemaName, @NotEmpty String tableName);
 }

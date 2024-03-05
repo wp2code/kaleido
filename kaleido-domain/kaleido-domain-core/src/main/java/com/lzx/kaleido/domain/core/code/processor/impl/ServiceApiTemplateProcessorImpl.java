@@ -44,6 +44,20 @@ public class ServiceApiTemplateProcessorImpl extends AbsTemplateProcessor<JavaSe
     protected String getTemplateNameIfAbsent(final String tableName) {
         return StrUtil.isNotBlank(tableName) ? tableName : TemplateParserEnum.SERVICE_API.getDefaultTemplateName();
     }
+    
+    @Override
+    protected CodeGenerationTableParam convertCodeGenerationTableParam(final JavaServiceApiConfigVO javaConfigVO) {
+        final CodeGenerationTableParam param = new CodeGenerationTableParam();
+        param.setCodePath(javaConfigVO.getCodePath());
+        param.setSourceFolder(javaConfigVO.getSourceFolder());
+        param.setConfigName(TemplateParserEnum.SERVICE_API.getCodeType());
+        param.setPackageName(javaConfigVO.getPackageName());
+        if (javaConfigVO.getSuperclass() != null) {
+            param.setSuperclassName(javaConfigVO.getSuperclass().getName());
+        }
+        return param;
+    }
+    
     @Override
     protected String getCodeName(String name, final String tableName) {
         return StrUtil.isNotBlank(name) ? name : "I" + TemplateConvertUtil.underlineToCamelFirstToUpper(tableName) + _SUFFIX;

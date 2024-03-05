@@ -3,8 +3,10 @@ package com.lzx.kaleido.domain.api.datasource;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceConnectParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceQueryParam;
+import com.lzx.kaleido.domain.model.dto.datasource.param.TableFieldColumnParam;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceMetaVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceVO;
+import com.lzx.kaleido.domain.model.vo.datasource.TableFieldColumnVO;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -55,15 +57,24 @@ public interface IDataSourceService {
      */
     List<DataSourceVO> queryByParam(final DataSourceQueryParam param);
     
+    /**
+     * 获取表字段信息列表
+     *
+     * @param tableFieldColumnParam
+     * @return
+     */
+    List<TableFieldColumnVO> getTableFieldColumnList(final TableFieldColumnParam tableFieldColumnParam);
+    
     
     /**
      * 获取数量连接信息
      *
      * @param id
      * @param deepQuery
+     * @param autoClose
      * @return
      */
-    DataSourceMetaVO getDataSourceMeta(@NotNull final Long id, final boolean deepQuery);
+    DataSourceMetaVO getDataSourceMeta(@NotNull final Long id, final boolean deepQuery,final boolean autoClose);
     
     /**
      * 测试连接数据库

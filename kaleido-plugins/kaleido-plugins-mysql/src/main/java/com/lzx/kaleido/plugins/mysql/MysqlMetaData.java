@@ -163,6 +163,12 @@ public class MysqlMetaData extends BaseMetaData {
         
     }
     
+    @Override
+    public String primaryKeySql(final String databaseName, final String schemaName, final String tableName) {
+        return "SELECT column_name FROM INFORMATION_SCHEMA.`KEY_COLUMN_USAGE` WHERE TABLE_SCHEMA = '%s'"
+                + "AND table_name = '%s' AND constraint_name = 'PRIMARY'".formatted(schemaName, tableName);
+    }
+    
     /**
      * @param connection
      * @param databaseName
@@ -172,7 +178,7 @@ public class MysqlMetaData extends BaseMetaData {
      */
     @Override
     public List<TableColumn> columns(Connection connection, String databaseName, String schemaName, String tableName) {
-        final String sql = String.format(ISQL.SELECT_TABLE_COLUMNS, databaseName, tableName);
+        final String sql = ISQL.SELECT_TABLE_COLUMNS.formatted(schemaName, tableName);
         final List<TableColumn> tableColumns = new ArrayList<>();
         return SQLExecutor.getInstance().execute(connection, sql, resultSet -> {
             while (resultSet.next()) {
@@ -251,6 +257,7 @@ public class MysqlMetaData extends BaseMetaData {
                 }
             }
         } catch (Exception e) {
+            //IG
         }
     }
 }

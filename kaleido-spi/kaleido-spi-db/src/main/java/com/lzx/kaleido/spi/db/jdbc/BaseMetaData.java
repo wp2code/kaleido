@@ -1,7 +1,9 @@
 package com.lzx.kaleido.spi.db.jdbc;
 
 import cn.hutool.core.util.StrUtil;
+import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
 import com.lzx.kaleido.spi.db.IMetaData;
+import com.lzx.kaleido.spi.db.model.TableColumnJavaMap;
 import com.lzx.kaleido.spi.db.model.metaData.Database;
 import com.lzx.kaleido.spi.db.model.metaData.Schema;
 import com.lzx.kaleido.spi.db.model.metaData.Table;
@@ -9,15 +11,18 @@ import com.lzx.kaleido.spi.db.model.metaData.TableColumn;
 import com.lzx.kaleido.spi.db.model.metaData.TableIndex;
 import com.lzx.kaleido.spi.db.model.metaData.Type;
 import com.lzx.kaleido.spi.db.sql.SQLExecutor;
+import com.lzx.kaleido.spi.db.utils.JdbcUtil;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author lwp
  * @date 2023-11-15
  **/
-public class BaseMetaData implements IMetaData {
+public abstract class BaseMetaData implements IMetaData {
     
     /**
      * 获取数据库支持的所有的类型
@@ -90,6 +95,27 @@ public class BaseMetaData implements IMetaData {
     }
     
     /**
+     * @param columnList
+     * @return
+     */
+    @Override
+    public List<TableColumnJavaMap> transformJavaProperty(final List<TableColumn> columnList) {
+        return columnList.stream().map(v -> {
+            final TableColumnJavaMap tableColumnJavaMap = new TableColumnJavaMap();
+            final String javaType = JdbcUtil.toJavaType(v.getColumnType());
+            final String javaTypeSimpleName = javaType.substring(javaType.lastIndexOf(".") + 1);
+            tableColumnJavaMap.setColumn(v.getName());
+            tableColumnJavaMap.setJdbcType(v.getColumnType());
+            tableColumnJavaMap.setProperty(StrUtil.toCamelCase(v.getName()));
+            tableColumnJavaMap.setJavaType(javaType);
+            tableColumnJavaMap.setJavaTypeSimpleName(javaTypeSimpleName);
+            tableColumnJavaMap.setPrimaryKey(v.getPrimaryKey());
+            tableColumnJavaMap.setComment(v.getComment());
+            return tableColumnJavaMap;
+        }).collect(Collectors.toList());
+    }
+    
+    /**
      * 获取表索引
      *
      * @param connection
@@ -105,5 +131,30 @@ public class BaseMetaData implements IMetaData {
                 .indexes(connection, StrUtil.isBlank(databaseName) ? null : databaseName, StrUtil.isBlank(schemaName) ? null : schemaName,
                         tableName);
         
+    }
+    
+    @Override
+    public List<String> primaryKeys(final Connection connection, final String databaseName, final String schemaName,
+            final String tableName) {
+        return SQLExecutor.getInstance().execute(connection, primaryKeySql(databaseName, schemaName, tableName), (resultSet) -> {
+            final List<String> pkList = new ArrayList<>();
+            while (resultSet.next()) {
+                final String columnName = resultSet.getString("COLUMN_NAME");
+                if (StrUtil.isNotBlank(columnName)) {
+                    pkList.add(columnName);
+                }
+            }
+            return pkList;
+        });
+    }
+    
+    /**
+     * @param databaseName
+     * @param schemaName
+     * @param tableName
+     * @return
+     */
+    public String primaryKeySql(final String databaseName, final String schemaName, final String tableName) {
+        throw new CommonRuntimeException("run primary key sql is null", null);
     }
 }

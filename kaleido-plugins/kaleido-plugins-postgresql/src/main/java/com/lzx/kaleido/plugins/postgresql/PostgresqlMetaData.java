@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  **/
 public class PostgresqlMetaData extends BaseMetaData {
     
-    private List<String> systemSchemas = Arrays.asList("pg_toast", "pg_temp_1", "pg_toast_temp_1", "pg_catalog", "information_schema");
+    private final List<String> systemSchemas = Arrays.asList("pg_toast", "pg_temp_1", "pg_toast_temp_1", "pg_catalog", "information_schema");
     
     
     /**
@@ -92,15 +92,28 @@ public class PostgresqlMetaData extends BaseMetaData {
      */
     @Override
     public List<TableColumn> columns(Connection connection, String databaseName, String schemaName, String tableName) {
-        List<TableColumn> columnList = super.columns(connection, databaseName, schemaName, tableName);
+        final List<TableColumn> columnList = super.columns(connection, databaseName, schemaName, tableName);
+        final List<String> primaryKeys = super.primaryKeys(connection, databaseName, schemaName, tableName);
         columnList.forEach(v -> {
             if (StrUtil.equalsIgnoreCase(v.getColumnType(), "bpchar")) {
                 v.setColumnType("CHAR");
             } else {
                 v.setColumnType(v.getColumnType().toUpperCase());
             }
+            v.setPrimaryKey(primaryKeys != null && primaryKeys.contains(v.getName()));
         });
         return columnList;
+    }
+    
+    @Override
+    public String primaryKeySql(final String databaseName, final String schemaName, final String tableName) {
+        return "SELECT A.attname AS COLUMN_NAME  FROM pg_catalog.pg_class ct "
+                + "JOIN pg_catalog.pg_attribute A ON ( ct.oid = A.attrelid ) "
+                + "JOIN pg_catalog.pg_namespace n ON ( ct.relnamespace = n.oid ) JOIN (SELECT i.indexrelid, i.indrelid, "
+                + "i.indisprimary, information_schema._pg_expandarray ( i.indkey ) AS keys  FROM pg_catalog.pg_index i) "
+                + "i ON ( A.attnum = ( i.keys ).x AND A.attrelid = i.indrelid )"
+                + "JOIN pg_catalog.pg_class ci ON ( ci.oid = i.indexrelid )  WHERE TRUE  "
+                + "AND n.nspname = '%s' AND ct.relname = '%s' AND i.indisprimary ".formatted(schemaName, tableName);
     }
     
     /**
