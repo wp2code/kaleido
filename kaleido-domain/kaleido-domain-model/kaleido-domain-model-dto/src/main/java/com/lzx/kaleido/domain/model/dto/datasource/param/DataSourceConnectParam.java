@@ -24,4 +24,5 @@ public class DataSourceConnectParam {
     private String dbName;
     
     private String extend;
+    
 }

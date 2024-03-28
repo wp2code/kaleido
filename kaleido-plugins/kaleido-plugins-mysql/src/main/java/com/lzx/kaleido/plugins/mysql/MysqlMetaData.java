@@ -79,9 +79,7 @@ public class MysqlMetaData extends BaseMetaData {
         return SQLExecutor.getInstance()
                 .tables(connection, StrUtil.isBlank(databaseName) ? null : databaseName, StrUtil.isBlank(schemaName) ? null : schemaName,
                         tableName, new String[] {"TABLE", "SYSTEM TABLE"}, (resultSet) -> {
-                            // 获取mysql表的comment
                             final List<Table> tables = ResultSetUtil.toObjectList(resultSet, Table.class);
-                            log.info("databaseName:{},schemaName:{}", databaseName, schemaName);
                             if (queryTableDetailMore && CollUtil.isNotEmpty(tables)) {
                                 try (Statement stmt = connection.createStatement()) {
                                     if (StrUtil.isNotBlank(databaseName)) {
@@ -92,9 +90,8 @@ public class MysqlMetaData extends BaseMetaData {
                                         boolean query = stmt.execute(sql);
                                         if (query) {
                                             try (ResultSet rs = stmt.getResultSet();) {
-                                                while (rs.next()) {
+                                                if (rs.next()) {
                                                     table.setComment(rs.getString("Comment"));
-                                                    break;
                                                 }
                                             }
                                         }

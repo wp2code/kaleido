@@ -1,12 +1,15 @@
 package com.lzx.kaleido.spi.db.jdbc;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.excption.CommonException;
 import com.lzx.kaleido.spi.db.IDBManager;
 import com.lzx.kaleido.spi.db.model.ConnectionInfo;
+import com.lzx.kaleido.spi.db.model.ConnectionWrapper;
 import com.lzx.kaleido.spi.db.model.DriverProperties;
 import com.lzx.kaleido.spi.db.sql.DriverManager;
+import com.lzx.kaleido.spi.db.utils.JdbcUtil;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -26,12 +29,10 @@ public class BaseDBManager implements IDBManager {
      * @throws CommonException
      */
     @Override
-    public Connection getConnection(final ConnectionInfo connectionInfo) throws CommonException {
-        Connection connection = connectionInfo.getConnectionNotReset();
+    public ConnectionWrapper getConnection(final ConnectionInfo connectionInfo) throws CommonException {
+        Connection connection = null;
+        ConnectionWrapper connectionWrapper = null;
         try {
-            if (connection != null && !connection.isClosed()) {
-                return connection;
-            }
             final DriverProperties driverProperties = Optional.ofNullable(connectionInfo.getPropertiesConfig())
                     .map(v -> v.getDefaultDriverProperties(connectionInfo.getSpecifyVersion()))
                     .orElseThrow(() -> new CommonException(ErrorCode.CONNECTION_CONFIG_ABNORMAL));
@@ -40,13 +41,17 @@ public class BaseDBManager implements IDBManager {
             if (StrUtil.isNotBlank(connectionInfo.getDatabaseName()) || StrUtil.isNotBlank(connectionInfo.getSchemaName())) {
                 connectDatabase(connection, connectionInfo.getSchemaName(), connectionInfo.getDatabaseName());
             }
-            connectionInfo.setResetConnection(false);
-            connectionInfo.setConnection(connection);
+            if (StrUtil.isBlank(connectionInfo.getDatabaseName())) {
+                connectionInfo.setDatabaseName(connection.getCatalog());
+            }
+            connectionInfo.setConnection(
+                    connectionWrapper = new ConnectionWrapper(Optional.ofNullable(connectionInfo.getId()).orElse(IdUtil.fastSimpleUUID()),
+                            connection, connectionInfo.getDbType(), connectionInfo.getDatabaseName()));
         } catch (SQLException | CommonException e) {
-            DriverManager.close(connection);
+            JdbcUtil.closeConnection(connection);
             throw new CommonException(ErrorCode.CONNECTION_FAILED, e);
         }
-        return connection;
+        return connectionWrapper;
     }
     
     /**

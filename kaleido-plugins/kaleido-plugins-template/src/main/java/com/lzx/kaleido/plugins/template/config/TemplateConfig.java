@@ -36,7 +36,6 @@ public class TemplateConfig {
     static class FreemarkerTemplateEngineConfig {
         
         /**
-         * @param templateConfiguration
          * @return
          */
         @Bean

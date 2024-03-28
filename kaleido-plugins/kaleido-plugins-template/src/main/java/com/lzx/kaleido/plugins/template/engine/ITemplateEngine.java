@@ -12,7 +12,6 @@ import java.util.List;
 public interface ITemplateEngine {
     
     /**
-     * @param engineName
      * @return
      */
     String getEngineName();

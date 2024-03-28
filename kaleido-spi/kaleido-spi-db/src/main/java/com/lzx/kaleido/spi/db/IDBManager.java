@@ -2,6 +2,7 @@ package com.lzx.kaleido.spi.db;
 
 import com.lzx.kaleido.infra.base.excption.CommonException;
 import com.lzx.kaleido.spi.db.model.ConnectionInfo;
+import com.lzx.kaleido.spi.db.model.ConnectionWrapper;
 import org.springframework.lang.NonNull;
 
 import java.sql.Connection;
@@ -30,7 +31,7 @@ public interface IDBManager {
      * @return
      * @throws CommonException
      */
-    Connection getConnection(@NonNull final ConnectionInfo connectionInfo) throws CommonException;
+    ConnectionWrapper getConnection(@NonNull final ConnectionInfo connectionInfo) throws CommonException;
     
     /**
      * 连接数据库

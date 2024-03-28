@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -30,7 +31,8 @@ import java.util.stream.Collectors;
  **/
 public class PostgresqlMetaData extends BaseMetaData {
     
-    private final List<String> systemSchemas = Arrays.asList("pg_toast", "pg_temp_1", "pg_toast_temp_1", "pg_catalog", "information_schema");
+    private final List<String> systemSchemas = Arrays.asList("pg_toast", "pg_temp_1", "pg_toast_temp_1", "pg_catalog",
+            "information_schema");
     
     
     /**
@@ -92,17 +94,24 @@ public class PostgresqlMetaData extends BaseMetaData {
      */
     @Override
     public List<TableColumn> columns(Connection connection, String databaseName, String schemaName, String tableName) {
-        final List<TableColumn> columnList = super.columns(connection, databaseName, schemaName, tableName);
-        final List<String> primaryKeys = super.primaryKeys(connection, databaseName, schemaName, tableName);
-        columnList.forEach(v -> {
-            if (StrUtil.equalsIgnoreCase(v.getColumnType(), "bpchar")) {
-                v.setColumnType("CHAR");
-            } else {
-                v.setColumnType(v.getColumnType().toUpperCase());
-            }
-            v.setPrimaryKey(primaryKeys != null && primaryKeys.contains(v.getName()));
-        });
-        return columnList;
+        try {
+            final List<TableColumn> columnList = super.columns(connection, databaseName, schemaName, tableName);
+            final List<String> primaryKeys = super.primaryKeys(connection,
+                    Optional.ofNullable(databaseName).orElse(connection.getCatalog()),
+                    Optional.ofNullable(schemaName).orElse(connection.getSchema()), tableName);
+            columnList.forEach(v -> {
+                if (StrUtil.equalsIgnoreCase(v.getColumnType(), "bpchar")) {
+                    v.setColumnType("CHAR");
+                } else {
+                    v.setColumnType(v.getColumnType().toUpperCase());
+                }
+                v.setPrimaryKey(primaryKeys != null && primaryKeys.contains(v.getName()));
+            });
+            return columnList;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
     
     @Override

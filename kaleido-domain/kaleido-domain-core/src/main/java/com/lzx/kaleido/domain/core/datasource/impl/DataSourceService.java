@@ -23,12 +23,12 @@ import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
 import com.lzx.kaleido.infra.base.utils.PojoConvertUtil;
 import com.lzx.kaleido.plugins.mp.BaseServiceImpl;
 import com.lzx.kaleido.spi.db.model.ConnectionInfo;
+import com.lzx.kaleido.spi.db.model.ConnectionWrapper;
 import com.lzx.kaleido.spi.db.model.TableColumnJavaMap;
 import com.lzx.kaleido.spi.db.model.metaData.Database;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -119,7 +119,8 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
     @Override
     public List<TableFieldColumnVO> getTableFieldColumnList(final TableFieldColumnParam tableFieldColumnParam) {
         final List<TableColumnJavaMap> tableColumnJavaMapList = DataSourceFactory.getInstance()
-                .getTableColumnJavaMapList(tableFieldColumnParam.getSchemaName(), tableFieldColumnParam.getTableName());
+                .getTableColumnJavaMapList(tableFieldColumnParam.getConnectionId(), tableFieldColumnParam.getDataBaseName(),
+                        tableFieldColumnParam.getSchemaName(), tableFieldColumnParam.getTableName());
         if (CollUtil.isNotEmpty(tableColumnJavaMapList)) {
             return tableColumnJavaMapList.stream().map(v -> {
                 final TableFieldColumnVO vo = new TableFieldColumnVO();
@@ -149,19 +150,19 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
         final DataSourceVO dataSourceVO = this.getDetailById(id);
         if (dataSourceVO != null) {
             final ConnectionInfo connectionInfo = DataSourceConvertUtil.convertConnectionInfo(dataSourceVO);
-            Connection connection = null;
+            ConnectionWrapper connectionWrapper = null;
             try {
-                DataSourceFactory.getInstance().clear();
-                connection = DataSourceFactory.getInstance().getConnection(connectionInfo);
+                connectionWrapper = DataSourceFactory.getInstance().getConnection(connectionInfo, false);
                 final List<Database> dateBaseList = DataSourceFactory.getInstance().getDateBaseList(connectionInfo);
-                return DataSourceMetaVO.builder().dataSource(dataSourceVO)
+                dataSourceVO.setPassword(null);
+                return DataSourceMetaVO.builder().dataSource(dataSourceVO).connectionId(connectionWrapper.getId())
                         .dateBaseList(DataSourceConvertUtil.convertDataBaseList(dateBaseList, connectionInfo, deepQuery, false)).build();
             } catch (CommonException e) {
                 log.error("getDataSource is failed! {}", e.getMessage());
                 throw new CommonRuntimeException(e.getErrorCode());
             } finally {
                 if (autoClose) {
-                    DataSourceFactory.getInstance().closeConnection(connection);
+                    DataSourceFactory.getInstance().closeConnection(connectionWrapper);
                 }
             }
         }
@@ -177,14 +178,15 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
     @Override
     public boolean connectTestDataSource(final DataSourceConnectParam param) {
         if (param != null) {
-            Connection connection = null;
+            ConnectionWrapper connectionWrapper = null;
+            final ConnectionInfo connectionInfo = DataSourceConvertUtil.convertConnectionInfo(param);
             try {
-                connection = DataSourceFactory.getInstance().getConnection(DataSourceConvertUtil.convertConnectionInfo(param));
-                return connection != null;
+                connectionWrapper = DataSourceFactory.getInstance().getConnection(connectionInfo, true);
+                return connectionWrapper != null;
             } catch (CommonException e) {
                 log.error("connect test is failed! {}", e.getMessage());
             } finally {
-                DataSourceFactory.getInstance().closeConnection(connection);
+                DataSourceFactory.getInstance().closeConnection(connectionWrapper);
             }
         }
         return false;

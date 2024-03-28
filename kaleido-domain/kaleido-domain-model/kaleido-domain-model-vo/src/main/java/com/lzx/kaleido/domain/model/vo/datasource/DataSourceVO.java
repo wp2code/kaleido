@@ -1,6 +1,5 @@
 package com.lzx.kaleido.domain.model.vo.datasource;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.lzx.kaleido.domain.model.entity.datasource.DataSourceEntity;
 import com.lzx.kaleido.infra.base.pojo.BaseVO;
 import io.github.zhaord.mapstruct.plus.annotations.AutoMap;
@@ -30,7 +29,6 @@ public class DataSourceVO extends BaseVO {
     
     private String userName;
     
-    @JsonIgnore
     private String password;
     
     private String dbName;

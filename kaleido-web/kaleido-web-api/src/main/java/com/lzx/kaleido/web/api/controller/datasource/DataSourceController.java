@@ -1,6 +1,7 @@
 package com.lzx.kaleido.web.api.controller.datasource;
 
 import com.lzx.kaleido.domain.api.datasource.IDataSourceService;
+import com.lzx.kaleido.domain.model.dto.datasource.param.ChangeDatabaseConnectParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceConnectParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceQueryParam;
@@ -107,6 +108,11 @@ public class DataSourceController {
     public R<Boolean> connectTestDataSource(@RequestBody DataSourceConnectParam param) {
         final boolean isSuccess = dataSourceService.connectTestDataSource(param);
         return R.result(isSuccess, ErrorCode.CONNECTION_FAILED);
+    }
+    
+    @PostMapping("/change/connect")
+    public R<String> connectDataSource(@RequestBody ChangeDatabaseConnectParam param) {
+        return R.success(null);
     }
     
     /**

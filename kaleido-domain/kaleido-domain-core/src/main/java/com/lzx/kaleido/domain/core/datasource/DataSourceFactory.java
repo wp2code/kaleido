@@ -2,23 +2,22 @@ package com.lzx.kaleido.domain.core.datasource;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.StrUtil;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.excption.CommonException;
 import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
 import com.lzx.kaleido.infra.base.utils.ServiceLoaderUtil;
+import com.lzx.kaleido.spi.db.ConnectionManager;
 import com.lzx.kaleido.spi.db.IDBManager;
 import com.lzx.kaleido.spi.db.IDBPlugin;
 import com.lzx.kaleido.spi.db.IMetaData;
 import com.lzx.kaleido.spi.db.model.ConnectionInfo;
+import com.lzx.kaleido.spi.db.model.ConnectionWrapper;
 import com.lzx.kaleido.spi.db.model.TableColumnJavaMap;
 import com.lzx.kaleido.spi.db.model.metaData.Database;
 import com.lzx.kaleido.spi.db.model.metaData.Schema;
 import com.lzx.kaleido.spi.db.model.metaData.Table;
 import com.lzx.kaleido.spi.db.model.metaData.TableColumn;
-import com.lzx.kaleido.spi.db.utils.JdbcUtil;
 
-import java.sql.Connection;
 import java.util.Collection;
 import java.util.List;
 
@@ -27,8 +26,6 @@ import java.util.List;
  * @date 2023-11-18
  **/
 public class DataSourceFactory {
-    
-    private volatile ConnectionInfo activeConnectionInfo;
     
     private final static DataSourceFactory instance = new DataSourceFactory();
     
@@ -55,44 +52,36 @@ public class DataSourceFactory {
     
     /**
      * @param connectionInfo
+     * @param isTest
      * @return
      * @throws CommonException
      */
-    public Connection getConnection(final ConnectionInfo connectionInfo) throws CommonException {
+    public ConnectionWrapper getConnection(final ConnectionInfo connectionInfo, boolean isTest) throws CommonException {
         Assert.notNull(connectionInfo);
-        Connection connection = connectionInfo.getConnectionNotReset();
-        if (connection != null) {
-            activeConnectionInfo = connectionInfo;
-            return connection;
+        ConnectionWrapper connectionWrapper = connectionInfo.getConnection();
+        if (connectionWrapper != null && !isTest) {
+            return connectionWrapper;
         }
         final IDBPlugin dataSource = this.getDataSource(connectionInfo.getDbType());
         connectionInfo.setPropertiesConfig(dataSource.getDBConfig());
         final IDBManager dbManager = dataSource.getDBManager();
         if (dbManager != null) {
-            connection = dbManager.getConnection(connectionInfo);
-            if (connection != null) {
-                activeConnectionInfo = connectionInfo;
-                return connection;
+            connectionWrapper = dbManager.getConnection(connectionInfo);
+            if (connectionWrapper != null) {
+                if (!isTest) {
+                    ConnectionManager.getInstance().register(connectionWrapper);
+                }
+                return connectionWrapper;
             }
         }
         throw new CommonException(ErrorCode.CONNECTION_FAILED);
     }
     
     /**
-     * @return
-     */
-    public ConnectionInfo getActiveConnection() {
-        if (activeConnectionInfo == null) {
-            throw new CommonRuntimeException(ErrorCode.CONNECTION_IS_NULL);
-        }
-        return activeConnectionInfo;
-    }
-    
-    /**
      *
      */
     public void clear() {
-        this.activeConnectionInfo = null;
+        ConnectionManager.getInstance().removeAll();
     }
     
     /**
@@ -103,7 +92,7 @@ public class DataSourceFactory {
         final IDBPlugin dataSource = getDataSource(connectionInfo.getDbType());
         final IMetaData metaData = dataSource.getMetaData();
         if (metaData != null) {
-            return metaData.databases(connectionInfo.getConnection());
+            return metaData.databases(connectionInfo.getConnection().getConnection());
         }
         return null;
     }
@@ -118,12 +107,12 @@ public class DataSourceFactory {
         final IMetaData metaData = dataSource.getMetaData();
         if (metaData != null) {
             // 数据库不一致，切换数据库连接
-            if (StrUtil.isNotBlank(databaseName) && !databaseName.equals(connectionInfo.getDatabaseName())) {
-                connectionInfo.setResetConnection(true);
-                connectionInfo.setDatabaseName(databaseName);
-                getConnection(connectionInfo);
-            }
-            return metaData.schemas(connectionInfo.getConnection(), databaseName, connectionInfo.getDatabaseName());
+            //            if (StrUtil.isNotBlank(databaseName) && !databaseName.equals(connectionInfo.getDatabaseName())) {
+            //                connectionInfo.setResetConnection(true);
+            //                connectionInfo.setDatabaseName(databaseName);
+            //                getConnection(connectionInfo);
+            //            }
+            return metaData.schemas(connectionInfo.getConnection().getConnection(), databaseName, connectionInfo.getDatabaseName());
         }
         return null;
     }
@@ -140,7 +129,8 @@ public class DataSourceFactory {
         final IDBPlugin dataSource = getDataSource(connectionInfo.getDbType());
         final IMetaData metaData = dataSource.getMetaData();
         if (metaData != null) {
-            return metaData.tables(connectionInfo.getConnection(), databaseName, schemaName, tableNamePattern, queryTableDetailMore);
+            return metaData.tables(connectionInfo.getConnection().getConnection(), databaseName, schemaName, tableNamePattern,
+                    queryTableDetailMore);
         }
         return null;
     }
@@ -155,17 +145,19 @@ public class DataSourceFactory {
     }
     
     /**
+     * @param connectionId
+     * @param dataBaseName
      * @param schemaName
      * @param tableName
      * @return
      */
-    public List<TableColumnJavaMap> getTableColumnJavaMapList(final String schemaName, final String tableName) {
-        final ConnectionInfo connectionInfo = getActiveConnection();
-        final IDBPlugin dataSource = getDataSource(connectionInfo.getDbType());
+    public List<TableColumnJavaMap> getTableColumnJavaMapList(final String connectionId, String dataBaseName, final String schemaName,
+            final String tableName) {
+        final ConnectionWrapper connection = ConnectionManager.getInstance().getConnectionThrowException(connectionId, dataBaseName);
+        final IDBPlugin dataSource = getDataSource(connection.getDbType());
         final IMetaData metaData = dataSource.getMetaData();
         if (metaData != null) {
-            final List<TableColumn> columns = metaData.columns(connectionInfo.getConnection(), connectionInfo.getDatabaseName(), schemaName,
-                    tableName);
+            final List<TableColumn> columns = metaData.columns(connection.getConnection(), dataBaseName, schemaName, tableName);
             if (CollUtil.isNotEmpty(columns)) {
                 return metaData.transformJavaProperty(columns);
             }
@@ -176,9 +168,14 @@ public class DataSourceFactory {
     /**
      * @param connection
      */
-    public void closeConnection(final Connection connection) {
-        this.clear();
-        JdbcUtil.closeConnection(connection);
+    public void closeConnection(final ConnectionWrapper connection) {
+        try {
+            if (connection != null) {
+                ConnectionManager.getInstance().remove(connection.getId(), connection.getDatabaseName());
+            }
+        } catch (Exception ex) {
+            //IG
+        }
     }
     
     /**
@@ -187,5 +184,4 @@ public class DataSourceFactory {
     public Collection<IDBPlugin> getInstances() {
         return ServiceLoaderUtil.getServiceInstances(IDBPlugin.class);
     }
-    
 }

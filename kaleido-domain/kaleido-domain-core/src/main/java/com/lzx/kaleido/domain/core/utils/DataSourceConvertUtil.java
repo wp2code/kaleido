@@ -33,8 +33,9 @@ public class DataSourceConvertUtil {
      * @return
      */
     public ConnectionInfo convertConnectionInfo(DataSourceVO dataSourceInfo) {
-        return ConnectionInfo.of(dataSourceInfo.getDbName(), dataSourceInfo.getType(), dataSourceInfo.getName(), dataSourceInfo.getPort(),
-                dataSourceInfo.getUrl(), dataSourceInfo.getUserName(), dataSourceInfo.getPassword(), dataSourceInfo.getExtend());
+        return ConnectionInfo.of(dataSourceInfo.getId() != null ? String.valueOf(dataSourceInfo.getId()) : null, dataSourceInfo.getDbName(),
+                dataSourceInfo.getType(), dataSourceInfo.getName(), dataSourceInfo.getPort(), dataSourceInfo.getUrl(),
+                dataSourceInfo.getUserName(), dataSourceInfo.getPassword(), dataSourceInfo.getExtend());
     }
     
     /**
@@ -42,7 +43,7 @@ public class DataSourceConvertUtil {
      * @return
      */
     public ConnectionInfo convertConnectionInfo(DataSourceConnectParam connectParam) {
-        return ConnectionInfo.of(connectParam.getDbName(), connectParam.getType(), connectParam.getName(), connectParam.getPort(),
+        return ConnectionInfo.of(null, connectParam.getDbName(), connectParam.getType(), connectParam.getName(), connectParam.getPort(),
                 connectParam.getUrl(), connectParam.getUserName(), connectParam.getPassword(), connectParam.getExtend());
     }
     
@@ -52,6 +53,7 @@ public class DataSourceConvertUtil {
      * @param deepQuery
      * @param queryTableDetailMore
      * @return
+     * @throws CommonException
      */
     public List<DatabaseVO> convertDataBaseList(List<Database> dateBaseList, ConnectionInfo connectionInfo, boolean deepQuery,
             boolean queryTableDetailMore) throws CommonException {
@@ -102,7 +104,6 @@ public class DataSourceConvertUtil {
         if (CollUtil.isNotEmpty(schemasList)) {
             final List<SchemaVO> schemaVOList = new ArrayList<>();
             for (final Schema schema : schemasList) {
-                log.info("schema:{},comment:{},databaseName:{}", schema.getName(), schema.getComment(), schema.getDatabaseName());
                 final List<TableVO> tableList = function != null ? convertTableList(function.apply(schema.getName())) : null;
                 schemaVOList.add(new SchemaVO(schema.getName(), tableList));
             }
