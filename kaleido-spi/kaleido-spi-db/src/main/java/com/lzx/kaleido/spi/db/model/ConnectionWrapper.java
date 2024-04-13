@@ -21,11 +21,25 @@ public class ConnectionWrapper {
     
     private String databaseName;
     
-    public ConnectionWrapper(String id, Connection connection, String dbType, String databaseName) {
+    /**
+     *
+     */
+    
+    private DBConfig propertiesConfig;
+    
+    /**
+     * @param id
+     * @param connection
+     * @param dbType
+     * @param databaseName
+     * @param propertiesConfig
+     */
+    public ConnectionWrapper(String id, Connection connection, String dbType, String databaseName,DBConfig propertiesConfig) {
         this.id = id;
         this.connection = connection;
         this.dbType = dbType;
         this.databaseName = databaseName;
+        this.propertiesConfig = propertiesConfig;
     }
     
     /**

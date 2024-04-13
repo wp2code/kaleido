@@ -20,6 +20,8 @@ import com.lzx.kaleido.spi.db.model.metaData.TableColumn;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 /**
  * @author lwp
@@ -52,14 +54,14 @@ public class DataSourceFactory {
     
     /**
      * @param connectionInfo
-     * @param isTest
+     * @param isCacheConnection
      * @return
      * @throws CommonException
      */
-    public ConnectionWrapper getConnection(final ConnectionInfo connectionInfo, boolean isTest) throws CommonException {
+    public ConnectionWrapper getConnection(final ConnectionInfo connectionInfo, boolean isCacheConnection) throws CommonException {
         Assert.notNull(connectionInfo);
         ConnectionWrapper connectionWrapper = connectionInfo.getConnection();
-        if (connectionWrapper != null && !isTest) {
+        if (connectionWrapper != null && isCacheConnection) {
             return connectionWrapper;
         }
         final IDBPlugin dataSource = this.getDataSource(connectionInfo.getDbType());
@@ -68,7 +70,7 @@ public class DataSourceFactory {
         if (dbManager != null) {
             connectionWrapper = dbManager.getConnection(connectionInfo);
             if (connectionWrapper != null) {
-                if (!isTest) {
+                if (isCacheConnection) {
                     ConnectionManager.getInstance().register(connectionWrapper);
                 }
                 return connectionWrapper;
@@ -92,7 +94,26 @@ public class DataSourceFactory {
         final IDBPlugin dataSource = getDataSource(connectionInfo.getDbType());
         final IMetaData metaData = dataSource.getMetaData();
         if (metaData != null) {
-            return metaData.databases(connectionInfo.getConnection().getConnection());
+            return metaData.databases(connectionInfo.getConnection().getConnection(), connectionInfo.getDatabaseName());
+        }
+        return null;
+    }
+    
+    /**
+     * @param connectionInfo
+     * @param convert
+     * @param <T>
+     * @return
+     */
+    public <T> List<T> getDateBaseAndConvert(final ConnectionInfo connectionInfo, BiFunction<IDBPlugin, Database, T> convert) {
+        final IDBPlugin dataSource = getDataSource(connectionInfo.getDbType());
+        final IMetaData metaData = dataSource.getMetaData();
+        if (metaData != null) {
+            final List<Database> databases = metaData.databases(connectionInfo.getConnection().getConnection(),
+                    connectionInfo.getDatabaseName());
+            if (CollUtil.isNotEmpty(databases)) {
+                return databases.stream().map(v -> convert.apply(dataSource, v)).collect(Collectors.toList());
+            }
         }
         return null;
     }

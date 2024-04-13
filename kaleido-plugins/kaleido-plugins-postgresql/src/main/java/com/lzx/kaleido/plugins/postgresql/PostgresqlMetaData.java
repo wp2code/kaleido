@@ -37,11 +37,12 @@ public class PostgresqlMetaData extends BaseMetaData {
     
     /**
      * @param connection
+     * @param databaseName
      * @return
      */
     @Override
-    public List<Database> databases(Connection connection) {
-        List<Database> databaseList = SQLExecutor.getInstance().execute(connection, "SELECT datname FROM pg_database;", resultSet -> {
+    public List<Database> databases(Connection connection, String databaseName) {
+        final List<Database> databaseList = SQLExecutor.getInstance().execute(connection, "SELECT datname FROM pg_database;", resultSet -> {
             final List<Database> databases = new ArrayList<>();
             while (resultSet.next()) {
                 String dbName = resultSet.getString("datname");
@@ -51,6 +52,9 @@ public class PostgresqlMetaData extends BaseMetaData {
                 final Database database = new Database();
                 database.setName(dbName);
                 databases.add(database);
+                if (StrUtil.isNotBlank(databaseName) && StrUtil.equals(databaseName, dbName)) {
+                    break;
+                }
             }
             return databases;
         });

@@ -1,12 +1,17 @@
 package com.lzx.kaleido.spi.db;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
 import com.lzx.kaleido.spi.db.model.ConnectionWrapper;
+import com.lzx.kaleido.spi.db.model.DBConfig;
 import com.lzx.kaleido.spi.db.utils.JdbcUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,7 +20,7 @@ import java.util.Map;
  **/
 public final class ConnectionManager {
     
-    private static final Map<String, Map<String, ConnectionWrapper>> activeConnection = new HashMap<>();
+    private final Map<String, Map<String, ConnectionWrapper>> activeConnection = new HashMap<>();
     
     /**
      * 注册
@@ -51,22 +56,50 @@ public final class ConnectionManager {
     }
     
     /**
-     * 移除
-     *
      * @param connectionId
      * @param databaseName
      */
-    public static void remove(final String connectionId, final String databaseName) {
+    public void remove(final String connectionId, final String databaseName) {
         Assert.notNull(connectionId);
-        Assert.notNull(databaseName);
-        activeConnection.computeIfPresent(connectionId, (k, v) -> {
-            final ConnectionWrapper connectionWrapper = v.get(databaseName);
-            if (connectionWrapper != null) {
-                JdbcUtil.closeConnection(connectionWrapper.getConnection());
-                v.remove(databaseName);
+        boolean isRemove = false;
+        for (final Map.Entry<String, Map<String, ConnectionWrapper>> entry : activeConnection.entrySet()) {
+            if (StrUtil.equals(entry.getKey(), connectionId)) {
+                Map<String, ConnectionWrapper> value = entry.getValue();
+                if (StrUtil.isBlank(databaseName)) {
+                    value.forEach((kk, vv) -> JdbcUtil.closeConnection(vv.getConnection()));
+                    isRemove = true;
+                } else {
+                    final ConnectionWrapper connectionWrapper = value.get(databaseName);
+                    if (connectionWrapper != null) {
+                        JdbcUtil.closeConnection(connectionWrapper.getConnection());
+                        value.remove(databaseName);
+                    }
+                    if (value.isEmpty()) {
+                        isRemove = true;
+                    }
+                }
             }
-            return v.isEmpty() ? null : v;
-        });
+        }
+        if (isRemove) {
+            activeConnection.remove(connectionId);
+        }
+    }
+    
+    /**
+     * @param connectionId
+     */
+    public void removeOther(final String connectionId) {
+        Assert.notNull(connectionId);
+        final List<String> removeKeys = new ArrayList<>();
+        for (final Map.Entry<String, Map<String, ConnectionWrapper>> entry : activeConnection.entrySet()) {
+            if (!StrUtil.equals(entry.getKey(), connectionId)) {
+                entry.getValue().forEach((kk, vv) -> JdbcUtil.closeConnection(vv.getConnection()));
+                removeKeys.add(entry.getKey());
+            }
+        }
+        if (CollUtil.isNotEmpty(removeKeys)) {
+            removeKeys.forEach(activeConnection::remove);
+        }
     }
     
     /**
@@ -88,12 +121,13 @@ public final class ConnectionManager {
     public ConnectionWrapper getConnectionThrowException(final String connectionId, final String databaseName) {
         Assert.notNull(connectionId);
         Assert.notNull(databaseName);
-        Map<String, ConnectionWrapper> wrapperMap = null;
-        if (!activeConnection.containsKey(connectionId) || !(wrapperMap = getConnectionWrapperMap(connectionId)).containsKey(
-                databaseName)) {
-            throw new CommonRuntimeException(ErrorCode.CONNECTION_IS_NULL);
+        if (activeConnection.containsKey(connectionId)) {
+            final ConnectionWrapper connectionWrapper = getConnectionWrapper(connectionId, databaseName);
+            if (connectionWrapper != null) {
+                return connectionWrapper;
+            }
         }
-        return wrapperMap.get(databaseName);
+        throw new CommonRuntimeException(ErrorCode.CONNECTION_IS_NULL);
     }
     
     /**
@@ -102,6 +136,29 @@ public final class ConnectionManager {
      */
     private Map<String, ConnectionWrapper> getConnectionWrapperMap(String connectionId) {
         return activeConnection.getOrDefault(connectionId, new HashMap<>());
+    }
+    
+    /**
+     * @param connectionId
+     * @param databaseName
+     * @return
+     */
+    public ConnectionWrapper getConnectionWrapper(String connectionId, String databaseName) {
+        final Map<String, ConnectionWrapper> connectionWrapperMap = getConnectionWrapperMap(connectionId);
+        if (connectionWrapperMap != null) {
+            for (final Map.Entry<String, ConnectionWrapper> entry : connectionWrapperMap.entrySet()) {
+                final ConnectionWrapper wrapper = entry.getValue();
+                final DBConfig dbConfig = wrapper.getPropertiesConfig();
+                if (dbConfig.isSupportSchema()) {
+                    if (entry.getKey().equals(databaseName)) {
+                        return wrapper;
+                    }
+                } else {
+                    return wrapper;
+                }
+            }
+        }
+        return null;
     }
     
     private static class StaticHolder {

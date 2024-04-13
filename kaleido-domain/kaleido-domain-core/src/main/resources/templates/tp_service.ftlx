@@ -11,8 +11,7 @@ import ${pak!};
  */
 @Service("${(name?uncap_first)!}")
 <#if superclassName??>
-public class ${name!} extends ${superclassName}<#if genericsClass??>
-<${genericsClass}></#if> <#if implInterface??>implements ${implInterface}</#if>{
+public class ${name!} extends ${superclassName}<#if genericsClass??><${genericsClass}></#if> <#if implInterface??>implements ${implInterface}</#if>{
 <#else>
 public class ${name!} <#if implInterface??>implements ${implInterface}</#if>{
 </#if>

@@ -57,6 +57,9 @@ public class DataSourceConvertUtil {
      */
     public List<DatabaseVO> convertDataBaseList(List<Database> dateBaseList, ConnectionInfo connectionInfo, boolean deepQuery,
             boolean queryTableDetailMore) throws CommonException {
+        if (CollUtil.isEmpty(dateBaseList)) {
+            return null;
+        }
         final List<DatabaseVO> list = new ArrayList<>();
         for (final Database database : dateBaseList) {
             final DatabaseVO vo = new DatabaseVO();

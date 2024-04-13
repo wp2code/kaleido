@@ -44,6 +44,7 @@ public class CodeGenerationController {
      * @param tableParam
      * @return
      */
+    @Deprecated
     @PostMapping("/{templateId}/preview")
     public @ResponseBody R<CodeGenerationResultVO> previewByTemplateId(@PathVariable("templateId") Long templateId,
             @Validated @RequestBody CodeGenerationTableParam tableParam) {

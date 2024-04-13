@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -39,11 +40,14 @@ public class MysqlMetaData extends BaseMetaData {
     
     /**
      * @param connection
+     * @param databaseName
      * @return
      */
     @Override
-    public List<Database> databases(Connection connection) {
-        return SQLExecutor.getInstance().databases(connection, v -> !systemDatabases.contains(v.getName()));
+    public List<Database> databases(Connection connection, String databaseName) {
+        return SQLExecutor.getInstance().databases(connection,
+                v -> !systemDatabases.contains(v.getName()) && (StrUtil.isBlank(databaseName) || StrUtil.equals(databaseName,
+                        v.getName())));
     }
     
     /**
@@ -175,7 +179,7 @@ public class MysqlMetaData extends BaseMetaData {
      */
     @Override
     public List<TableColumn> columns(Connection connection, String databaseName, String schemaName, String tableName) {
-        final String sql = ISQL.SELECT_TABLE_COLUMNS.formatted(schemaName, tableName);
+        final String sql = ISQL.SELECT_TABLE_COLUMNS.formatted(Optional.ofNullable(schemaName).orElse(databaseName), tableName);
         final List<TableColumn> tableColumns = new ArrayList<>();
         return SQLExecutor.getInstance().execute(connection, sql, resultSet -> {
             while (resultSet.next()) {

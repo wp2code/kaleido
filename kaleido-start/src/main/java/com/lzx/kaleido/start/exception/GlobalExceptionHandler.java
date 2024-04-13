@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public R<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
-        log.error("参数验证失败！");
+        log.error("参数验证失败！",exception);
         return errorResult(exception.getBindingResult());
     }
     

@@ -30,9 +30,10 @@ public interface IMetaData {
      * 获取数据库
      *
      * @param connection
+     * @param databaseName
      * @return
      */
-    List<Database> databases(Connection connection);
+    List<Database> databases(Connection connection,String databaseName);
     
     /**
      * 获取schema

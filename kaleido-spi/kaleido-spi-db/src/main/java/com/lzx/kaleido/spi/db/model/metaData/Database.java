@@ -35,4 +35,5 @@ public class Database implements Serializable {
     private String collation;
     
     private String owner;
+    
 }

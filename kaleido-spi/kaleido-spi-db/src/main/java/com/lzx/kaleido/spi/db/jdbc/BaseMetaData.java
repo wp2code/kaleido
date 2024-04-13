@@ -42,7 +42,7 @@ public abstract class BaseMetaData implements IMetaData {
      * @return
      */
     @Override
-    public List<Database> databases(final Connection connection) {
+    public List<Database> databases(final Connection connection,final String databaseName) {
         return SQLExecutor.getInstance().databases(connection, null);
     }
     

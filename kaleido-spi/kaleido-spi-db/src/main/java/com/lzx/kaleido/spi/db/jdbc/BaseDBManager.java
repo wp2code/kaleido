@@ -38,6 +38,9 @@ public class BaseDBManager implements IDBManager {
                     .orElseThrow(() -> new CommonException(ErrorCode.CONNECTION_CONFIG_ABNORMAL));
             final String jdbcUrl = this.getJdbcUrl(driverProperties.getJdbcUrl(), connectionInfo);
             connection = DriverManager.getConnection(jdbcUrl, connectionInfo.getUserName(), connectionInfo.getPassword(), driverProperties);
+            if (connection == null) {
+                return null;
+            }
             if (StrUtil.isNotBlank(connectionInfo.getDatabaseName()) || StrUtil.isNotBlank(connectionInfo.getSchemaName())) {
                 connectDatabase(connection, connectionInfo.getSchemaName(), connectionInfo.getDatabaseName());
             }
@@ -46,7 +49,8 @@ public class BaseDBManager implements IDBManager {
             }
             connectionInfo.setConnection(
                     connectionWrapper = new ConnectionWrapper(Optional.ofNullable(connectionInfo.getId()).orElse(IdUtil.fastSimpleUUID()),
-                            connection, connectionInfo.getDbType(), connectionInfo.getDatabaseName()));
+                            connection, connectionInfo.getDbType(), connectionInfo.getDatabaseName(),
+                            connectionInfo.getPropertiesConfig()));
         } catch (SQLException | CommonException e) {
             JdbcUtil.closeConnection(connection);
             throw new CommonException(ErrorCode.CONNECTION_FAILED, e);

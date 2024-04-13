@@ -4,8 +4,10 @@ import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceConnectParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceQueryParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.TableFieldColumnParam;
+import com.lzx.kaleido.domain.model.vo.datasource.ConnectionDataVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceMetaVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceVO;
+import com.lzx.kaleido.domain.model.vo.datasource.DatabaseVO;
 import com.lzx.kaleido.domain.model.vo.datasource.TableFieldColumnVO;
 import jakarta.validation.constraints.NotNull;
 
@@ -74,7 +76,7 @@ public interface IDataSourceService {
      * @param autoClose
      * @return
      */
-    DataSourceMetaVO getDataSourceMeta(@NotNull final Long id, final boolean deepQuery,final boolean autoClose);
+    DataSourceMetaVO getDataSourceMeta(@NotNull final Long id, final boolean deepQuery, final boolean autoClose);
     
     /**
      * 测试连接数据库
@@ -83,4 +85,47 @@ public interface IDataSourceService {
      * @return
      */
     boolean connectTestDataSource(final DataSourceConnectParam param);
+    
+    
+    /**
+     * 打开连接
+     *
+     * @param dataSourceId
+     * @return
+     */
+    ConnectionDataVO openConnectDataSource(final Long dataSourceId);
+    
+    /**
+     * 关闭连接
+     *
+     * @param connectionId
+     * @return
+     */
+    void closeConnectDataSource(final String connectionId);
+    
+    
+    /**
+     * 打开数据库
+     *
+     * @param connectionId
+     * @param dataBaseName
+     * @return
+     */
+    DatabaseVO openDataBase(final String connectionId, final String dataBaseName);
+    
+    /**
+     * 关闭数据库
+     *
+     * @param connectionId
+     * @param dataBaseName
+     */
+    void closeDataBase(final String connectionId, final String dataBaseName);
+    
+    /**
+     * 获取数据连接消息
+     *
+     * @param connectionId
+     * @return
+     */
+    DataSourceVO getDataSource(final String connectionId);
 }

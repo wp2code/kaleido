@@ -2,6 +2,7 @@ package com.lzx.kaleido.domain.core.datasource.impl;
 
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -13,8 +14,10 @@ import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceQueryParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.TableFieldColumnParam;
 import com.lzx.kaleido.domain.model.entity.datasource.DataSourceEntity;
+import com.lzx.kaleido.domain.model.vo.datasource.ConnectionDataVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceMetaVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceVO;
+import com.lzx.kaleido.domain.model.vo.datasource.DatabaseVO;
 import com.lzx.kaleido.domain.model.vo.datasource.TableFieldColumnVO;
 import com.lzx.kaleido.domain.repository.mapper.IDataSourceMapper;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
@@ -22,6 +25,7 @@ import com.lzx.kaleido.infra.base.excption.CommonException;
 import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
 import com.lzx.kaleido.infra.base.utils.PojoConvertUtil;
 import com.lzx.kaleido.plugins.mp.BaseServiceImpl;
+import com.lzx.kaleido.spi.db.ConnectionManager;
 import com.lzx.kaleido.spi.db.model.ConnectionInfo;
 import com.lzx.kaleido.spi.db.model.ConnectionWrapper;
 import com.lzx.kaleido.spi.db.model.TableColumnJavaMap;
@@ -152,7 +156,7 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
             final ConnectionInfo connectionInfo = DataSourceConvertUtil.convertConnectionInfo(dataSourceVO);
             ConnectionWrapper connectionWrapper = null;
             try {
-                connectionWrapper = DataSourceFactory.getInstance().getConnection(connectionInfo, false);
+                connectionWrapper = DataSourceFactory.getInstance().getConnection(connectionInfo, autoClose);
                 final List<Database> dateBaseList = DataSourceFactory.getInstance().getDateBaseList(connectionInfo);
                 dataSourceVO.setPassword(null);
                 return DataSourceMetaVO.builder().dataSource(dataSourceVO).connectionId(connectionWrapper.getId())
@@ -181,7 +185,7 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
             ConnectionWrapper connectionWrapper = null;
             final ConnectionInfo connectionInfo = DataSourceConvertUtil.convertConnectionInfo(param);
             try {
-                connectionWrapper = DataSourceFactory.getInstance().getConnection(connectionInfo, true);
+                connectionWrapper = DataSourceFactory.getInstance().getConnection(connectionInfo, false);
                 return connectionWrapper != null;
             } catch (CommonException e) {
                 log.error("connect test is failed! {}", e.getMessage());
@@ -192,4 +196,103 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
         return false;
     }
     
+    /**
+     * 打开连接
+     *
+     * @param dataSourceId
+     * @return
+     */
+    @Override
+    public ConnectionDataVO openConnectDataSource(final Long dataSourceId) {
+        final DataSourceVO dataSourceVO = this.getDetailById(dataSourceId);
+        if (dataSourceVO != null) {
+            final ConnectionInfo connectionInfo = DataSourceConvertUtil.convertConnectionInfo(dataSourceVO);
+            ConnectionWrapper connectionWrapper = null;
+            try {
+                connectionWrapper = DataSourceFactory.getInstance().getConnection(connectionInfo, true);
+                final ConnectionDataVO connectionDataVO = new ConnectionDataVO();
+                final String connectionId = connectionWrapper.getId();
+                connectionDataVO.setConnectionId(connectionId);
+                final List<ConnectionDataVO.SimpleDatabase> simpleDatabases = DataSourceFactory.getInstance()
+                        .getDateBaseAndConvert(connectionInfo, (db, database) -> {
+                            ConnectionDataVO.SimpleDatabase simpleDatabase = new ConnectionDataVO.SimpleDatabase();
+                            simpleDatabase.setDataBaseName(database.getName());
+                            simpleDatabase.setDataBaseComment(database.getComment());
+                            connectionDataVO.setType(db.getDbType());
+                            return simpleDatabase;
+                        });
+                connectionDataVO.setDatabases(simpleDatabases);
+                return connectionDataVO;
+            } catch (CommonException e) {
+                log.error("打开{}连接失败！异常：{}", dataSourceId, ExceptionUtil.getMessage(e));
+            }
+        }
+        throw new CommonRuntimeException(ErrorCode.CONNECTION_IS_NULL);
+    }
+    
+    /**
+     * 关闭连接
+     *
+     * @param connectionId
+     * @return
+     */
+    @Override
+    public void closeConnectDataSource(final String connectionId) {
+        ConnectionManager.getInstance().removeOther(connectionId);
+    }
+    
+    /**
+     * 打开数据库
+     *
+     * @param connectionId
+     * @param dataBaseName
+     * @return
+     */
+    @Override
+    public DatabaseVO openDataBase(final String connectionId, final String dataBaseName) {
+        final DataSourceVO dataSourceVO = this.getDetailById(Long.parseLong(connectionId));
+        final ConnectionInfo connectionInfo = DataSourceConvertUtil.convertConnectionInfo(dataSourceVO);
+        try {
+            connectionInfo.setDatabaseName(dataBaseName);
+            ConnectionWrapper connectionWrapper = ConnectionManager.getInstance().getConnectionWrapper(connectionId, dataBaseName);
+            if (connectionWrapper == null || connectionWrapper.getConnection() == null) {
+                connectionWrapper = DataSourceFactory.getInstance().getConnection(connectionInfo, true);
+            }
+            connectionWrapper.setDatabaseName(dataBaseName);
+            connectionInfo.setPropertiesConfig(connectionWrapper.getPropertiesConfig());
+            connectionInfo.setConnection(connectionWrapper);
+            final List<DatabaseVO> dateBaseList = DataSourceConvertUtil.convertDataBaseList(
+                    DataSourceFactory.getInstance().getDateBaseList(connectionInfo), connectionInfo, true, false);
+            return CollUtil.isNotEmpty(dateBaseList) ? dateBaseList.stream().filter(v -> v.getName().equals(dataBaseName)).findFirst()
+                    .orElse(null) : null;
+        } catch (Exception e) {
+            log.error("打开{}数据库失败！异常：{}", dataBaseName, ExceptionUtil.getMessage(e));
+        }
+        throw new CommonRuntimeException(ErrorCode.CONNECTION_FAILED);
+    }
+    
+    /**
+     * 关闭数据库
+     *
+     * @param connectionId
+     * @param dataBaseName
+     */
+    @Override
+    public void closeDataBase(final String connectionId, final String dataBaseName) {
+        ConnectionManager.getInstance().remove(connectionId, dataBaseName);
+    }
+    
+    /**
+     * 获取数据连接消息
+     *
+     * @param connectionId
+     * @return
+     */
+    @Override
+    public DataSourceVO getDataSource(final String connectionId) {
+        if (StrUtil.isBlank(connectionId)) {
+            return null;
+        }
+        return this.getDetailById(Long.parseLong(connectionId));
+    }
 }

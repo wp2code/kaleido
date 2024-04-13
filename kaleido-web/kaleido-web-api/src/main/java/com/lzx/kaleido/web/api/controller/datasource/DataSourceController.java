@@ -1,13 +1,14 @@
 package com.lzx.kaleido.web.api.controller.datasource;
 
 import com.lzx.kaleido.domain.api.datasource.IDataSourceService;
-import com.lzx.kaleido.domain.model.dto.datasource.param.ChangeDatabaseConnectParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceConnectParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceQueryParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.TableFieldColumnParam;
+import com.lzx.kaleido.domain.model.vo.datasource.ConnectionDataVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceMetaVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceVO;
+import com.lzx.kaleido.domain.model.vo.datasource.DatabaseVO;
 import com.lzx.kaleido.domain.model.vo.datasource.TableFieldColumnVO;
 import com.lzx.kaleido.infra.base.constant.Constants;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
@@ -38,7 +39,7 @@ public class DataSourceController {
     private IDataSourceService dataSourceService;
     
     /**
-     * 创建
+     * 创建数据源
      *
      * @param param
      * @return
@@ -50,7 +51,7 @@ public class DataSourceController {
     }
     
     /**
-     * 更新
+     * 更新数据源
      *
      * @param id
      * @param param
@@ -63,7 +64,7 @@ public class DataSourceController {
     }
     
     /**
-     * 删除
+     * 删除数据源
      *
      * @param id
      * @return
@@ -75,7 +76,7 @@ public class DataSourceController {
     }
     
     /**
-     * 查询详情
+     * 查询数据源详情
      *
      * @param id
      * @return
@@ -83,6 +84,18 @@ public class DataSourceController {
     @GetMapping("/{id}/get")
     public R<DataSourceVO> getDataSource(@PathVariable("id") Long id) {
         return R.success(dataSourceService.getDetailById(id));
+    }
+    
+    /**
+     * 获取连接的数据源
+     *
+     * @param connectionId
+     * @return
+     */
+    @GetMapping("/connection/{connectionId}")
+    public R<DataSourceVO> getDataSource(@PathVariable("connectionId") String connectionId) {
+        final DataSourceVO dataSource = dataSourceService.getDataSource(connectionId);
+        return R.success(dataSource);
     }
     
     /**
@@ -110,10 +123,58 @@ public class DataSourceController {
         return R.result(isSuccess, ErrorCode.CONNECTION_FAILED);
     }
     
-    @PostMapping("/change/connect")
-    public R<String> connectDataSource(@RequestBody ChangeDatabaseConnectParam param) {
-        return R.success(null);
+    
+    /**
+     * 打开连接
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/connect/{id}/open")
+    public R<ConnectionDataVO> openConnectDataSource(@PathVariable("id") Long id) {
+        final ConnectionDataVO connectionData = dataSourceService.openConnectDataSource(id);
+        return R.success(connectionData);
     }
+    
+    /**
+     * 关闭连接
+     *
+     * @param connectionId
+     * @return
+     */
+    @DeleteMapping("/connect/{connectionId}/close")
+    public R<Boolean> closeConnectDataSource(@PathVariable("connectionId") String connectionId) {
+        dataSourceService.closeConnectDataSource(connectionId);
+        return R.success(true);
+    }
+    
+    /**
+     * 打开数据库
+     *
+     * @param databaseName 数据库名称
+     * @param connectionId 连接ID
+     * @return
+     */
+    @GetMapping("/db/{connectionId}/{databaseName}/open")
+    public R<DatabaseVO> openDataBase(@PathVariable("databaseName") String databaseName,
+            @PathVariable("connectionId") String connectionId) {
+        final DatabaseVO databaseVO = dataSourceService.openDataBase(connectionId, databaseName);
+        return R.success(databaseVO);
+    }
+    
+    /**
+     * 关闭数据库
+     *
+     * @param databaseName 数据库名称
+     * @param connectionId 连接ID
+     * @return
+     */
+    @GetMapping("/db/{connectionId}/{databaseName}/close")
+    public R<Boolean> closeDataBase(@PathVariable("databaseName") String databaseName, @PathVariable("connectionId") String connectionId) {
+        dataSourceService.closeDataBase(connectionId, databaseName);
+        return R.success(true);
+    }
+    
     
     /**
      * 获取数据连接数据
@@ -123,7 +184,7 @@ public class DataSourceController {
      */
     @GetMapping("/meta/{id}/info")
     public R<DataSourceMetaVO> getDataSourceMeta(@PathVariable("id") Long id) {
-        final DataSourceMetaVO dataSourceMeta = dataSourceService.getDataSourceMeta(id, false, false);
+        final DataSourceMetaVO dataSourceMeta = dataSourceService.getDataSourceMeta(id, false, true);
         return R.success(dataSourceMeta);
     }
     
@@ -135,7 +196,7 @@ public class DataSourceController {
      */
     @GetMapping("/meta/{id}/all/info")
     public R<DataSourceMetaVO> getDataSourceMetaAll(@PathVariable("id") Long id) {
-        final DataSourceMetaVO dataSourceMeta = dataSourceService.getDataSourceMeta(id, true, false);
+        final DataSourceMetaVO dataSourceMeta = dataSourceService.getDataSourceMeta(id, true, true);
         return R.success(dataSourceMeta);
     }
     
