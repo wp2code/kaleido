@@ -1,5 +1,6 @@
 package com.lzx.kaleido.domain.model.dto.code.param;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -56,12 +57,19 @@ public class CodeGenerationTableFieldParam implements Serializable {
     private boolean primaryKey;
     
     /**
+     *
+     */
+    private transient Integer dataType;
+    
+    /**
      * @return
      */
     public String getJavaTypeSimpleName() {
-        if (javaType != null && javaType.contains(".")) {
-            this.javaTypeSimpleName = javaType.substring(javaType.lastIndexOf(".") + 1);
+        if (StrUtil.isNotBlank(javaTypeSimpleName)) {
             return javaTypeSimpleName;
+        }
+        if (javaType != null && javaType.contains(".")) {
+            return this.javaTypeSimpleName = javaType.substring(javaType.lastIndexOf(".") + 1);
         }
         return javaType;
     }

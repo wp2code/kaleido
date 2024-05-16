@@ -82,7 +82,7 @@ public class EntityTemplateProcessorImpl extends AbsTemplateProcessor<JavaEntity
      */
     @Override
     protected String getCodeName(String name, final String tableName) {
-        return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.underlineToCamelFirstToUpper(tableName) + _SUFFIX;
+        return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.toCamelFirstToUpper(tableName) + _SUFFIX;
     }
     
     @Override
@@ -140,5 +140,5 @@ public class EntityTemplateProcessorImpl extends AbsTemplateProcessor<JavaEntity
         params.put(CodeTemplateConstants.packages, packages);
         return params;
     }
-  
+    
 }

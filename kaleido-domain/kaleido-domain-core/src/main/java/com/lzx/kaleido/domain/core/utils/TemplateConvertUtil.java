@@ -72,6 +72,30 @@ public class TemplateConvertUtil {
     }
     
     /**
+     * 下划线和连接符
+     *
+     * @param str
+     * @return
+     */
+    public String toCamelFirstToUpper(String str) {
+        if (StrUtil.isBlank(str)) {
+            return null;
+        }
+        if (!StrUtil.contains(str, StrUtil.UNDERLINE) && !StrUtil.contains(str, StrUtil.DASHED)) {
+            return firstCharOnlyToUpper(str);
+        }
+        return StrUtil.contains(str, StrUtil.UNDERLINE) ? underlineToCamelFirstToUpper(str) : hyphenToCamelFirstToUpper(str);
+    }
+    
+    /**
+     * @param str
+     * @return
+     */
+    public String hyphenToCamelFirstToUpper(String str) {
+        return hyphenToCamel(str, true);
+    }
+    
+    /**
      * @param str
      * @return
      */
@@ -90,7 +114,7 @@ public class TemplateConvertUtil {
         if (StrUtil.isBlank(str)) {
             return null;
         }
-        if (StrUtil.containsAny(str, "_")) {
+        if (StrUtil.containsAny(str, StrUtil.UNDERLINE)) {
             return CaseFormat.LOWER_UNDERSCORE.to(isUpper ? CaseFormat.UPPER_CAMEL : CaseFormat.LOWER_CAMEL, str);
         }
         return str;
@@ -123,7 +147,7 @@ public class TemplateConvertUtil {
         if (StrUtil.isBlank(str)) {
             return null;
         }
-        if (StrUtil.containsAny(str, "-")) {
+        if (StrUtil.containsAny(str, StrUtil.DASHED)) {
             return CaseFormat.LOWER_HYPHEN.to(isUpper ? CaseFormat.UPPER_CAMEL : CaseFormat.LOWER_CAMEL, str);
         }
         return str;

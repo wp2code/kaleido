@@ -13,6 +13,8 @@ import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaServiceConfigVO;
+import com.lzx.kaleido.infra.base.pojo.PackageInfo;
+import com.lzx.kaleido.infra.base.utils.PackageUtil;
 
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +39,7 @@ public class ServiceTemplateProcessorImpl extends AbsTemplateProcessor<JavaServi
                 (v) -> codeGenerationTableParam.setSuperclassName(String.valueOf(v)),
                 Optional.of(config.getSuperclass()).map(SuperclassVO::getName).orElse(null));
     }
+    
     /**
      * @param tableName
      * @return
@@ -61,7 +64,7 @@ public class ServiceTemplateProcessorImpl extends AbsTemplateProcessor<JavaServi
     
     @Override
     protected String getCodeName(String name, final String tableName) {
-        return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.underlineToCamelFirstToUpper(tableName) + _SUFFIX;
+        return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.toCamelFirstToUpper(tableName) + _SUFFIX;
     }
     
     /**
@@ -102,10 +105,20 @@ public class ServiceTemplateProcessorImpl extends AbsTemplateProcessor<JavaServi
                     }
                 }
             }
-            final CodeGenerationViewVO apiViewVO = refCodeGenerationViewList.stream()
-                    .filter(v -> TemplateParserEnum.isServiceApi(v.getCodeType())).findFirst().orElse(null);
-            params.put(CodeTemplateConstants.implInterface, apiViewVO.getName());
-            packages.add(TemplateConvertUtil.getFullPackageName(apiViewVO));
+            if (StrUtil.isNotBlank(codeGenerationTableParam.getImplInterfaceName())) {
+                final PackageInfo packageInfo = PackageUtil.getPackageInfo(codeGenerationTableParam.getImplInterfaceName());
+                packages.add(packageInfo.getName());
+                params.put(CodeTemplateConstants.implInterface, packageInfo.getSimpleName());
+            } else {
+                final CodeGenerationViewVO apiViewVO = refCodeGenerationViewList.stream()
+                        .filter(v -> TemplateParserEnum.isServiceApi(v.getCodeType())).findFirst().orElse(null);
+                if (apiViewVO != null) {
+                    final String fullPackageName = TemplateConvertUtil.getFullPackageName(apiViewVO);
+                    codeGenerationTableParam.setImplInterfaceName(fullPackageName);
+                    params.put(CodeTemplateConstants.implInterface, apiViewVO.getName());
+                    packages.add(fullPackageName);
+                }
+            }
         }
         params.put(CodeTemplateConstants.packages, packages);
         return params;

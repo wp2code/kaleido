@@ -1,9 +1,11 @@
 package com.lzx.kaleido.domain.model.vo.code;
 
+import com.lzx.kaleido.domain.model.vo.datasource.TableFieldColumnVO;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author lwp
@@ -73,5 +75,19 @@ public class CodeGenerationViewVO implements Serializable {
      */
     private String primaryKey;
     
+    /**
+     * 实现接口（serviceImpl）
+     */
+    private String implInterfaceName;
+    
+    /**
+     * 空间（xml）
+     */
+    private String namespace;
+    
+    /**
+     * 字段映射
+     */
+    private List<TableFieldColumnVO> tableFieldColumnMap;
     
 }

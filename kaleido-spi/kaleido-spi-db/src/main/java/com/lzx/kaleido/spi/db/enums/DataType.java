@@ -54,5 +54,5 @@ public enum DataType implements IBaseEnum<Integer> {
     DataType(Integer type) {
         this.initEnum(type, this.name());
     }
-    
+
 }

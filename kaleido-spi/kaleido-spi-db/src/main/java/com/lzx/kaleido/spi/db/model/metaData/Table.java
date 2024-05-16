@@ -26,14 +26,12 @@ public class Table implements Serializable {
      * 描述
      */
     @JsonAlias({"REMARKS"})
-    
     private String comment;
     
     /**
      * DB 名
      */
     @JsonAlias({"TABLE_SCHEM"})
-    
     private String schemaName;
     
     /**

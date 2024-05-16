@@ -30,9 +30,9 @@
         <where>
             <#list tableFieldColumnList as model>
                 <#if model.javaType=="java.lang.String">
-              <if test="${model.property} != null and ${model.property} != ''">
+            <if test="${model.property} != null and ${model.property} != ''">
                 <#else>
-              <if test="${model.property} != null">
+            <if test="${model.property} != null">
                 </#if>
                 and ${model.column} = ${r"#"}{${(model.property)!}},
             </if>
@@ -40,47 +40,46 @@
         </where>
     </select>
     </#if>
-    <#if tablePK??>
-      <#if methodModel.apiId=="selectByPrimaryKey">
-     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="${tablePK.javaType}">
+    <#if tablePK??><#if methodModel.apiId=="selectByPrimaryKey">
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="${tablePK.javaType}">
          select
          <include refid="Base_Table_Column"/>
          from ${tableName}
          where ${tablePK.column} = ${r"#"}{${(tablePK.property)!}}
-     </select>
+    </select>
       </#if>
       <#if methodModel.apiId=="deleteByPrimaryKey">
-     <delete id="deleteByPrimaryKey" parameterType="${tablePK.javaType}">
+    <delete id="deleteByPrimaryKey" parameterType="${tablePK.javaType}">
        delete
        from ${tableName} where ${tablePK.column} = ${r"#"}{${(tablePK.property)!}}
-     </delete>
+    </delete>
       </#if>
       <#if methodModel.apiId=="updateByPrimaryKey">
-      <update id="updateByPrimaryKey" parameterType="${resultMapType!}">
+    <update id="updateByPrimaryKey" parameterType="${resultMapType!}">
           update ${tableName}
           <set>
-          <#list tableFieldColumnList as model>
-            ${model.column} = ${r"#"}{${(model.property)!}},
-          </#list>
+            <#list tableFieldColumnList as model>
+              ${model.column} = ${r"#"}{${(model.property)!}},
+            </#list>
           </set>
           where ${tablePK.column} = ${r"#"}{${(tablePK.property)!}}
-      </update>
+    </update>
       </#if>
       <#if methodModel.apiId=="updateByPrimaryKeySelective">
-    <update id="updateByPrimaryKeySelective!}" parameterType="${resultMapType!}">
-        update ${tableName}
-        <set>
-         <#list tableFieldColumnList as model>
-           <#if model.javaType=="java.lang.String">
-          <if test="${model.property} != null and ${model.property} != ''">
-           <#else>
-          <if test="${model.property} != null">
-           </#if>
-           ${model.column} = ${r"#"}{${(model.property)!}},
-         </if>
-         </#list>
-        </set>
-        where ${tablePK.column} = ${r"#"}{${(tablePK.property)!}}
+    <update id="updateByPrimaryKeySelective" parameterType="${resultMapType!}">
+          update ${tableName}
+          <set>
+           <#list tableFieldColumnList as model>
+             <#if model.javaType=="java.lang.String">
+            <if test="${model.property} != null and ${model.property} != ''">
+             <#else>
+            <if test="${model.property} != null">
+             </#if>
+             ${model.column} = ${r"#"}{${(model.property)!}},
+            </if>
+           </#list>
+          </set>
+          where ${tablePK.column} = ${r"#"}{${(tablePK.property)!}}
     </update>
       </#if>
       <#if methodModel.apiId=="insertSelective">
@@ -92,9 +91,9 @@
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <#list tableFieldColumnList as model>
                 <#if model.javaType=="java.lang.String">
-              <if test="${model.property} != null and ${model.property} != ''">
+            <if test="${model.property} != null and ${model.property} != ''">
                 <#else>
-              <if test="${model.property} != null">
+            <if test="${model.property} != null">
                 </#if>
               ${(model.column)!},
             </if>
@@ -103,9 +102,9 @@
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <#list tableFieldColumnList as model>
                 <#if model.javaType=="java.lang.String">
-              <if test="${model.property} != null and ${model.property} != ''">
+            <if test="${model.property} != null and ${model.property} != ''">
                 <#else>
-              <if test="${model.property} != null">
+            <if test="${model.property} != null">
                 </#if>
               ${r"#"}{${(model.property)!}},
             </if>
@@ -122,9 +121,9 @@
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <#list tableFieldColumnList as model>
                 <#if model.javaType=="java.lang.String">
-              <if test="${model.property} != null and ${model.property} != ''">
+            <if test="${model.property} != null and ${model.property} != ''">
                 <#else>
-              <if test="${model.property} != null">
+            <if test="${model.property} != null">
                 </#if>
               ${(model.column)!},
             </if>
@@ -133,9 +132,9 @@
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <#list tableFieldColumnList as model>
                 <#if model.javaType=="java.lang.String">
-              <if test="${model.property} != null and ${model.property} != ''">
+            <if test="${model.property} != null and ${model.property} != ''">
                 <#else>
-              <if test="${model.property} != null">
+            <if test="${model.property} != null">
                 </#if>
               ${r"#"}{${(model.property)!}},
             </if>
@@ -145,9 +144,9 @@
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <#list tableFieldColumnList as model>
                 <#if model.javaType=="java.lang.String">
-              <if test="${model.property} != null and ${model.property} != ''">
+            <if test="${model.property} != null and ${model.property} != ''">
                 <#else>
-              <if test="${model.property} != null">
+            <if test="${model.property} != null">
                 </#if>
               ${(model.column)!}=VALUES(${(model.column)!}),
             </if>

@@ -22,10 +22,20 @@ public class CodeGenerationAllParam implements Serializable {
     private Long templateId;
     
     /**
+     * 连接ID
+     */
+    private String connectionId;
+    
+    /**
      *
      */
     @Valid
     @NotNull(message = "代码生成参数配置不能为null")
     @Size(min = 1, message = "代码生成参数配置不能为空")
     private List<CodeGenerationTableParam> codeGenerationList;
+    
+    /**
+     * 响应的模板代码
+     */
+    private List<String> responseTemplateCodeList;
 }

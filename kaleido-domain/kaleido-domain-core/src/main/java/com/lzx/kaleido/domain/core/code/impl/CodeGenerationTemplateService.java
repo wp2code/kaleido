@@ -110,9 +110,17 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateById(final Long id, final CodeGenerationTemplateVO vo) {
-        vo.setId(id);
-        final CodeGenerationTemplateEntity entity = PojoConvertUtil.vo2Entity(vo, CodeGenerationTemplateEntity.class);
-        if (this.updateById(entity)) {
+        CodeGenerationTemplateEntity dbEntity = getById(id);
+        if (dbEntity == null) {
+            return false;
+        }
+        if (StrUtil.isNotBlank(vo.getTemplateName())) {
+            dbEntity.setTemplateName(vo.getTemplateName());
+        }
+        if (StrUtil.isNotBlank(vo.getBasicConfig())) {
+            dbEntity.setBasicConfig(vo.getBasicConfig());
+        }
+        if (this.updateById(dbEntity)) {
             if (CollUtil.isNotEmpty(vo.getTemplateConfigList())) {
                 vo.getTemplateConfigList().forEach(v -> v.setTemplateId(id));
                 if (codeGenerationTemplateConfigService.updateByIdBatch(vo.getTemplateConfigList())) {

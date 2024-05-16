@@ -1,8 +1,11 @@
 package com.lzx.kaleido.plugins.postgresql;
 
 import cn.hutool.core.util.StrUtil;
+import com.lzx.kaleido.infra.base.enums.IBaseEnum;
+import com.lzx.kaleido.infra.base.utils.EasyEnumUtil;
 import com.lzx.kaleido.plugins.postgresql.sql.ISQL;
 import com.lzx.kaleido.plugins.postgresql.sql.PostgresqlIndexType;
+import com.lzx.kaleido.spi.db.enums.DataType;
 import com.lzx.kaleido.spi.db.jdbc.BaseMetaData;
 import com.lzx.kaleido.spi.db.model.metaData.Database;
 import com.lzx.kaleido.spi.db.model.metaData.Schema;
@@ -108,6 +111,10 @@ public class PostgresqlMetaData extends BaseMetaData {
                     v.setColumnType("CHAR");
                 } else {
                     v.setColumnType(v.getColumnType().toUpperCase());
+                }
+                final IBaseEnum<Integer> dataTypeEnum = EasyEnumUtil.getEnumByName(DataType.class, v.getColumnType());
+                if (dataTypeEnum != null) {
+                    v.setDataType(dataTypeEnum.getCode());
                 }
                 v.setPrimaryKey(primaryKeys != null && primaryKeys.contains(v.getName()));
             });

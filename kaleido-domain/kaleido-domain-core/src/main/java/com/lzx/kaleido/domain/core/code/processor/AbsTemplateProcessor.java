@@ -1,15 +1,18 @@
 package com.lzx.kaleido.domain.core.code.processor;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Maps;
 import com.lzx.kaleido.domain.core.utils.TemplateConvertUtil;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableFieldParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableParam;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.JavaConfigVO;
+import com.lzx.kaleido.domain.model.vo.datasource.TableFieldColumnVO;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
 import com.lzx.kaleido.infra.base.utils.JsonUtil;
@@ -21,6 +24,7 @@ import com.lzx.kaleido.plugins.template.utils.CodeGenerationUtil;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author lwp
@@ -50,7 +54,7 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
      */
     @Override
     public CodeGenerationTableParam toCodeGenerationTableParam(final JavaConfigVO javaConfigVO) {
-        return convertCodeGenerationTableParam((T)javaConfigVO);
+        return convertCodeGenerationTableParam((T) javaConfigVO);
     }
     
     protected abstract CodeGenerationTableParam convertCodeGenerationTableParam(T javaConfigVO);
@@ -109,8 +113,9 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
                     .sourceFolder(codeGenerationTableParam.getSourceFolder()).codePath(codeGenerationTableParam.getCodePath())
                     .superclassName(codeGenerationTableParam.getSuperclassName()).codeOutPath(codeOutPath).templateCode(templateCode)
                     .codeType(config.getName()).useLombok(codeGenerationTableParam.getUseLombok())
+                    .implInterfaceName(codeGenerationTableParam.getImplInterfaceName()).namespace(codeGenerationTableParam.getNamespace())
                     .useSwagger(codeGenerationTableParam.getUseSwagger()).useMybatisPlus(codeGenerationTableParam.getUseMybatisPlus())
-                    .build();
+                    .tableFieldColumnMap(convertTableFieldColumnList(codeGenerationTableParam.getTableFieldColumnList())).build();
         } catch (Exception e) {
             log.error("模板解析{}失败！错误信息：{}", config.getName(), ExceptionUtil.getMessage(e));
             throw new TemplateParseException(ErrorCode.CODE_TEMPLATE_PARSE_ERROR);
@@ -130,7 +135,7 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
      * @return
      */
     protected String getCodeName(String name, String tableName) {
-        return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.underlineToCamelFirstToUpper(tableName);
+        return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.toCamelFirstToUpper(tableName);
     }
     
     /**
@@ -208,6 +213,35 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
             params.putAll(paramsMap);
         }
         return params;
+    }
+    
+    /**
+     * @param tableFieldColumnMapList 
+     * @return
+     */
+    protected List<CodeGenerationTableFieldParam> convertCodeGenerationTableFieldParamList(
+            List<TableFieldColumnVO> tableFieldColumnMapList) {
+        if (CollUtil.isNotEmpty(tableFieldColumnMapList)) {
+            return tableFieldColumnMapList.stream()
+                    .map(v -> new CodeGenerationTableFieldParam().setJdbcTypeCode(v.getDataType()).setPrimaryKey(v.getPrimaryKey())
+                            .setProperty(v.getProperty()).setJavaType(v.getJavaType()).setColumn(v.getColumn())
+                            .setJavaTypeSimpleName(v.getJavaTypeSimpleName())).collect(Collectors.toList());
+        }
+        return null;
+    }
+    
+    /**
+     * @param paramList
+     * @return
+     */
+    protected List<TableFieldColumnVO> convertTableFieldColumnList(List<CodeGenerationTableFieldParam> paramList) {
+        if (CollUtil.isNotEmpty(paramList)) {
+            return paramList.stream()
+                    .map(v -> new TableFieldColumnVO().setColumn(v.getColumn()).setJdbcType(v.getJdbcType()).setProperty(v.getProperty())
+                            .setComment(v.getComment()).setJavaTypeSimpleName(v.getJavaTypeSimpleName()).setPrimaryKey(v.isPrimaryKey())
+                            .setDataType(v.getDataType()).setJavaType(v.getJavaType())).collect(Collectors.toList());
+        }
+        return null;
     }
     
 }

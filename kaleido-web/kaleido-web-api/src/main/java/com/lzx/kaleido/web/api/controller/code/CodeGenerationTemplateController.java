@@ -102,7 +102,7 @@ public class CodeGenerationTemplateController {
     @PutMapping("/{id}/{templateName}/update")
     public R<Boolean> updateTemplateNameById(@PathVariable("id") Long id, @PathVariable("templateName") String templateName) {
         final boolean isSuccess = codeGenerationGroupService.updateTemplateNameById(id, templateName);
-        return R.result(isSuccess, ErrorCode.UPDATE_FAILED);
+        return R.result(isSuccess, ErrorCode.UPDATE_FAILED,isSuccess);
     }
     
     /**

@@ -46,6 +46,16 @@ public class CodeGenerationTableParam implements Serializable {
     private String templateName;
     
     /**
+     * 数据库名称
+     */
+    private String dataBaseName;
+    
+    /**
+     * 表所属模式
+     */
+    private String schemaName;
+    
+    /**
      * 模板路径
      */
     private String templatePath;
@@ -55,10 +65,6 @@ public class CodeGenerationTableParam implements Serializable {
      */
     private String tableComment;
     
-    /**
-     * 表所属模式
-     */
-    private String schemaName;
     
     /**
      * 代码地址
@@ -100,6 +106,16 @@ public class CodeGenerationTableParam implements Serializable {
      *
      */
     private String responseGenericClass;
+    
+    /**
+     *
+     */
+    private String implInterfaceName;
+    
+    /**
+     *
+     */
+    private String namespace;
     
     /**
      * 表字段信息

@@ -29,6 +29,7 @@ public interface ICodeGeneration {
      * @param generationTableParam
      * @return
      */
+    @Deprecated
     CodeGenerationResultVO preview(final Long templateId,final CodeGenerationTableParam generationTableParam);
     
     /**

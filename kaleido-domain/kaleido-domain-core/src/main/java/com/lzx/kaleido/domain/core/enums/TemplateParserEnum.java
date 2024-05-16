@@ -64,6 +64,14 @@ public enum TemplateParserEnum {
      * @param codeType
      * @return
      */
+    public static boolean isXml(String codeType) {
+        return XML.getCodeType().equalsIgnoreCase(codeType);
+    }
+    
+    /**
+     * @param codeType
+     * @return
+     */
     public static boolean isVo(String codeType) {
         return VO.getCodeType().equalsIgnoreCase(codeType);
     }

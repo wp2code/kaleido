@@ -37,7 +37,7 @@ public class ControllerTemplateProcessorImpl extends AbsTemplateProcessor<JavaCo
      */
     @Override
     protected String getCodeName(String name, final String tableName) {
-        return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.underlineToCamelFirstToUpper(tableName) + _SUFFIX;
+        return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.toCamelFirstToUpper(tableName) + _SUFFIX;
     }
     
     /**
@@ -89,7 +89,14 @@ public class ControllerTemplateProcessorImpl extends AbsTemplateProcessor<JavaCo
             serviceApiViewVO = refCodeGenerationViewList.stream().filter(v -> TemplateParserEnum.isServiceApi(v.getCodeType())).findFirst()
                     .orElse(null);
             voViewVO = refCodeGenerationViewList.stream().filter(v -> TemplateParserEnum.isVo(v.getCodeType())).findFirst().orElse(null);
-            packages.add(TemplateConvertUtil.getFullPackageName(serviceApiViewVO));
+            final String fullPackageName = TemplateConvertUtil.getFullPackageName(serviceApiViewVO);
+            if (StrUtil.isNotBlank(fullPackageName)) {
+                packages.add(fullPackageName);
+            }
+            if (CollUtil.isEmpty(codeGenerationTableParam.getTableFieldColumnList()) && serviceApiViewVO != null) {
+                codeGenerationTableParam.setTableFieldColumnList(
+                        convertCodeGenerationTableFieldParamList(serviceApiViewVO.getTableFieldColumnMap()));
+            }
         }
         final List<String> apiList = codeGenerationTableParam.getWebMethodList();
         final List<CodeApiDTO> apiParamList = new ArrayList<>();
@@ -106,7 +113,8 @@ public class ControllerTemplateProcessorImpl extends AbsTemplateProcessor<JavaCo
                     if ("object".equals(returnType) || "objectList".equals(returnType)) {
                         returnType = Optional.ofNullable(voViewVO).map(CodeGenerationViewVO::getName).orElse("Object");
                         packages.add(TemplateConvertUtil.getFullPackageName(voViewVO));
-                        if (ControllerApiTemplateEnum.isPage(apiTemplateEnum)) {
+                        if (ControllerApiTemplateEnum.isPage(apiTemplateEnum) && Boolean.TRUE.equals(
+                                codeGenerationTableParam.getUseMybatisPlus())) {
                             packages.add("com.baomidou.mybatisplus.extension.plugins.pagination.Page");
                         }
                     }
@@ -186,7 +194,7 @@ public class ControllerTemplateProcessorImpl extends AbsTemplateProcessor<JavaCo
     
     
     /**
-     * @param javaControllerConfigVO
+     * @param javaConfigVO
      * @return
      */
     @Override

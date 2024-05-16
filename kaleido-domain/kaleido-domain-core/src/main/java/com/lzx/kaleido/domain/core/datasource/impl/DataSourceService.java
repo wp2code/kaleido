@@ -135,6 +135,7 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
                 vo.setJdbcType(v.getJdbcType());
                 vo.setProperty(v.getProperty());
                 vo.setPrimaryKey(v.getPrimaryKey());
+                vo.setDataType(v.getDataType());
                 return vo;
             }).collect(Collectors.toList());
         }

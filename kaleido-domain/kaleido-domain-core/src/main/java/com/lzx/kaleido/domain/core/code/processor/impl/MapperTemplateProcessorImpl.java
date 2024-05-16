@@ -13,8 +13,8 @@ import com.lzx.kaleido.domain.model.dto.code.CodeClassDTO;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableParam;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
-import com.lzx.kaleido.domain.model.vo.code.template.java.JavaMapperConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
+import com.lzx.kaleido.domain.model.vo.code.template.java.JavaMapperConfigVO;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -62,7 +62,7 @@ public class MapperTemplateProcessorImpl extends AbsTemplateProcessor<JavaMapper
      */
     @Override
     protected String getCodeName(String name, final String tableName) {
-        return StrUtil.isNotBlank(name) ? name : "I" + TemplateConvertUtil.underlineToCamelFirstToUpper(tableName) + _SUFFIX;
+        return StrUtil.isNotBlank(name) ? name : "I" + TemplateConvertUtil.toCamelFirstToUpper(tableName) + _SUFFIX;
     }
     
     /**
@@ -73,6 +73,7 @@ public class MapperTemplateProcessorImpl extends AbsTemplateProcessor<JavaMapper
     protected String getTemplateNameIfAbsent(final String tableName) {
         return StrUtil.isNotBlank(tableName) ? tableName : TemplateParserEnum.MAPPER.getDefaultTemplateName();
     }
+    
     @Override
     protected Map<String, Object> doBuildTemplateParams(final String codeName, final JavaMapperConfigVO javaMapperConfigVO,
             final BasicConfigVO basicConfig, final CodeGenerationTableParam codeGenerationTableParam,
@@ -89,9 +90,13 @@ public class MapperTemplateProcessorImpl extends AbsTemplateProcessor<JavaMapper
         if (CollUtil.isNotEmpty(refCodeGenerationViewList)) {
             entityViewVO = refCodeGenerationViewList.stream().filter(v -> TemplateParserEnum.isEntity(v.getCodeType())).findFirst()
                     .orElse(null);
-            if (entityViewVO != null) {
+            if (entityViewVO != null && codeGenerationTableParam.getUseMybatisPlus()) {
                 params.put(CodeTemplateConstants.genericsClass, entityViewVO.getName());
                 packages.add(TemplateConvertUtil.getFullPackageName(entityViewVO));
+            }
+            if (CollUtil.isEmpty(codeGenerationTableParam.getTableFieldColumnList()) && entityViewVO != null) {
+                codeGenerationTableParam.setTableFieldColumnList(
+                        convertCodeGenerationTableFieldParamList(entityViewVO.getTableFieldColumnMap()));
             }
         }
         final List<String> apiList = codeGenerationTableParam.getMethodList();

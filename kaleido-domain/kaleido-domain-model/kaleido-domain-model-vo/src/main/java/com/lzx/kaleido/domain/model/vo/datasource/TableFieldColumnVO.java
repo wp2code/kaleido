@@ -3,6 +3,7 @@ package com.lzx.kaleido.domain.model.vo.datasource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 
@@ -13,6 +14,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Accessors(chain = true)
 public class TableFieldColumnVO implements Serializable {
     private String comment;
     private String column;
@@ -21,4 +23,5 @@ public class TableFieldColumnVO implements Serializable {
     private String javaType;
     private String javaTypeSimpleName;
     private Boolean primaryKey;
+    private Integer dataType;
 }

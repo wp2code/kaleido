@@ -32,7 +32,7 @@ public class CodeTemplateConstants {
     
     public final static String primaryKey = "primaryKey";
     
-    public final static String implInterface = "rootPath";
+    public final static String implInterface = "implInterface";
     
     public final static String tablePK = "tablePK";
     

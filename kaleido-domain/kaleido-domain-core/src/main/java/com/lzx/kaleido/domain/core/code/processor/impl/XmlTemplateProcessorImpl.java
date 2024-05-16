@@ -57,7 +57,7 @@ public class XmlTemplateProcessorImpl extends AbsTemplateProcessor<JavaXmlConfig
     
     @Override
     protected String getCodeName(String name, final String tableName) {
-        return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.underlineToCamelFirstToUpper(tableName) + _SUFFIX;
+        return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.toCamelFirstToUpper(tableName) + _SUFFIX;
     }
     
     /**
@@ -88,18 +88,28 @@ public class XmlTemplateProcessorImpl extends AbsTemplateProcessor<JavaXmlConfig
                     .orElse(null);
             mapperViewVO = refCodeGenerationViewList.stream().filter(v -> TemplateParserEnum.isMapper(v.getCodeType())).findFirst()
                     .orElse(null);
+            if (CollUtil.isEmpty(codeGenerationTableParam.getTableFieldColumnList()) && entityViewVO != null) {
+                codeGenerationTableParam.setTableFieldColumnList(
+                        convertCodeGenerationTableFieldParamList(entityViewVO.getTableFieldColumnMap()));
+            }
+        }
+        final String namespace = StrUtil.isNotBlank(codeGenerationTableParam.getNamespace()) ? codeGenerationTableParam.getNamespace()
+                : TemplateConvertUtil.getFullPackageName(mapperViewVO);
+        if (StrUtil.isBlank(codeGenerationTableParam.getNamespace())) {
+            codeGenerationTableParam.setNamespace(namespace);
         }
         final String schemaName = codeGenerationTableParam.getSchemaName();
         params.put(CodeTemplateConstants.tableName,
                 StrUtil.isNotBlank(schemaName) ? schemaName + "." + codeGenerationTableParam.getTableName()
                         : codeGenerationTableParam.getTableName());
-        params.put(CodeTemplateConstants.namespace, TemplateConvertUtil.getFullPackageName(mapperViewVO));
+        params.put(CodeTemplateConstants.namespace, codeGenerationTableParam.getNamespace());
         params.put(CodeTemplateConstants.resultMapType, TemplateConvertUtil.getFullPackageName(entityViewVO));
         final List<CodeGenerationTableFieldParam> tableFieldColumnList = codeGenerationTableParam.getTableFieldColumnList();
         params.put(CodeTemplateConstants.tableFieldColumnList, tableFieldColumnList);
         params.put(CodeTemplateConstants.tablePK, codeGenerationTableParam.getPrimaryKeyField());
         final List<String> apiList = codeGenerationTableParam.getMethodList();
-        if (CollUtil.isNotEmpty(apiList)) {
+        if (CollUtil.isNotEmpty(apiList) && (codeGenerationTableParam.getUseMybatisPlus() == null || Boolean.FALSE.equals(
+                codeGenerationTableParam.getUseMybatisPlus()))) {
             final List<CodeApiDTO> apiParamList = new ArrayList<>(apiList.size());
             for (final String apiId : apiList) {
                 final ApiTemplateEnum apiTemplateEnum = ApiTemplateEnum.getInstance(apiId);

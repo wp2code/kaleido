@@ -11,6 +11,7 @@ import com.lzx.kaleido.domain.core.code.processor.impl.XmlTemplateProcessorImpl;
 import com.lzx.kaleido.domain.core.enums.ApiTemplateEnum;
 import com.lzx.kaleido.domain.core.enums.ControllerApiTemplateEnum;
 import com.lzx.kaleido.domain.core.enums.TemplateParserEnum;
+import com.lzx.kaleido.domain.core.utils.TemplateConvertUtil;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableFieldParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableParam;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
@@ -114,7 +115,7 @@ public class CodeGenerationUtilTest {
         final CodeGenerationTableParam codeGenerationTableParam = new CodeGenerationTableParam();
         codeGenerationTableParam.setTemplateName("tp_vo.ftlx");
         codeGenerationTableParam.setTableName("test_demo");
-        codeGenerationTableParam.setComment("设备信息表");
+        codeGenerationTableParam.setTableComment("设备信息表");
         codeGenerationTableParam.setTableFieldColumnList(mockCodeGenerationTableFieldParams());
         codeGenerationTableParam.setUseSwagger(true);
         codeGenerationTableParam.setUseLombok(true);
@@ -144,7 +145,7 @@ public class CodeGenerationUtilTest {
         final CodeGenerationTableParam codeGenerationTableParam = new CodeGenerationTableParam();
         codeGenerationTableParam.setTemplateName("tp_entity.ftlx");
         codeGenerationTableParam.setTableName("test_demo");
-        codeGenerationTableParam.setComment("设备信息表");
+        codeGenerationTableParam.setTableComment("设备信息表");
         codeGenerationTableParam.setTableFieldColumnList(mockCodeGenerationTableFieldParams());
         codeGenerationTableParam.setUseSwagger(false);
         codeGenerationTableParam.setUseLombok(true);
@@ -172,7 +173,7 @@ public class CodeGenerationUtilTest {
         final CodeGenerationTableParam codeGenerationTableParam = new CodeGenerationTableParam();
         codeGenerationTableParam.setTemplateName("tp_mapper.ftlx");
         codeGenerationTableParam.setTableName("test_demo");
-        codeGenerationTableParam.setComment("设备信息表");
+        codeGenerationTableParam.setTableComment("设备信息表");
         codeGenerationTableParam.setWebMethodList(Arrays.stream(ApiTemplateEnum.values()).map(ApiTemplateEnum::getApiId).toList());
         codeGenerationTableParam.setTableFieldColumnList(mockCodeGenerationTableFieldParams());
         final CodeGenerationViewVO testDemoEntity = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test")
@@ -202,7 +203,7 @@ public class CodeGenerationUtilTest {
         codeGenerationTableParam.setTableFieldColumnList(mockCodeGenerationTableFieldParams());
         codeGenerationTableParam.setTemplateName("tp_xml.ftlx");
         codeGenerationTableParam.setTableName("test_demo");
-        codeGenerationTableParam.setComment("设备信息表");
+        codeGenerationTableParam.setTableComment("设备信息表");
         codeGenerationTableParam.setMethodList(new ArrayList<>());
         final CodeGenerationViewVO testDemoEntity = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test")
                 .name("TestDemoEntity").codeType(TemplateParserEnum.ENTITY.getCodeType()).build();
@@ -238,7 +239,7 @@ public class CodeGenerationUtilTest {
         codeGenerationTableParam.setTemplateName("tp_controller1.ftlx");
         codeGenerationTableParam.setTemplatePath("D:\\opt");
         codeGenerationTableParam.setTableName("test_demo");
-        codeGenerationTableParam.setComment("设备信息表");
+        codeGenerationTableParam.setTableComment("设备信息表");
         final CodeGenerationViewVO testDemoService = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test")
                 .name("ITestDemoService").codeType(TemplateParserEnum.SERVICE_API.getCodeType()).build();
         final CodeGenerationViewVO testDemoMapper = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test").name("TestDemoVO")
@@ -267,7 +268,7 @@ public class CodeGenerationUtilTest {
         codeGenerationTableParam.setTableFieldColumnList(mockCodeGenerationTableFieldParams());
         codeGenerationTableParam.setTemplateName("tp_service_api.ftlx");
         codeGenerationTableParam.setTableName("test_demo");
-        codeGenerationTableParam.setComment("设备信息表");
+        codeGenerationTableParam.setTableComment("设备信息表");
         final CodeGenerationViewVO testDemoEntity = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test")
                 .name("TestDemoEntity").codeType(TemplateParserEnum.ENTITY.getCodeType()).build();
         final CodeGenerationViewVO result = new ServiceApiTemplateProcessorImpl().generation(configVO, basicConfigVO, generateCodeFile,
@@ -295,7 +296,7 @@ public class CodeGenerationUtilTest {
         codeGenerationTableParam.setTableFieldColumnList(mockCodeGenerationTableFieldParams());
         codeGenerationTableParam.setTemplateName("tp_service.ftlx");
         codeGenerationTableParam.setTableName("test_demo");
-        codeGenerationTableParam.setComment("设备信息表");
+        codeGenerationTableParam.setTableComment("设备信息表");
         final CodeGenerationViewVO testDemoEntity = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test")
                 .name("TestDemoEntity").codeType(TemplateParserEnum.ENTITY.getCodeType()).build();
         final CodeGenerationViewVO testDemoMapper = CodeGenerationViewVO.builder().packageName("com.lzx.kaleido.test")
@@ -310,11 +311,13 @@ public class CodeGenerationUtilTest {
         log.info("ServiceTemplateParserImplTest is {}", JsonUtil.toJson(result));
         Assertions.assertTrue(generateCodeFile ? StrUtil.isNotBlank(result.getCodePath()) : StrUtil.isNotBlank(templateCode));
     }
+    
     @Test
-    void mockTableParams(){
+    void mockTableParams() {
         final List<CodeGenerationTableFieldParam> codeGenerationTableFieldParams = mockCodeGenerationTableFieldParams();
         System.out.println(JsonUtil.toJson(codeGenerationTableFieldParams));
     }
+    
     private List<CodeGenerationTableFieldParam> mockCodeGenerationTableFieldParams() {
         final CodeGenerationTableFieldParam v1 = new CodeGenerationTableFieldParam();
         v1.setComment("设备ID");
@@ -346,5 +349,14 @@ public class CodeGenerationUtilTest {
         final DataType dataType3 = JdbcUtil.resolveDataType(v3.getJdbcType(), v3.getJdbcTypeCode());
         v3.setXmlJdbcType(dataType3.getName());
         return Stream.of(v1, v2, v3).collect(Collectors.toList());
+    }
+    
+    @Test
+    public void toCamelFirstToUpperTest() {
+        //        String str="demoInfo";
+        //        String str="demo_info";
+        String str = "demo-info";
+        String to = TemplateConvertUtil.toCamelFirstToUpper(str);
+        System.out.println(to);
     }
 }

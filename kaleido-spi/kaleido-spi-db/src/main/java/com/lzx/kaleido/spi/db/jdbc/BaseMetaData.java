@@ -1,8 +1,12 @@
 package com.lzx.kaleido.spi.db.jdbc;
 
 import cn.hutool.core.util.StrUtil;
+import com.lzx.kaleido.infra.base.enums.IBaseEnum;
+import com.lzx.kaleido.infra.base.enums.JavaTypeEnum;
 import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
+import com.lzx.kaleido.infra.base.utils.EasyEnumUtil;
 import com.lzx.kaleido.spi.db.IMetaData;
+import com.lzx.kaleido.spi.db.enums.DataType;
 import com.lzx.kaleido.spi.db.model.TableColumnJavaMap;
 import com.lzx.kaleido.spi.db.model.metaData.Database;
 import com.lzx.kaleido.spi.db.model.metaData.Schema;
@@ -42,7 +46,7 @@ public abstract class BaseMetaData implements IMetaData {
      * @return
      */
     @Override
-    public List<Database> databases(final Connection connection,final String databaseName) {
+    public List<Database> databases(final Connection connection, final String databaseName) {
         return SQLExecutor.getInstance().databases(connection, null);
     }
     
@@ -102,15 +106,22 @@ public abstract class BaseMetaData implements IMetaData {
     public List<TableColumnJavaMap> transformJavaProperty(final List<TableColumn> columnList) {
         return columnList.stream().map(v -> {
             final TableColumnJavaMap tableColumnJavaMap = new TableColumnJavaMap();
-            final String javaType = JdbcUtil.toJavaType(v.getColumnType());
-            final String javaTypeSimpleName = javaType.substring(javaType.lastIndexOf(".") + 1);
+            final JavaTypeEnum javaType = JdbcUtil.toJavaTypeEnum(v.getColumnType());
+            //重新获取数据类型
+            if (v.getDataType() == null) {
+                final IBaseEnum<Integer> dataTypeEnum = EasyEnumUtil.getEnumByName(DataType.class, javaType.getSimpleType().toUpperCase());
+                if (dataTypeEnum != null) {
+                    v.setDataType(dataTypeEnum.getCode());
+                }
+            }
             tableColumnJavaMap.setColumn(v.getName());
             tableColumnJavaMap.setJdbcType(v.getColumnType());
             tableColumnJavaMap.setProperty(StrUtil.toCamelCase(v.getName()));
-            tableColumnJavaMap.setJavaType(javaType);
-            tableColumnJavaMap.setJavaTypeSimpleName(javaTypeSimpleName);
+            tableColumnJavaMap.setJavaType(javaType.getType());
+            tableColumnJavaMap.setJavaTypeSimpleName(javaType.getSimpleType());
             tableColumnJavaMap.setPrimaryKey(v.getPrimaryKey());
             tableColumnJavaMap.setComment(v.getComment());
+            tableColumnJavaMap.setDataType(v.getDataType());
             return tableColumnJavaMap;
         }).collect(Collectors.toList());
     }

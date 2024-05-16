@@ -2,9 +2,11 @@ package com.lzx.kaleido.domain.model.vo.code;
 
 import cn.hutool.core.collection.CollUtil;
 import com.lzx.kaleido.domain.model.entity.code.CodeGenerationTemplateEntity;
+import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.infra.base.annotations.validation.AddGroup;
 import com.lzx.kaleido.infra.base.annotations.validation.UpdateGroup;
 import com.lzx.kaleido.infra.base.pojo.BaseVO;
+import com.lzx.kaleido.infra.base.utils.JsonUtil;
 import io.github.zhaord.mapstruct.plus.annotations.AutoMap;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -30,14 +32,13 @@ public class CodeGenerationTemplateVO extends BaseVO {
     /**
      * 模板名称
      */
-    @NotEmpty(groups = {AddGroup.class, UpdateGroup.class})
+    @NotEmpty(groups = {AddGroup.class})
     private String templateName;
     
     /**
      * 编程语言
      */
-    @NotEmpty(groups = {AddGroup.class, UpdateGroup.class})
-    private String language;
+    private String language="java";
     
     /**
      * 模板基本配置
@@ -66,7 +67,7 @@ public class CodeGenerationTemplateVO extends BaseVO {
     @Valid
     private List<CodeGenerationTemplateConfigVO> templateConfigList;
     
-
+    
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -88,5 +89,8 @@ public class CodeGenerationTemplateVO extends BaseVO {
         return sb.toString();
     }
     
+    public BasicConfigVO toBasicConfig() {
+        return JsonUtil.toBean(basicConfig, BasicConfigVO.class);
+    }
     
 }

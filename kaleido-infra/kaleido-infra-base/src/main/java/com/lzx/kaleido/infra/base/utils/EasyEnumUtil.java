@@ -43,13 +43,19 @@ public class EasyEnumUtil {
     }
     
     /**
-     * @param key
-     * @param <E>
+     * @param clazz
+     * @param name
      * @param <T>
+     * @param <E>
      * @return
      */
-    public <E extends IBaseEnum<T>, T> EnumBean<T> getEnum(E key) {
-        final EnumBean<?> enumBean = ENUM_BEAN_MAP.get(key);
+    public <T, E extends IBaseEnum<T>> E getEnumByName(Class<? extends IBaseEnum<T>> clazz, String name) {
+        return Stream.of(clazz.getEnumConstants()).filter(baseEnum -> baseEnum.getName().equals(name)).map(v -> (E) v).findAny()
+                .orElse(null);
+    }
+    
+    public <E extends IBaseEnum<T>, T> EnumBean<T> getEnum(E em) {
+        final EnumBean<?> enumBean = ENUM_BEAN_MAP.get(em);
         if (enumBean != null) {
             return (EnumBean<T>) enumBean;
         }

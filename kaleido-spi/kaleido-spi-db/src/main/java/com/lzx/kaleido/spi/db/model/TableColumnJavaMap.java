@@ -17,4 +17,5 @@ public class TableColumnJavaMap implements Serializable {
     private String javaType;
     private String javaTypeSimpleName;
     private Boolean primaryKey;
+    private Integer dataType;
 }

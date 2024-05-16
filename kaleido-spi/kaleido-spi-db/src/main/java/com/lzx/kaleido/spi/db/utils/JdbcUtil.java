@@ -1,5 +1,6 @@
 package com.lzx.kaleido.spi.db.utils;
 
+import com.lzx.kaleido.infra.base.enums.JavaTypeEnum;
 import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
 import com.lzx.kaleido.infra.base.utils.EasyEnumUtil;
 import com.lzx.kaleido.spi.db.enums.DataType;
@@ -59,45 +60,61 @@ public class JdbcUtil {
      * @return
      */
     public static String toJavaType(String columnType) {
+        return toJavaTypeEnum(columnType).getType();
+    }
+    
+    /**
+     * @param columnType
+     * @return
+     */
+    public static JavaTypeEnum toJavaTypeEnum(String columnType) {
         columnType = columnType.toUpperCase();
-        if ("TINYINT".equals(columnType)) {
-            columnType = "java.lang.Byte";
-        } else {
-            if ("CHAR".equals(columnType) || "TEXT".equals(columnType) || "VARCHAR".equals(columnType) || "TINYTEXT".equals(columnType)
-                    || "LONGTEXT".equals(columnType) || "JSON".equals(columnType) || "XML".equals(columnType)) {
-                columnType = "java.lang.String";
-            } else if ("BIGINT".equals(columnType) || "INT8".equals(columnType) || "BIGSERIAL".equals(columnType)) {
-                columnType = "java.lang.Long";
-            } else if ("INT".equals(columnType) || "INTEGER".equals(columnType) || "MEDIUMINT".equals(columnType) || "SMALLINT".equals(
-                    columnType) || "INT2".equals(columnType) || "INT4".equals(columnType)) {
-                columnType = "java.lang.Integer";
-            } else if ("FLOAT".equals(columnType) || "FLOAT4".equals(columnType)) {
-                columnType = "java.lang.Float";
-            } else if ("DOUBLE".equals(columnType) || "FLOAT8".equals(columnType) || "MONEY".equals(columnType)) {
-                columnType = "java.lang.Double";
-            } else if ("NUMERIC".equals(columnType) || "DECIMAL".equals(columnType) || "numeric".equals(columnType)) {
-                columnType = "java.math.BigDecimal";
-            } else if ("DATE".equals(columnType) || "YEAR".equals(columnType)) {
-                return "java.util.Date";
-            } else if ("TIMESTAMP".equals(columnType) || "DATETIME".equals(columnType)) {
-                return "java.time.LocalDateTime";
-            } else if ("BIT".equals(columnType) || "BOOL".equals(columnType)) {
-                return "java.lang.Boolean";
-            } else if ("BLOB".equals(columnType)) {
-                return "java.lang.byte[]";
-            } else if ("CLOB".equals(columnType)) {
-                columnType = "java.sql.Clob";
-            } else if ("TIME".equals(columnType)) {
-                columnType = "java.sql.Time";
-            } else if ("NCHAR".equals(columnType)) {
-                columnType = "java.lang.String";
-            } else if ("INT UNSIGNED".equals(columnType)) {
-                columnType = "java.lang.Integer";
-            } else {
-                columnType = "java.lang.Object";
-            }
+        if ("TEXT".equals(columnType) || "VARCHAR".equals(columnType) || "TINYTEXT".equals(columnType) || "LONGTEXT".equals(columnType)
+                || "JSON".equals(columnType) || "XML".equals(columnType) || "NCHAR".equals(columnType)) {
+            return JavaTypeEnum.String;
         }
-        return columnType;
+        if ("BIGINT".equals(columnType) || "INT8".equals(columnType) || "BIGSERIAL".equals(columnType)) {
+            return JavaTypeEnum.Long;
+        }
+        if ("INT".equals(columnType) || "INTEGER".equals(columnType) || "MEDIUMINT".equals(columnType) || "SMALLINT".equals(columnType)
+                || "INT2".equals(columnType) || "INT4".equals(columnType) || "INT UNSIGNED".equals(columnType)) {
+            return JavaTypeEnum.Integer;
+        }
+        if ("FLOAT".equals(columnType) || "FLOAT4".equals(columnType)) {
+            return JavaTypeEnum.Float;
+        }
+        if ("DOUBLE".equals(columnType) || "FLOAT8".equals(columnType) || "MONEY".equals(columnType)) {
+            return JavaTypeEnum.Double;
+        }
+        if ("NUMERIC".equals(columnType) || "DECIMAL".equals(columnType) || "numeric".equals(columnType)) {
+            return JavaTypeEnum.BigDecimal;
+        }
+        if ("DATE".equals(columnType) || "YEAR".equals(columnType)) {
+            return JavaTypeEnum.Date;
+        }
+        if ("TIMESTAMP".equals(columnType) || "DATETIME".equals(columnType)) {
+            return JavaTypeEnum.LocalDateTime;
+        }
+        if ("TINYINT".equals(columnType)) {
+            return JavaTypeEnum.Byte;
+        }
+        if ("BIT".equals(columnType) || "BOOL".equals(columnType)) {
+            return JavaTypeEnum.Boolean;
+        }
+        if ("BLOB".equals(columnType)) {
+            return JavaTypeEnum.Bytes;
+        }
+        if ("CLOB".equals(columnType)) {
+            return JavaTypeEnum.Clob;
+        }
+        if ("TIME".equals(columnType)) {
+            return JavaTypeEnum.Time;
+        }
+        if ("CHAR".equals(columnType)) {
+            return JavaTypeEnum.CHAR;
+        }
+        
+        return JavaTypeEnum.Object;
     }
     
     /**

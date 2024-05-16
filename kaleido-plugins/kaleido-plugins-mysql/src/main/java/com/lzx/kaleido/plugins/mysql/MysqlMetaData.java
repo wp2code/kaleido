@@ -2,9 +2,12 @@ package com.lzx.kaleido.plugins.mysql;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import com.lzx.kaleido.infra.base.enums.IBaseEnum;
 import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
+import com.lzx.kaleido.infra.base.utils.EasyEnumUtil;
 import com.lzx.kaleido.plugins.mysql.sql.ISQL;
 import com.lzx.kaleido.plugins.mysql.sql.MysqlIndexType;
+import com.lzx.kaleido.spi.db.enums.DataType;
 import com.lzx.kaleido.spi.db.jdbc.BaseMetaData;
 import com.lzx.kaleido.spi.db.model.metaData.Database;
 import com.lzx.kaleido.spi.db.model.metaData.Table;
@@ -12,6 +15,7 @@ import com.lzx.kaleido.spi.db.model.metaData.TableColumn;
 import com.lzx.kaleido.spi.db.model.metaData.TableIndex;
 import com.lzx.kaleido.spi.db.model.metaData.TableIndexColumn;
 import com.lzx.kaleido.spi.db.sql.SQLExecutor;
+import com.lzx.kaleido.spi.db.utils.JdbcUtil;
 import com.lzx.kaleido.spi.db.utils.ResultSetUtil;
 import io.micrometer.common.util.StringUtils;
 import jakarta.validation.constraints.NotEmpty;
@@ -183,11 +187,16 @@ public class MysqlMetaData extends BaseMetaData {
         final List<TableColumn> tableColumns = new ArrayList<>();
         return SQLExecutor.getInstance().execute(connection, sql, resultSet -> {
             while (resultSet.next()) {
-                TableColumn column = new TableColumn();
+                final TableColumn column = new TableColumn();
                 column.setDatabaseName(databaseName);
                 column.setTableName(tableName);
+                final String dataType = resultSet.getString("DATA_TYPE").toUpperCase();
+                final IBaseEnum<Integer> dataTypeEnum = EasyEnumUtil.getEnumByName(DataType.class, dataType);
+                if (dataTypeEnum != null) {
+                    column.setDataType(dataTypeEnum.getCode());
+                }
                 column.setName(resultSet.getString("COLUMN_NAME"));
-                column.setColumnType(resultSet.getString("DATA_TYPE").toUpperCase());
+                column.setColumnType(dataType);
                 column.setDefaultValue(resultSet.getString("COLUMN_DEFAULT"));
                 column.setAutoIncrement(resultSet.getString("EXTRA").contains("auto_increment"));
                 column.setComment(resultSet.getString("COLUMN_COMMENT"));

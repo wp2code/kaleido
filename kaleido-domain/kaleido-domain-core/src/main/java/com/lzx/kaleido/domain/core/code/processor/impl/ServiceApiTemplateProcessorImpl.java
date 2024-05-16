@@ -11,8 +11,8 @@ import com.lzx.kaleido.domain.model.dto.code.CodeClassDTO;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableParam;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
-import com.lzx.kaleido.domain.model.vo.code.template.java.JavaServiceApiConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
+import com.lzx.kaleido.domain.model.vo.code.template.java.JavaServiceApiConfigVO;
 
 import java.util.HashSet;
 import java.util.List;
@@ -60,7 +60,7 @@ public class ServiceApiTemplateProcessorImpl extends AbsTemplateProcessor<JavaSe
     
     @Override
     protected String getCodeName(String name, final String tableName) {
-        return StrUtil.isNotBlank(name) ? name : "I" + TemplateConvertUtil.underlineToCamelFirstToUpper(tableName) + _SUFFIX;
+        return StrUtil.isNotBlank(name) ? name : "I" + TemplateConvertUtil.toCamelFirstToUpper(tableName) + _SUFFIX;
     }
     
     /**
@@ -84,7 +84,7 @@ public class ServiceApiTemplateProcessorImpl extends AbsTemplateProcessor<JavaSe
             packages.add(superclass.getFullName());
         }
         CodeGenerationViewVO entityViewVO = null;
-        if (CollUtil.isNotEmpty(refCodeGenerationViewList)) {
+        if (CollUtil.isNotEmpty(refCodeGenerationViewList) && Boolean.TRUE.equals(codeGenerationTableParam.getUseMybatisPlus())) {
             entityViewVO = refCodeGenerationViewList.stream().filter(v -> TemplateParserEnum.isEntity(v.getCodeType())).findFirst()
                     .orElse(null);
             if (entityViewVO != null) {

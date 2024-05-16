@@ -72,7 +72,7 @@ public class VoTemplateProcessorImpl extends AbsTemplateProcessor<JavaVoConfigVO
      */
     @Override
     protected String getCodeName(String name, final String tableName) {
-        return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.underlineToCamelFirstToUpper(tableName) + _SUFFIX;
+        return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.toCamelFirstToUpper(tableName) + _SUFFIX;
     }
     
     
