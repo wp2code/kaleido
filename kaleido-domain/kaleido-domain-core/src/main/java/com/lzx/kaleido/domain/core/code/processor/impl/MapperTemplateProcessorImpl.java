@@ -11,9 +11,9 @@ import com.lzx.kaleido.domain.core.utils.TemplateConvertUtil;
 import com.lzx.kaleido.domain.model.dto.code.CodeApiDTO;
 import com.lzx.kaleido.domain.model.dto.code.CodeClassDTO;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableParam;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
-import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaMapperConfigVO;
 
 import java.util.ArrayList;
@@ -32,13 +32,29 @@ public class MapperTemplateProcessorImpl extends AbsTemplateProcessor<JavaMapper
     private static final String _SUFFIX = "Mapper";
     
     @Override
-    protected void fillCodeGenerationTableParam(final JavaMapperConfigVO config, BasicConfigVO basicConfig,
-            CodeGenerationTableParam codeGenerationTableParam) {
-        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseMybatisPlus(),
-                (v) -> codeGenerationTableParam.setUseMybatisPlus(Boolean.parseBoolean(v.toString())), config.isUseMybatisPlus());
-        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getSuperclassName(),
-                (v) -> codeGenerationTableParam.setSuperclassName(String.valueOf(v)),
-                Optional.of(config.getSuperclass()).map(SuperclassVO::getName).orElse(null));
+    protected void fillCodeGenerationTableParam(final JavaMapperConfigVO config, final BasicConfigVO basicConfig,
+            final CodeGenerationTableParam codeGenerationTableParam, final CodeGenerationTemplateConfigVO configVO) {
+        if (codeGenerationTableParam.isDirectUseTemplateConfig()) {
+            codeGenerationTableParam.setPackageName(config.getPackageName());
+            codeGenerationTableParam.setSourceFolder(config.getSourceFolder());
+            codeGenerationTableParam.setUseMybatisPlus(config.isUseMybatisPlus());
+            codeGenerationTableParam.setSuperclassName(config.getSuperclass() != null ? config.getSuperclass().getName() : null);
+            if (StrUtil.isNotBlank(configVO.getCodePath())) {
+                codeGenerationTableParam.setCodePath(configVO.getCodePath());
+            }
+            if (!config.isUseMybatisPlus()) {
+                codeGenerationTableParam.setMethodList(config.getMethodList());
+            }
+        } else {
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseMybatisPlus(),
+                    (v) -> codeGenerationTableParam.setUseMybatisPlus(Boolean.parseBoolean(v.toString())), config.isUseMybatisPlus());
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getSuperclassName(),
+                    (v) -> codeGenerationTableParam.setSuperclassName(String.valueOf(v)),
+                    config.getSuperclass() != null ? config.getSuperclass().getName() : null);
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getCodePath(),
+                    (v) -> codeGenerationTableParam.setCodePath(v.toString()), config.getCodePath());
+        }
+        
     }
     
     
@@ -100,7 +116,7 @@ public class MapperTemplateProcessorImpl extends AbsTemplateProcessor<JavaMapper
             }
         }
         final List<String> apiList = codeGenerationTableParam.getMethodList();
-        if (CollUtil.isNotEmpty(apiList)) {
+        if (CollUtil.isNotEmpty(apiList) && !codeGenerationTableParam.getUseMybatisPlus()) {
             final List<CodeApiDTO> apiParamList = new ArrayList<>(apiList.size());
             for (final String apiId : apiList) {
                 final ApiTemplateEnum apiTemplateEnum = ApiTemplateEnum.getInstance(apiId);

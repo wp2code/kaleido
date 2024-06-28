@@ -64,6 +64,7 @@ public class JavaConfigVO implements Serializable {
         config.setTemplateId(templateId);
         config.setTemplateContent(templateContent);
         config.setAlias(this.aliasName);
+        config.setCodePath(this.codePath);
         config.setHideStatus(0);
         config.setTemplateParams(JsonUtil.toJson(this));
         return config;

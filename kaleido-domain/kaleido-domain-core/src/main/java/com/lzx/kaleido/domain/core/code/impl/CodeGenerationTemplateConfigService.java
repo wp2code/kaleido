@@ -1,21 +1,35 @@
 package com.lzx.kaleido.domain.core.code.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.lzx.kaleido.domain.api.code.ICodeGenerationTemplateConfigService;
+import com.lzx.kaleido.domain.core.datasource.DataSourceFactory;
+import com.lzx.kaleido.domain.core.enums.TemplateParserEnum;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateUpdateParam;
+import com.lzx.kaleido.domain.model.dto.datasource.param.TableFieldColumnParam;
 import com.lzx.kaleido.domain.model.entity.code.CodeGenerationTemplateConfigEntity;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
+import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
+import com.lzx.kaleido.domain.model.vo.code.template.TemplateParamVO;
+import com.lzx.kaleido.domain.model.vo.datasource.TableFieldColumnVO;
 import com.lzx.kaleido.domain.repository.mapper.ICodeGenerationTemplateConfigMapper;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
+import com.lzx.kaleido.infra.base.pojo.spi.ITableColumnJava;
+import com.lzx.kaleido.infra.base.utils.JsonUtil;
 import com.lzx.kaleido.infra.base.utils.PojoConvertUtil;
 import com.lzx.kaleido.plugins.mp.BaseServiceImpl;
+import com.lzx.kaleido.spi.db.model.TableColumnJavaMap;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author lwp
@@ -65,6 +79,63 @@ public class CodeGenerationTemplateConfigService
     }
     
     /**
+     * 跟新模板配置
+     *
+     * @param templateId
+     * @return
+     */
+    @Override
+    public boolean updateCodeGenerationTemplateConfig(final Long templateId, final CodeGenerationTemplateUpdateParam param) {
+        final TemplateParserEnum instance = TemplateParserEnum.getInstance(param.getName());
+        if (instance == null) {
+            throw new CommonRuntimeException(ErrorCode.UPDATE_FAILED);
+        }
+        final LambdaQueryWrapper<CodeGenerationTemplateConfigEntity> wrapper = Wrappers.<CodeGenerationTemplateConfigEntity>lambdaQuery()
+                .eq(CodeGenerationTemplateConfigEntity::getTemplateId, templateId)
+                .eq(CodeGenerationTemplateConfigEntity::getName, param.getName());
+        final CodeGenerationTemplateConfigEntity entity = this.getOne(wrapper);
+        entity.setCodePath(param.getCodePath());
+        String templateParams = entity.getTemplateParams();
+        final TemplateParamVO templateParamVO = JsonUtil.toBean(templateParams, TemplateParamVO.class);
+        templateParamVO.setUseLombok(param.getUseLombok());
+        templateParamVO.setUseMybatisPlus(param.getUseMybatisPlus());
+        templateParamVO.setUseSwagger(param.getUseSwagger());
+        templateParamVO.setSourceFolder(param.getSourceFolder());
+        templateParamVO.setResponseGenericClass(param.getResponseGenericClass());
+        templateParamVO.setPackageName(param.getPackageName());
+        templateParamVO.setDefaultIgFields(param.getDefaultIgFields());
+        SuperclassVO superclass = templateParamVO.getSuperclass();
+        if (StrUtil.isNotBlank(param.getSuperclassName())) {
+            if (superclass == null) {
+                superclass = new SuperclassVO(param.getSuperclassName());
+            } else {
+                superclass.setName(param.getSuperclassName());
+            }
+        } else {
+            superclass = null;
+        }
+        templateParamVO.setSuperclass(superclass);
+        entity.setTemplateParams(JsonUtil.toJson(templateParamVO));
+        return this.updateById(entity);
+    }
+    
+    /**
+     * 修改代码地址
+     *
+     * @param templateId
+     * @param codePath
+     * @return
+     */
+    @Override
+    public boolean updateCodePathByTemplateId(final Long templateId, final String codePath, List<String> codeTypeList) {
+        final LambdaUpdateWrapper<CodeGenerationTemplateConfigEntity> updateWrapper = Wrappers.<CodeGenerationTemplateConfigEntity>lambdaUpdate()
+                .set(CodeGenerationTemplateConfigEntity::getCodePath, codePath)
+                .eq(CodeGenerationTemplateConfigEntity::getTemplateId, templateId)
+                .in(CollUtil.isNotEmpty(codeTypeList), CodeGenerationTemplateConfigEntity::getName, codeTypeList);
+        return this.update(updateWrapper);
+    }
+    
+    /**
      * 获取代码配置详情
      *
      * @param id
@@ -77,21 +148,35 @@ public class CodeGenerationTemplateConfigService
     }
     
     /**
+     * 获取模板配置
+     *
+     * @param templateId
+     * @param name
+     * @return
+     */
+    @Override
+    public CodeGenerationTemplateConfigVO getCodeGenerationTemplateConfig(final Long templateId, final String name) {
+        final LambdaQueryWrapper<CodeGenerationTemplateConfigEntity> wrapper = Wrappers.<CodeGenerationTemplateConfigEntity>lambdaQuery()
+                .eq(CodeGenerationTemplateConfigEntity::getTemplateId, templateId).eq(CodeGenerationTemplateConfigEntity::getName, name);
+        return PojoConvertUtil.entity2Vo(this.getOne(wrapper), CodeGenerationTemplateConfigVO.class);
+    }
+    
+    /**
      * 根据模板ID获取配置信息
      *
      * @param templateId
      * @param hideStatus
-     * @param needParseTemplate
+     * @param nameList
      * @return
      */
     @Override
-    public List<CodeGenerationTemplateConfigVO> getByTemplateId(final Long templateId, final Integer hideStatus) {
+    public List<CodeGenerationTemplateConfigVO> getByTemplateId(final Long templateId, final Integer hideStatus,
+            final List<String> nameList) {
         final LambdaQueryWrapper<CodeGenerationTemplateConfigEntity> wrapper = Wrappers.<CodeGenerationTemplateConfigEntity>lambdaQuery()
                 .eq(CodeGenerationTemplateConfigEntity::getTemplateId, templateId)
+                .in(CollUtil.isNotEmpty(nameList), CodeGenerationTemplateConfigEntity::getName, nameList)
                 .eq(hideStatus != null, CodeGenerationTemplateConfigEntity::getHideStatus, hideStatus);
-        final List<CodeGenerationTemplateConfigVO> templateConfigList = PojoConvertUtil.entity2VoList(this.list(wrapper),
-                CodeGenerationTemplateConfigVO.class);
-        return templateConfigList;
+        return PojoConvertUtil.entity2VoList(this.list(wrapper), CodeGenerationTemplateConfigVO.class);
     }
     
     /**
@@ -142,5 +227,62 @@ public class CodeGenerationTemplateConfigService
         final LambdaUpdateWrapper<CodeGenerationTemplateConfigEntity> updateWrapper = Wrappers.<CodeGenerationTemplateConfigEntity>lambdaUpdate()
                 .eq(CodeGenerationTemplateConfigEntity::getId, id).set(CodeGenerationTemplateConfigEntity::getHideStatus, hideStatus);
         return this.update(updateWrapper);
+    }
+    
+    
+    /**
+     * 获取模板表字段
+     *
+     * @param templateId
+     * @param name
+     * @param tableFieldColumnParam
+     * @return
+     */
+    @Override
+    public List<TableFieldColumnVO> getTemplateTableFieldColumnList(final Long templateId, final String name,
+            final TableFieldColumnParam tableFieldColumnParam) {
+        final List<String> defaultIgFields = new ArrayList<>();
+        CodeGenerationTemplateConfigVO config = getCodeGenerationTemplateConfig(templateId, name);
+        if (config != null && StrUtil.isNotBlank(config.getTemplateParams())) {
+            final TemplateParamVO templateParamVO = JsonUtil.toBean(config.getTemplateParams(), TemplateParamVO.class);
+            if (templateParamVO != null && CollUtil.isNotEmpty(templateParamVO.getDefaultIgFields())) {
+                defaultIgFields.addAll(templateParamVO.getDefaultIgFields());
+            }
+        }
+        return getTemplateTableFieldColumnList(tableFieldColumnParam, (v) -> {
+            final TableFieldColumnVO fieldColumnVO = new TableFieldColumnVO();
+            fieldColumnVO.setComment(v.getComment());
+            fieldColumnVO.setColumn(v.getColumn());
+            fieldColumnVO.setJavaType(v.getJavaType());
+            fieldColumnVO.setJavaTypeSimpleName(v.getJavaTypeSimpleName());
+            fieldColumnVO.setJdbcType(v.getJdbcType());
+            fieldColumnVO.setProperty(v.getProperty());
+            fieldColumnVO.setPrimaryKey(v.getPrimaryKey());
+            fieldColumnVO.setDataType(v.getDataType());
+            if (defaultIgFields.size() > 0) {
+                fieldColumnVO.setSelected(!defaultIgFields.contains(v.getColumn()) && !defaultIgFields.contains(v.getProperty()));
+            } else {
+                fieldColumnVO.setSelected(true);
+            }
+            return fieldColumnVO;
+        });
+    }
+    
+    /**
+     * 获取表字段信息列表
+     *
+     * @param tableFieldColumnParam
+     * @return
+     */
+    @Override
+    public <T> List<T> getTemplateTableFieldColumnList(final TableFieldColumnParam tableFieldColumnParam,
+            final Function<ITableColumnJava, T> function) {
+        final List<TableColumnJavaMap> tableColumnJavaMapList = DataSourceFactory.getInstance()
+                .getTableColumnJavaMapList(tableFieldColumnParam.getConnectionId(), tableFieldColumnParam.getDataBaseName(),
+                        tableFieldColumnParam.getSchemaName(), tableFieldColumnParam.getTableName());
+        if (CollUtil.isNotEmpty(tableColumnJavaMapList)) {
+            return tableColumnJavaMapList.stream().map(function::apply).collect(Collectors.toList());
+        }
+        return null;
     }
 }

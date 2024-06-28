@@ -3,9 +3,15 @@ package com.lzx.kaleido.web.api.controller.code;
 import com.lzx.kaleido.domain.api.annotations.LogRecord;
 import com.lzx.kaleido.domain.api.code.ICodeGenerationTemplateConfigService;
 import com.lzx.kaleido.domain.api.code.ICodeGenerationTemplateService;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationGlobalConfigParam;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationSimpleParam;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateExportParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateQueryParam;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateUpdateParam;
+import com.lzx.kaleido.domain.model.dto.datasource.param.TableFieldColumnParam;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateViewVO;
+import com.lzx.kaleido.domain.model.vo.datasource.TableFieldColumnVO;
 import com.lzx.kaleido.infra.base.annotations.validation.AddGroup;
 import com.lzx.kaleido.infra.base.annotations.validation.UpdateGroup;
 import com.lzx.kaleido.infra.base.constant.Constants;
@@ -13,7 +19,6 @@ import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.pojo.R;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -54,16 +59,38 @@ public class CodeGenerationTemplateController {
     }
     
     /**
-     * 新增代码模板
+     * 复制新增代码模板
      *
-     * @param vo
+     * @param param
      * @return
      */
-    @LogRecord
-    @PostMapping("/add")
-    public R<Long> addCodeGenerationTemplate(@RequestBody @Validated(AddGroup.class) CodeGenerationTemplateVO vo) {
-        final Long id = codeGenerationGroupService.addCodeGenerationTemplate(vo);
+    @PostMapping("/add/copy")
+    public R<Long> addWithCopy(@RequestBody CodeGenerationSimpleParam param) {
+        final Long id = codeGenerationGroupService.addTemplateWithCopy(param.getTemplateId(), param.getTemplateName());
         return R.result(id != null, ErrorCode.SAVE_FAILED, id);
+    }
+    
+    /**
+     * 模板名称是否存在
+     *
+     * @param param
+     * @return
+     */
+    @PostMapping("/templateName/exists")
+    public R<Boolean> checkTemplateNameExists(@RequestBody CodeGenerationSimpleParam param) {
+        final boolean isExist = codeGenerationGroupService.checkTemplateName(param.getTemplateId(), param.getTemplateName());
+        return R.success(isExist);
+    }
+    
+    
+    /**
+     * 模板导出
+     *
+     * @param vo
+     */
+    @PostMapping("/export")
+    public void export(@RequestBody CodeGenerationTemplateExportParam vo) {
+        //TODO
     }
     
     /**
@@ -89,20 +116,43 @@ public class CodeGenerationTemplateController {
     public R<Boolean> updateCodeGenerationTemplate(@PathVariable("id") Long id,
             @RequestBody @Validated(UpdateGroup.class) CodeGenerationTemplateVO vo) {
         final boolean isSuccess = codeGenerationGroupService.updateById(id, vo);
-        return R.result(isSuccess, ErrorCode.UPDATE_FAILED);
+        return R.result(isSuccess, ErrorCode.UPDATE_FAILED, isSuccess);
+    }
+    
+    /**
+     * 更新部分代码模板
+     *
+     * @param vo
+     * @return
+     */
+    @PutMapping("/partition/update")
+    public R<Boolean> updateCodeGenerationTemplateOfPartition(@RequestBody @Validated CodeGenerationTemplateUpdateParam vo) {
+        final boolean isSuccess = codeGenerationGroupService.updateCodeGenerationTemplateOfPartition(vo);
+        return R.result(isSuccess, ErrorCode.UPDATE_FAILED, isSuccess);
+    }
+    
+    /**
+     * 更新全局配置
+     *
+     * @param vo
+     * @return
+     */
+    @PutMapping("/updateGlobalConfig")
+    public R<Boolean> updateGlobalConfig(@RequestBody CodeGenerationGlobalConfigParam param) {
+        final boolean isSuccess = codeGenerationGroupService.updateGlobalConfig(param);
+        return R.result(isSuccess, ErrorCode.UPDATE_FAILED, isSuccess);
     }
     
     /**
      * 更新代码模板名称
      *
-     * @param id
-     * @param templateName
+     * @param param
      * @return
      */
-    @PutMapping("/{id}/{templateName}/update")
-    public R<Boolean> updateTemplateNameById(@PathVariable("id") Long id, @PathVariable("templateName") String templateName) {
-        final boolean isSuccess = codeGenerationGroupService.updateTemplateNameById(id, templateName);
-        return R.result(isSuccess, ErrorCode.UPDATE_FAILED,isSuccess);
+    @PutMapping("/templateName/update")
+    public R<Boolean> updateTemplateNameById(@RequestBody CodeGenerationSimpleParam param) {
+        final boolean isSuccess = codeGenerationGroupService.updateTemplateNameById(param.getTemplateId(), param.getTemplateName());
+        return R.result(isSuccess, ErrorCode.UPDATE_FAILED, isSuccess);
     }
     
     /**
@@ -118,15 +168,16 @@ public class CodeGenerationTemplateController {
         return R.result(isSuccess, ErrorCode.UPDATE_FAILED);
     }
     
+    
     /**
-     * 查询模板详情
+     * 获取模板详情
      *
-     * @param id
+     * @param param
      * @return
      */
-    @GetMapping("/{id}/get")
-    public R<CodeGenerationTemplateVO> getCodeGenerationTemplate(@PathVariable("id") Long id) {
-        return R.success(codeGenerationGroupService.getDetailById(id, null));
+    @PostMapping("/template/info")
+    public R<CodeGenerationTemplateVO> getCodeGenerationTemplate(@RequestBody CodeGenerationSimpleParam param) {
+        return R.success(codeGenerationGroupService.getCodeGenerationTemplate(param));
     }
     
     /**
@@ -153,5 +204,21 @@ public class CodeGenerationTemplateController {
             @PathVariable("hideStatus") Integer hideStatus) {
         final boolean isSuccess = codeGenerationTemplateConfigService.updateHideStatus(id, hideStatus);
         return R.result(isSuccess, ErrorCode.UPDATE_FAILED);
+    }
+    
+    /**
+     * 获取模板表字段
+     *
+     * @param templateId
+     * @param name
+     * @param param
+     * @return
+     */
+    @PostMapping("{templateId}/{name}/table/column/fields")
+    public R<List<TableFieldColumnVO>> getTemplateTableFieldColumnList(@PathVariable("templateId") Long templateId,
+            @PathVariable("name") String name, @RequestBody TableFieldColumnParam param) {
+        final List<TableFieldColumnVO> templateTableFieldColumnList = codeGenerationTemplateConfigService.getTemplateTableFieldColumnList(
+                templateId, name, param);
+        return R.success(templateTableFieldColumnList);
     }
 }

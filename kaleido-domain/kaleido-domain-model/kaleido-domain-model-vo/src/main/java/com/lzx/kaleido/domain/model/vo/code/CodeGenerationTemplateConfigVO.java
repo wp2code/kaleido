@@ -1,6 +1,8 @@
 package com.lzx.kaleido.domain.model.vo.code;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.lzx.kaleido.domain.model.entity.code.CodeGenerationTemplateConfigEntity;
+import com.lzx.kaleido.domain.model.vo.serializer.TemplateParamSerializer;
 import com.lzx.kaleido.infra.base.annotations.validation.AddGroup;
 import com.lzx.kaleido.infra.base.annotations.validation.UpdateGroup;
 import com.lzx.kaleido.infra.base.pojo.BaseVO;
@@ -55,7 +57,13 @@ public class CodeGenerationTemplateConfigVO extends BaseVO {
     /**
      * 模板参数配置
      */
+    @JsonSerialize(using = TemplateParamSerializer.class)
     private String templateParams;
+    
+    /**
+     * 代码地址
+     */
+    private String codePath;
     
     
     @Override
@@ -72,6 +80,7 @@ public class CodeGenerationTemplateConfigVO extends BaseVO {
         sb.append(templateContent);
         sb.append(hideStatus);
         sb.append(templateParams);
+        sb.append(codePath);
         return sb.toString();
     }
     

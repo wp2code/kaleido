@@ -52,4 +52,15 @@ public class CodeGenerationTemplateEntity extends BaseEntity {
     @TableField("is_default")
     private Integer isDefault;
     
+    /**
+     * 来源类型（0-初始自动创建；1-手动创建；2-复制创建）
+     */
+    @TableField("source_type")
+    private Integer sourceType;
+    
+    /**
+     * 来源
+     */
+    @TableField("source")
+    private String source;
 }

@@ -20,7 +20,7 @@ public class JavaServiceApiConfigVO extends JavaConfigVO {
      */
     private SuperclassVO superclass;
     
-    
+    private boolean useMybatisPlus;
     public JavaServiceApiConfigVO() {
         this.name = NAME;
         this.aliasName=NAME;

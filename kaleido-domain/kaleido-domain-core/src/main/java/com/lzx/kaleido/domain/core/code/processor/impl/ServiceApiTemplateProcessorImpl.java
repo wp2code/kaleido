@@ -9,15 +9,14 @@ import com.lzx.kaleido.domain.core.enums.TemplateParserEnum;
 import com.lzx.kaleido.domain.core.utils.TemplateConvertUtil;
 import com.lzx.kaleido.domain.model.dto.code.CodeClassDTO;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableParam;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
-import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaServiceApiConfigVO;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -30,10 +29,23 @@ public class ServiceApiTemplateProcessorImpl extends AbsTemplateProcessor<JavaSe
     
     @Override
     protected void fillCodeGenerationTableParam(final JavaServiceApiConfigVO config, final BasicConfigVO basicConfig,
-            final CodeGenerationTableParam codeGenerationTableParam) {
-        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getSuperclassName(),
-                (v) -> codeGenerationTableParam.setSuperclassName(String.valueOf(v)),
-                Optional.of(config.getSuperclass()).map(SuperclassVO::getName).orElse(null));
+            final CodeGenerationTableParam codeGenerationTableParam,final CodeGenerationTemplateConfigVO configVO) {
+        if(codeGenerationTableParam.isDirectUseTemplateConfig()){
+            codeGenerationTableParam.setUseMybatisPlus(config.isUseMybatisPlus());
+            codeGenerationTableParam.setPackageName(config.getPackageName());
+            codeGenerationTableParam.setSourceFolder(config.getSourceFolder());
+            codeGenerationTableParam.setSuperclassName(config.getSuperclass() != null ? config.getSuperclass().getName() : null);
+            if (StrUtil.isNotBlank(configVO.getCodePath())) {
+                codeGenerationTableParam.setCodePath(configVO.getCodePath());
+            }
+        }else{
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getSuperclassName(),
+                    (v) -> codeGenerationTableParam.setSuperclassName(String.valueOf(v)),
+                    config.getSuperclass() != null ? config.getSuperclass().getName() : null);
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getCodePath(), (v) -> codeGenerationTableParam.setCodePath(v.toString()),
+                    config.getCodePath());
+        }
+
     }
     
     /**

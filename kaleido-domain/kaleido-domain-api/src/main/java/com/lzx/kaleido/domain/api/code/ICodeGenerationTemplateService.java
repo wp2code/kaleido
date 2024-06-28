@@ -1,6 +1,9 @@
 package com.lzx.kaleido.domain.api.code;
 
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationGlobalConfigParam;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationSimpleParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateQueryParam;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateUpdateParam;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateViewVO;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +26,13 @@ public interface ICodeGenerationTemplateService {
     
     
     /**
+     * @param id
+     * @return
+     */
+    Long addTemplateWithCopy(@NotNull final Long id, final String templateName);
+    
+    
+    /**
      * 新增代码模板
      *
      * @param vo
@@ -30,6 +40,22 @@ public interface ICodeGenerationTemplateService {
      */
     Long addCodeGenerationTemplate(final CodeGenerationTemplateVO vo);
     
+    /**
+     * 校验模板名称
+     *
+     * @param templateId
+     * @param templateName
+     * @return
+     */
+    boolean checkTemplateName(Long templateId, String templateName);
+    
+    
+    /**
+     * 校验默认模板是否存在
+     *
+     * @return
+     */
+    boolean checkInitDefaultTemplate();
     
     /**
      * 更新代码模板
@@ -40,6 +66,20 @@ public interface ICodeGenerationTemplateService {
      */
     boolean updateById(@NotNull final Long id, final CodeGenerationTemplateVO vo);
     
+    /**更新部分代码模板
+     * @param param
+     * @return
+     */
+    boolean updateCodeGenerationTemplateOfPartition(@NotNull CodeGenerationTemplateUpdateParam param);
+    
+    
+    /**
+     * 更新全局基本配置
+     *
+     * @param param
+     * @return
+     */
+    boolean updateGlobalConfig(CodeGenerationGlobalConfigParam param);
     
     /**
      * 更新模板名称
@@ -75,6 +115,14 @@ public interface ICodeGenerationTemplateService {
      * @return
      */
     CodeGenerationTemplateVO getDetailById(@NotNull final Long id, Integer hideStatus);
+    
+    /**
+     * 获取模板信息
+     *
+     * @param param
+     * @return
+     */
+    CodeGenerationTemplateVO getCodeGenerationTemplate(CodeGenerationSimpleParam param);
     
     
     /**

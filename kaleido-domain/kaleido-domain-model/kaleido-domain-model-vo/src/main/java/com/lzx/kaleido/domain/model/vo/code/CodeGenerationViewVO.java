@@ -86,6 +86,11 @@ public class CodeGenerationViewVO implements Serializable {
     private String namespace;
     
     /**
+     * 文件名称后缀
+     */
+    private String fileSuffix;
+    
+    /**
      * 字段映射
      */
     private List<TableFieldColumnVO> tableFieldColumnMap;

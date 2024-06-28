@@ -1,15 +1,14 @@
 package com.lzx.kaleido.spi.db.model;
 
+import com.lzx.kaleido.infra.base.pojo.spi.ITableColumnJava;
 import lombok.Data;
-
-import java.io.Serializable;
 
 /**
  * @author lwp
  * @date 2024-01-16
  **/
 @Data
-public class TableColumnJavaMap implements Serializable {
+public class TableColumnJavaMap implements ITableColumnJava {
     private String comment;
     private String column;
     private String jdbcType;
@@ -18,4 +17,6 @@ public class TableColumnJavaMap implements Serializable {
     private String javaTypeSimpleName;
     private Boolean primaryKey;
     private Integer dataType;
+    
+
 }

@@ -67,11 +67,11 @@ public class MyBatisPlusConfig {
             globalConfig.setBanner(false);
             globalConfig.setSqlInjector(new DefaultSqlInjector());
             globalConfig.setMetaObjectHandler(new DataMetaObjectHandler());
-            final GlobalConfig.DbConfig dbConfig = globalConfig.getDbConfig();
-            dbConfig.setLogicDeleteField(DataMetaObjectHandler.DELETED);
-            globalConfig.setIdentifierGenerator(new CustomIdentifierGenerator());
-            dbConfig.setLogicDeleteValue("1");
-            dbConfig.setLogicNotDeleteValue("0");
+//            final GlobalConfig.DbConfig dbConfig = globalConfig.getDbConfig();
+//            dbConfig.setLogicDeleteField(DataMetaObjectHandler.DELETED);
+//            globalConfig.setIdentifierGenerator(new CustomIdentifierGenerator());
+//            dbConfig.setLogicDeleteValue("1");
+//            dbConfig.setLogicNotDeleteValue("0");
         }
     }
 }

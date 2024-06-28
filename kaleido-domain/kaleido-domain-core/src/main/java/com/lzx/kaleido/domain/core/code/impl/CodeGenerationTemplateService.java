@@ -8,14 +8,22 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.lzx.kaleido.domain.api.code.ICodeGenerationTemplateConfigService;
 import com.lzx.kaleido.domain.api.code.ICodeGenerationTemplateService;
 import com.lzx.kaleido.domain.api.enums.CodeTemplateDefaultEnum;
+import com.lzx.kaleido.domain.api.enums.CodeTemplateHideEnum;
 import com.lzx.kaleido.domain.api.enums.CodeTemplateInternalEnum;
+import com.lzx.kaleido.domain.api.enums.CodeTemplateSourceTypeEnum;
 import com.lzx.kaleido.domain.core.enums.TemplateParserEnum;
+import com.lzx.kaleido.domain.core.utils.TemplateConvertUtil;
+import com.lzx.kaleido.domain.model.dto.code.param.ApplyTemplateParam;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationGlobalConfigParam;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationSimpleParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateQueryParam;
+import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateUpdateParam;
 import com.lzx.kaleido.domain.model.entity.code.CodeGenerationTemplateEntity;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateViewConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateViewVO;
+import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.JavaConfigVO;
 import com.lzx.kaleido.domain.repository.mapper.ICodeGenerationTemplateMapper;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
@@ -27,8 +35,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author lwp
@@ -64,6 +76,7 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
                 final TemplateParserEnum templateParserEnum = TemplateParserEnum.getInstance(name);
                 if (templateParserEnum != null) {
                     final JavaConfigVO javaConfig = templateParserEnum.getTemplateParser().parser(v.getConfig());
+                    javaConfig.setCodePath(v.getCodePath());
                     return javaConfig.swapper(templateId, null);
                 }
                 return null;
@@ -71,6 +84,44 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
             if (codeGenerationTemplateConfigService.addCodeGenerationTemplateConfigBatch(configList)) {
                 return templateId;
             }
+        }
+        throw new CommonRuntimeException(ErrorCode.SAVE_FAILED);
+    }
+    
+    /**
+     * @param id
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long addTemplateWithCopy(final Long id, final String templateName) {
+        final CodeGenerationTemplateVO template = getCodeGenerationTemplate(id, null, null);
+        if (template == null) {
+            throw new CommonRuntimeException(ErrorCode.SAVE_FAILED);
+        }
+        if (checkTemplateName(null, templateName)) {
+            throw new CommonRuntimeException(ErrorCode.SAVE_FAILED);
+        }
+        LocalDateTime now = LocalDateTime.now();
+        final CodeGenerationTemplateEntity entity = PojoConvertUtil.vo2Entity(template, CodeGenerationTemplateEntity.class);
+        entity.setId(null);
+        entity.setCreateTime(now);
+        entity.setUpdateTime(now);
+        entity.setIsDefault(CodeTemplateDefaultEnum.NORMAL.getCode());
+        entity.setIsInternal(CodeTemplateInternalEnum.N.getCode());
+        entity.setSourceType(CodeTemplateSourceTypeEnum.COPY_ADD.getCode());
+        entity.setSource(String.valueOf(id));
+        entity.setTemplateName(templateName);
+        if (this.save(entity)) {
+            final List<CodeGenerationTemplateConfigVO> templateConfigList = template.getTemplateConfigList();
+            templateConfigList.forEach(v -> {
+                v.setId(null);
+                v.setTemplateId(entity.getId());
+            });
+            if (!codeGenerationTemplateConfigService.addCodeGenerationTemplateConfigBatch(templateConfigList)) {
+                throw new CommonRuntimeException(ErrorCode.SAVE_FAILED);
+            }
+            return entity.getId();
         }
         throw new CommonRuntimeException(ErrorCode.SAVE_FAILED);
     }
@@ -101,6 +152,78 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
     }
     
     /**
+     * 校验模板名称
+     *
+     * @param templateId
+     * @param templateName
+     * @return
+     */
+    @Override
+    public boolean checkTemplateName(final Long templateId, final String templateName) {
+        final LambdaQueryWrapper<CodeGenerationTemplateEntity> wrapper = Wrappers.<CodeGenerationTemplateEntity>lambdaQuery()
+                .eq(CodeGenerationTemplateEntity::getTemplateName, templateName)
+                .ne(templateId != null, CodeGenerationTemplateEntity::getId, templateId);
+        return this.getBaseMapper().exists(wrapper);
+    }
+    
+    /**
+     * 校验默认模板是否存在
+     *
+     * @return
+     */
+    @Override
+    public boolean checkInitDefaultTemplate() {
+        final LambdaQueryWrapper<CodeGenerationTemplateEntity> wrapper = Wrappers.<CodeGenerationTemplateEntity>lambdaQuery()
+                .eq(CodeGenerationTemplateEntity::getIsDefault, CodeTemplateDefaultEnum.DEFAULT.getCode())
+                .eq(CodeGenerationTemplateEntity::getSourceType, CodeTemplateSourceTypeEnum.INIT_ADD.getCode())
+                .eq(CodeGenerationTemplateEntity::getIsInternal, CodeTemplateInternalEnum.Y.getCode());
+        return this.getBaseMapper().exists(wrapper);
+    }
+    
+    /**
+     * 更新全局基本配置
+     *
+     * @param param
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateGlobalConfig(final CodeGenerationGlobalConfigParam param) {
+        if (param == null) {
+            return false;
+        }
+        final Map<Long, List<String>> applyTemplateParamMap =
+                CollUtil.isNotEmpty(param.getApplyTemplateList()) ? param.getApplyTemplateList().stream()
+                        .collect(Collectors.toMap(ApplyTemplateParam::getTemplateId, ApplyTemplateParam::getCodeTypeList, (k1, k2) -> k1))
+                        : new HashMap<>();
+        final LambdaQueryWrapper<CodeGenerationTemplateEntity> wrapper = Wrappers.<CodeGenerationTemplateEntity>lambdaQuery()
+                .in(CollUtil.isNotEmpty(applyTemplateParamMap.keySet()), CodeGenerationTemplateEntity::getId,
+                        applyTemplateParamMap.keySet());
+        final List<CodeGenerationTemplateEntity> list = this.list(wrapper);
+        if (CollUtil.isNotEmpty(list)) {
+            for (final CodeGenerationTemplateEntity entity : list) {
+                final BasicConfigVO dbBasicConfig = TemplateConvertUtil.toBasicConfig(entity.getBasicConfig());
+                if (!StrUtil.equals(dbBasicConfig.getCodePath(), param.getCodePath())) {
+                    final List<String> codeTypeList = applyTemplateParamMap.get(entity.getId());
+                    //统一修改代码地址
+                    if (!codeGenerationTemplateConfigService.updateCodePathByTemplateId(entity.getId(), param.getCodePath(),
+                            codeTypeList)) {
+                        throw new CommonRuntimeException(ErrorCode.UPDATE_FAILED);
+                    }
+                }
+                if (!StrUtil.equals(entity.toString(), param.toString())) {
+                    final BasicConfigVO vo = new BasicConfigVO(param.getAuthor(), param.getCodePath(), param.getLicense());
+                    entity.setBasicConfig(JsonUtil.toJson(vo));
+                    if (!this.updateById(entity)) {
+                        throw new CommonRuntimeException(ErrorCode.UPDATE_FAILED);
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    
+    /**
      * 更新代码模板
      *
      * @param id
@@ -110,15 +233,12 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateById(final Long id, final CodeGenerationTemplateVO vo) {
-        CodeGenerationTemplateEntity dbEntity = getById(id);
+        final CodeGenerationTemplateEntity dbEntity = getById(id);
         if (dbEntity == null) {
             return false;
         }
         if (StrUtil.isNotBlank(vo.getTemplateName())) {
             dbEntity.setTemplateName(vo.getTemplateName());
-        }
-        if (StrUtil.isNotBlank(vo.getBasicConfig())) {
-            dbEntity.setBasicConfig(vo.getBasicConfig());
         }
         if (this.updateById(dbEntity)) {
             if (CollUtil.isNotEmpty(vo.getTemplateConfigList())) {
@@ -134,6 +254,21 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
     }
     
     /**
+     * 更新部分代码模板
+     *
+     * @param param
+     * @return
+     */
+    @Override
+    public boolean updateCodeGenerationTemplateOfPartition(final CodeGenerationTemplateUpdateParam param) {
+        final CodeGenerationTemplateEntity dbEntity = getById(param.getTemplateId());
+        if (dbEntity == null) {
+            return false;
+        }
+        return codeGenerationTemplateConfigService.updateCodeGenerationTemplateConfig(param.getTemplateId(), param);
+    }
+    
+    /**
      * 更新模板名称
      *
      * @param id
@@ -142,8 +277,11 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
      */
     @Override
     public boolean updateTemplateNameById(final Long id, final String templateName) {
+        if (checkTemplateName(id, templateName)) {
+            throw new CommonRuntimeException(ErrorCode.UPDATE_FAILED);
+        }
         final LambdaUpdateWrapper<CodeGenerationTemplateEntity> updateWrapper = Wrappers.<CodeGenerationTemplateEntity>lambdaUpdate()
-                .set(CodeGenerationTemplateEntity::getId, id).set(CodeGenerationTemplateEntity::getTemplateName, templateName);
+                .eq(CodeGenerationTemplateEntity::getId, id).set(CodeGenerationTemplateEntity::getTemplateName, templateName);
         return this.update(updateWrapper);
     }
     
@@ -198,7 +336,7 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
             final List<CodeGenerationTemplateVO> voList = PojoConvertUtil.entity2VoList(entities, CodeGenerationTemplateVO.class);
             for (final CodeGenerationTemplateVO vo : voList) {
                 final List<CodeGenerationTemplateConfigVO> templateConfigList = codeGenerationTemplateConfigService.getByTemplateId(
-                        vo.getId(), param.getHideStatus());
+                        vo.getId(), param.getHideStatus(), null);
                 vo.setTemplateConfigList(templateConfigList);
             }
             return voList;
@@ -215,15 +353,16 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
      */
     @Override
     public CodeGenerationTemplateVO getDetailById(final Long id, final Integer hideStatus) {
-        final CodeGenerationTemplateEntity entity = this.getById(id);
-        if (entity != null) {
-            final CodeGenerationTemplateVO vo = PojoConvertUtil.entity2Vo(entity, CodeGenerationTemplateVO.class);
-            final List<CodeGenerationTemplateConfigVO> templateConfigList = codeGenerationTemplateConfigService.getByTemplateId(vo.getId(),
-                    hideStatus);
-            vo.setTemplateConfigList(templateConfigList);
-            return vo;
-        }
-        return null;
+        return getCodeGenerationTemplate(id, hideStatus, null);
+    }
+    
+    /**
+     * @param param
+     * @return
+     */
+    @Override
+    public CodeGenerationTemplateVO getCodeGenerationTemplate(final CodeGenerationSimpleParam param) {
+        return getCodeGenerationTemplate(param.getTemplateId(), CodeTemplateHideEnum.SHOW.getCode(), param.getNameList());
     }
     
     /**
@@ -242,5 +381,23 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
             }
         }
         throw new CommonRuntimeException(ErrorCode.DELETED_FAILED);
+    }
+    
+    /**
+     * @param id
+     * @param hideStatus
+     * @param nameList
+     * @return
+     */
+    private CodeGenerationTemplateVO getCodeGenerationTemplate(final Long id, final Integer hideStatus, List<String> nameList) {
+        final CodeGenerationTemplateEntity entity = this.getById(id);
+        if (entity != null) {
+            final CodeGenerationTemplateVO vo = PojoConvertUtil.entity2Vo(entity, CodeGenerationTemplateVO.class);
+            final List<CodeGenerationTemplateConfigVO> templateConfigList = codeGenerationTemplateConfigService.getByTemplateId(vo.getId(),
+                    hideStatus, nameList);
+            vo.setTemplateConfigList(templateConfigList);
+            return vo;
+        }
+        return null;
     }
 }

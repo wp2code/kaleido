@@ -62,6 +62,11 @@ public class CodeGenerationTableFieldParam implements Serializable {
     private transient Integer dataType;
     
     /**
+     * 是否选择（前端渲染）
+     */
+    private boolean selected;
+    
+    /**
      * @return
      */
     public String getJavaTypeSimpleName() {

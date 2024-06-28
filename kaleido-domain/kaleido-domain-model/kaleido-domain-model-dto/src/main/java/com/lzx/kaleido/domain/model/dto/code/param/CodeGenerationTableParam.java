@@ -14,6 +14,10 @@ import java.util.List;
 public class CodeGenerationTableParam implements Serializable {
     
     /**
+     * 连接ID
+     */
+    private String connectionId;
+    /**
      * 代码模板名称
      */
     @NotEmpty(message = "代码模板名称不能为空")
@@ -132,6 +136,15 @@ public class CodeGenerationTableParam implements Serializable {
      */
     private List<String> webMethodList;
     
+    /**
+     * 是否生成代码文件
+     */
+    private boolean generationCodeFile;
+    
+    /**
+     * 直接使用模板配置
+     */
+    private boolean directUseTemplateConfig;
     
     public CodeGenerationTableFieldParam getPrimaryKeyField() {
         if (tableFieldColumnList == null) {

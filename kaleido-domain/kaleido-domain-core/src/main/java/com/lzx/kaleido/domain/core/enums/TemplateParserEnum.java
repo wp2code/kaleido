@@ -22,13 +22,13 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum TemplateParserEnum {
     
-    ENTITY("Entity", Singleton.get(EntityTemplateProcessorImpl.class), 1, "tp_entity.ftlx"),
-    VO("VO", Singleton.get(VoTemplateProcessorImpl.class), 2, "tp_vo.ftlx"),
-    MAPPER("Mapper", Singleton.get(MapperTemplateProcessorImpl.class), 3, "tp_mapper.ftlx"),
-    XML("Xml", Singleton.get(XmlTemplateProcessorImpl.class), 4, "tp_xml.ftlx"),
-    SERVICE_API("ServiceApi", Singleton.get(ServiceApiTemplateProcessorImpl.class), 5, "tp_service_api.ftlx"),
-    SERVICE("Service", Singleton.get(ServiceTemplateProcessorImpl.class), 6, "tp_service.ftlx"),
-    CONTROLLER("Controller", Singleton.get(ControllerTemplateProcessorImpl.class), 7, "tp_controller.ftlx");
+    ENTITY("Entity", Singleton.get(EntityTemplateProcessorImpl.class), 1, "tp_entity.ftlx", "java"),
+    VO("VO", Singleton.get(VoTemplateProcessorImpl.class), 2, "tp_vo.ftlx", "java"),
+    MAPPER("Mapper", Singleton.get(MapperTemplateProcessorImpl.class), 3, "tp_mapper.ftlx", "java"),
+    XML("Xml", Singleton.get(XmlTemplateProcessorImpl.class), 4, "tp_xml.ftlx", "xml"),
+    SERVICE_API("ServiceApi", Singleton.get(ServiceApiTemplateProcessorImpl.class), 5, "tp_service_api.ftlx", "java"),
+    SERVICE("Service", Singleton.get(ServiceTemplateProcessorImpl.class), 6, "tp_service.ftlx", "java"),
+    CONTROLLER("Controller", Singleton.get(ControllerTemplateProcessorImpl.class), 7, "tp_controller.ftlx", "java");
     
     private final String codeType;
     
@@ -43,6 +43,11 @@ public enum TemplateParserEnum {
      * 默认模板名称
      */
     private final String defaultTemplateName;
+    
+    /**
+     * 文件名称后缀
+     */
+    private final String fileSuffix;
     
     public static TemplateParserEnum getInstance(String codeType) {
         return Arrays.stream(values()).filter(v -> v.getCodeType().equalsIgnoreCase(codeType)).findFirst().orElse(null);

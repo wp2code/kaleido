@@ -5,6 +5,8 @@ import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 /**
  * @author lwp
  * @date 2023-12-09
@@ -26,13 +28,13 @@ public class JavaVoConfigVO extends JavaConfigVO {
     
     
     /**
-     * 配置类型名称
+     * 默认不生产的字段
      */
-    
+    private List<String> defaultIgFields;
     
     public JavaVoConfigVO() {
         this.name = NAME;
-        this.aliasName=NAME;
+        this.aliasName = NAME;
         this.useLombok = true;
     }
     

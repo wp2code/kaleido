@@ -3,6 +3,8 @@ package com.lzx.kaleido.domain.core.utils;
 import cn.hutool.core.util.StrUtil;
 import com.google.common.base.CaseFormat;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
+import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
+import com.lzx.kaleido.infra.base.utils.JsonUtil;
 import lombok.experimental.UtilityClass;
 
 import java.util.function.Consumer;
@@ -16,12 +18,21 @@ public class TemplateConvertUtil {
     
     
     /**
+     * @param basicConfigJson
+     * @return
+     */
+    public BasicConfigVO toBasicConfig(String basicConfigJson) {
+        return JsonUtil.toBean(basicConfigJson, BasicConfigVO.class);
+    }
+    
+    /**
      * @param value
      * @param defaultValues
      * @param consumer
      */
     public void setIfAbsent(Object value, Consumer<Object> consumer, Object... defaultValues) {
-        if (value == null && defaultValues != null && consumer != null) {
+        final boolean isNotValueFlag = value == null || value.toString().length() <= 0 || StrUtil.isBlank(value.toString().trim());
+        if (isNotValueFlag && defaultValues != null && consumer != null) {
             for (final Object defaultValue : defaultValues) {
                 if (defaultValue != null) {
                     consumer.accept(defaultValue);

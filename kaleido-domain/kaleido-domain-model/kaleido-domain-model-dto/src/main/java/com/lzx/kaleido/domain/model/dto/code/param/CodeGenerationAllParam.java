@@ -27,6 +27,10 @@ public class CodeGenerationAllParam implements Serializable {
     private String connectionId;
     
     /**
+     * 直接使用模板配置
+     */
+    private boolean directUseTemplateConfig;
+    /**
      *
      */
     @Valid

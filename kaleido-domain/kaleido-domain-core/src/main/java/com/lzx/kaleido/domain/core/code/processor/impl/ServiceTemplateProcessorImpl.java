@@ -9,9 +9,9 @@ import com.lzx.kaleido.domain.core.enums.TemplateParserEnum;
 import com.lzx.kaleido.domain.core.utils.TemplateConvertUtil;
 import com.lzx.kaleido.domain.model.dto.code.CodeClassDTO;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableParam;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
-import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaServiceConfigVO;
 import com.lzx.kaleido.infra.base.pojo.PackageInfo;
 import com.lzx.kaleido.infra.base.utils.PackageUtil;
@@ -19,7 +19,6 @@ import com.lzx.kaleido.infra.base.utils.PackageUtil;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -32,12 +31,23 @@ public class ServiceTemplateProcessorImpl extends AbsTemplateProcessor<JavaServi
     
     @Override
     protected void fillCodeGenerationTableParam(final JavaServiceConfigVO config, final BasicConfigVO basicConfig,
-            final CodeGenerationTableParam codeGenerationTableParam) {
-        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseMybatisPlus(),
-                (v) -> codeGenerationTableParam.setUseMybatisPlus(Boolean.parseBoolean(v.toString())), config.isUseMybatisPlus());
-        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getSuperclassName(),
-                (v) -> codeGenerationTableParam.setSuperclassName(String.valueOf(v)),
-                Optional.of(config.getSuperclass()).map(SuperclassVO::getName).orElse(null));
+            final CodeGenerationTableParam codeGenerationTableParam,final CodeGenerationTemplateConfigVO configVO) {
+        if (codeGenerationTableParam.isDirectUseTemplateConfig()) {
+            codeGenerationTableParam.setUseMybatisPlus(config.isUseMybatisPlus());
+            codeGenerationTableParam.setSuperclassName(config.getSuperclass() != null ? config.getSuperclass().getName() : null);
+            if (StrUtil.isNotBlank(configVO.getCodePath())) {
+                codeGenerationTableParam.setCodePath(configVO.getCodePath());
+            }
+        } else {
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseMybatisPlus(),
+                    (v) -> codeGenerationTableParam.setUseMybatisPlus(Boolean.parseBoolean(v.toString())), config.isUseMybatisPlus());
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getSuperclassName(),
+                    (v) -> codeGenerationTableParam.setSuperclassName(String.valueOf(v)),
+                    config.getSuperclass() != null ? config.getSuperclass().getName() : null);
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getCodePath(), (v) -> codeGenerationTableParam.setCodePath(v.toString()),
+                    configVO.getCodePath());
+        }
+        
     }
     
     /**

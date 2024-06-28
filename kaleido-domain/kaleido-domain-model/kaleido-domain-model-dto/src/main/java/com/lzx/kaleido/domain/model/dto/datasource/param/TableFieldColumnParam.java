@@ -1,7 +1,7 @@
 package com.lzx.kaleido.domain.model.dto.datasource.param;
 
-import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 
@@ -10,7 +10,7 @@ import java.io.Serializable;
  * @date 2024-02-18
  **/
 @Data
-@Builder
+@Accessors(chain = true)
 public class TableFieldColumnParam implements Serializable {
     
     private String dataBaseName;
@@ -20,4 +20,5 @@ public class TableFieldColumnParam implements Serializable {
     private String tableName;
     
     private String connectionId;
+    
 }

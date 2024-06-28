@@ -11,9 +11,9 @@ import com.lzx.kaleido.domain.core.utils.TemplateConvertUtil;
 import com.lzx.kaleido.domain.model.dto.code.CodeApiDTO;
 import com.lzx.kaleido.domain.model.dto.code.CodeClassDTO;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableParam;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
-import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaControllerConfigVO;
 
 import java.util.ArrayList;
@@ -56,18 +56,34 @@ public class ControllerTemplateProcessorImpl extends AbsTemplateProcessor<JavaCo
      */
     @Override
     protected void fillCodeGenerationTableParam(final JavaControllerConfigVO config, final BasicConfigVO basicConfig,
-            final CodeGenerationTableParam codeGenerationTableParam) {
-        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getWebMethodList(),
-                (v) -> codeGenerationTableParam.setWebMethodList((List<String>) v), config.getMethodList());
-        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getResponseGenericClass(),
-                (v) -> codeGenerationTableParam.setResponseGenericClass(v.toString()), config.getResponseGenericClass());
-        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseSwagger(),
-                (v) -> codeGenerationTableParam.setUseSwagger(Boolean.parseBoolean(v.toString())), config.isUseSwagger());
-        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseMybatisPlus(),
-                (v) -> codeGenerationTableParam.setUseMybatisPlus(Boolean.parseBoolean(v.toString())), config.isUseMybatisPlus());
-        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getSuperclassName(),
-                (v) -> codeGenerationTableParam.setSuperclassName(String.valueOf(v)),
-                Optional.of(config.getSuperclass()).map(SuperclassVO::getName).orElse(null));
+            final CodeGenerationTableParam codeGenerationTableParam, final CodeGenerationTemplateConfigVO configVO) {
+        if (codeGenerationTableParam.isDirectUseTemplateConfig()) {
+            codeGenerationTableParam.setUseMybatisPlus(config.isUseMybatisPlus());
+            codeGenerationTableParam.setUseSwagger(config.isUseSwagger());
+            codeGenerationTableParam.setPackageName(config.getPackageName());
+            codeGenerationTableParam.setSourceFolder(config.getSourceFolder());
+            if (StrUtil.isNotBlank(configVO.getCodePath())) {
+                codeGenerationTableParam.setCodePath(configVO.getCodePath());
+            }
+            codeGenerationTableParam.setSuperclassName(config.getSuperclass() != null ? config.getSuperclass().getName() : null);
+            codeGenerationTableParam.setResponseGenericClass(config.getResponseGenericClass());
+            codeGenerationTableParam.setWebMethodList(config.getMethodList());
+        } else {
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getWebMethodList(),
+                    (v) -> codeGenerationTableParam.setWebMethodList((List<String>) v), config.getMethodList());
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getResponseGenericClass(),
+                    (v) -> codeGenerationTableParam.setResponseGenericClass(v.toString()), config.getResponseGenericClass());
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseSwagger(),
+                    (v) -> codeGenerationTableParam.setUseSwagger(Boolean.parseBoolean(v.toString())), config.isUseSwagger());
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseMybatisPlus(),
+                    (v) -> codeGenerationTableParam.setUseMybatisPlus(Boolean.parseBoolean(v.toString())), config.isUseMybatisPlus());
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getSuperclassName(),
+                    (v) -> codeGenerationTableParam.setSuperclassName(String.valueOf(v)),
+                    config.getSuperclass() != null ? config.getSuperclass().getName() : null);
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getCodePath(),
+                    (v) -> codeGenerationTableParam.setCodePath(v.toString()), config.getCodePath());
+        }
+        
     }
     
     /**

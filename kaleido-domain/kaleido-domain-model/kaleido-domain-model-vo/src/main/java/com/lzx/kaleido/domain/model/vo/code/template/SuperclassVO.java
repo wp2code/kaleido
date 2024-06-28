@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,6 +33,8 @@ public class SuperclassVO implements Serializable {
         this.name = name;
         if (generics != null) {
             this.generics = Arrays.stream(generics).toList();
+        } else {
+            this.generics = new ArrayList<>();
         }
     }
     

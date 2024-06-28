@@ -5,7 +5,6 @@ import cn.hutool.http.ContentType;
 import com.lzx.kaleido.domain.api.code.ICodeGeneration;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationAllParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationParam;
-import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableParam;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationResultVO;
 import com.lzx.kaleido.domain.model.vo.code.JavaTypeVO;
 import com.lzx.kaleido.infra.base.constant.Constants;
@@ -17,7 +16,6 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,20 +41,6 @@ public class CodeGenerationController {
     @Resource
     private ICodeGeneration codeGeneration;
     
-    /**
-     * 代码预览-根据模板Id
-     *
-     * @param templateId
-     * @param tableParam
-     * @return
-     */
-    @Deprecated
-    @PostMapping("/{templateId}/preview")
-    public @ResponseBody R<CodeGenerationResultVO> previewByTemplateId(@PathVariable("templateId") Long templateId,
-            @Validated @RequestBody CodeGenerationTableParam tableParam) {
-        final CodeGenerationResultVO codeGenerationResultVO = codeGeneration.preview(templateId, tableParam);
-        return R.success(codeGenerationResultVO);
-    }
     
     /**
      * 代码预览
@@ -69,6 +53,8 @@ public class CodeGenerationController {
         final CodeGenerationResultVO codeGenerationResultVO = codeGeneration.generationOrPreview(codeGenerationAllParam, true);
         return R.success(codeGenerationResultVO);
     }
+    
+
     
     /**
      * 代码生成

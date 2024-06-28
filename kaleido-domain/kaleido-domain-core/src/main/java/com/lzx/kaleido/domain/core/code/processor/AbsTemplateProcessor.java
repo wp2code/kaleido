@@ -87,10 +87,10 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
                 throw new CommonRuntimeException(ErrorCode.CODE_TEMPLATE_PARSE_ERROR);
             }
             //设置模板参数
-            this.autoFillCodeGenerationTableParam(templateConfig, basicConfig, codeGenerationTableParam);
+            this.autoFillCodeGenerationTableParam(templateConfig, basicConfig, codeGenerationTableParam, config);
             //代码名称
             String codeName = codeGenerationTableParam.getName();
-            if (StrUtil.isBlank(codeName)) {
+            if (StrUtil.isBlank(codeName) || codeGenerationTableParam.isDirectUseTemplateConfig()) {
                 codeName = this.getCodeName(codeGenerationTableParam.getName(), codeGenerationTableParam.getTableName());
             }
             //构建模板参数
@@ -98,24 +98,24 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
                     refCodeGenerationViewList);
             String templateCode = null, codeOutPath = null;
             //生成代码（生成代码文件）
-            if (generateCodeFile) {
+            if (generateCodeFile && codeGenerationTableParam.isGenerationCodeFile()) {
                 codeOutPath = CodeGenerationUtil.processTemplate(config.getTemplateContent(), codeGenerationTableParam.getCodePath(),
-                        codeName + getCodeFileType(), params, getTemplateNameIfAbsent(codeGenerationTableParam.getTemplateName()),
-                        codeGenerationTableParam.getTemplateName(), codeGenerationTableParam.getTemplatePath(), resourceMode);
-            } else {
-                //生成代码
-                templateCode = CodeGenerationUtil.processTemplateToStr(config.getTemplateContent(), params,
-                        codeGenerationTableParam.getTemplateEngineName(),
+                        codeName + getCodeFileType(), params, codeGenerationTableParam.getTemplateEngineName(),
                         getTemplateNameIfAbsent(codeGenerationTableParam.getTemplateName()), codeGenerationTableParam.getTemplatePath(),
                         resourceMode);
             }
+            //生成代码
+            templateCode = CodeGenerationUtil.processTemplateToStr(config.getTemplateContent(), params,
+                    codeGenerationTableParam.getTemplateEngineName(), getTemplateNameIfAbsent(codeGenerationTableParam.getTemplateName()),
+                    codeGenerationTableParam.getTemplatePath(), resourceMode);
             return CodeGenerationViewVO.builder().name(codeName).packageName(codeGenerationTableParam.getPackageName())
                     .sourceFolder(codeGenerationTableParam.getSourceFolder()).codePath(codeGenerationTableParam.getCodePath())
                     .superclassName(codeGenerationTableParam.getSuperclassName()).codeOutPath(codeOutPath).templateCode(templateCode)
                     .codeType(config.getName()).useLombok(codeGenerationTableParam.getUseLombok())
                     .implInterfaceName(codeGenerationTableParam.getImplInterfaceName()).namespace(codeGenerationTableParam.getNamespace())
                     .useSwagger(codeGenerationTableParam.getUseSwagger()).useMybatisPlus(codeGenerationTableParam.getUseMybatisPlus())
-                    .tableFieldColumnMap(convertTableFieldColumnList(codeGenerationTableParam.getTableFieldColumnList())).build();
+                    .tableFieldColumnMap(convertTableFieldColumnList(codeGenerationTableParam.getTableFieldColumnList(), templateConfig))
+                    .build();
         } catch (Exception e) {
             log.error("模板解析{}失败！错误信息：{}", config.getName(), ExceptionUtil.getMessage(e));
             throw new TemplateParseException(ErrorCode.CODE_TEMPLATE_PARSE_ERROR);
@@ -151,12 +151,23 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
         return ".java";
     }
     
+    /**
+     * 补全参数信息
+     *
+     * @param templateParams
+     * @param basicConfig
+     * @param codeGenerationTableParam
+     * @param configVO
+     */
     protected void fillCodeGenerationTableParam(T templateParams, BasicConfigVO basicConfig,
-            CodeGenerationTableParam codeGenerationTableParam) {
+            CodeGenerationTableParam codeGenerationTableParam, CodeGenerationTemplateConfigVO configVO) {
+        // 子类实现
     }
     
     
     /**
+     * 构建模板参数
+     *
      * @param codeName
      * @param javaVoConfig
      * @param basicConfig
@@ -166,6 +177,7 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
      */
     protected Map<String, Object> doBuildTemplateParams(final String codeName, final T javaVoConfig, final BasicConfigVO basicConfig,
             final CodeGenerationTableParam codeGenerationTableParam, final List<CodeGenerationViewVO> refCodeGenerationViewList) {
+        // 子类实现
         return null;
     }
     
@@ -175,22 +187,25 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
      * @param templateParams
      * @param basicConfig
      * @param codeGenerationTableParam
+     * @param configVO
      */
     private void autoFillCodeGenerationTableParam(final T templateParams, final BasicConfigVO basicConfig,
-            final CodeGenerationTableParam codeGenerationTableParam) {
-        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getCodePath(), (v) -> codeGenerationTableParam.setCodePath(v.toString()),
-                templateParams.getCodePath(), basicConfig.getCodePath());
+            final CodeGenerationTableParam codeGenerationTableParam, CodeGenerationTemplateConfigVO configVO) {
         TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getPackageName(),
                 (v) -> codeGenerationTableParam.setPackageName(v.toString()), templateParams.getPackageName());
         TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getSourceFolder(),
                 (v) -> codeGenerationTableParam.setSourceFolder(v.toString()), templateParams.getSourceFolder());
         TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getTemplateEngineName(),
                 (v) -> codeGenerationTableParam.setTemplateEngineName(v.toString()), TemplateContext.DEFAULT_ENGINE);
-        this.fillCodeGenerationTableParam(templateParams, basicConfig, codeGenerationTableParam);
+        TemplateConvertUtil.setIfAbsent(templateParams.getCodePath(),
+                (v) -> templateParams.setCodePath(v.toString()), basicConfig.getCodePath());
+        this.fillCodeGenerationTableParam(templateParams, basicConfig, codeGenerationTableParam, configVO);
     }
     
     
     /**
+     * 构建模板参数
+     *
      * @param codeName
      * @param javaVoConfig
      * @param basicConfig
@@ -216,7 +231,7 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
     }
     
     /**
-     * @param tableFieldColumnMapList 
+     * @param tableFieldColumnMapList
      * @return
      */
     protected List<CodeGenerationTableFieldParam> convertCodeGenerationTableFieldParamList(
@@ -234,12 +249,13 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
      * @param paramList
      * @return
      */
-    protected List<TableFieldColumnVO> convertTableFieldColumnList(List<CodeGenerationTableFieldParam> paramList) {
+    protected List<TableFieldColumnVO> convertTableFieldColumnList(List<CodeGenerationTableFieldParam> paramList, T templateConfig) {
         if (CollUtil.isNotEmpty(paramList)) {
             return paramList.stream()
                     .map(v -> new TableFieldColumnVO().setColumn(v.getColumn()).setJdbcType(v.getJdbcType()).setProperty(v.getProperty())
                             .setComment(v.getComment()).setJavaTypeSimpleName(v.getJavaTypeSimpleName()).setPrimaryKey(v.isPrimaryKey())
-                            .setDataType(v.getDataType()).setJavaType(v.getJavaType())).collect(Collectors.toList());
+                            .setSelected(v.isSelected()).setDataType(v.getDataType()).setJavaType(v.getJavaType()))
+                    .collect(Collectors.toList());
         }
         return null;
     }

@@ -5,32 +5,24 @@ import cn.hutool.core.util.StrUtil;
 import com.lzx.kaleido.domain.api.code.ICodeGeneration;
 import com.lzx.kaleido.domain.api.code.ICodeGenerationTemplateConfigService;
 import com.lzx.kaleido.domain.api.code.ICodeGenerationTemplateService;
-import com.lzx.kaleido.domain.api.datasource.IDataSourceService;
 import com.lzx.kaleido.domain.api.enums.CodeTemplateHideEnum;
-import com.lzx.kaleido.domain.core.code.processor.ITemplateProcessor;
 import com.lzx.kaleido.domain.core.enums.TemplateParserEnum;
+import com.lzx.kaleido.domain.core.utils.TemplateConvertUtil;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationAllParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationParam;
-import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableFieldParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableParam;
-import com.lzx.kaleido.domain.model.dto.datasource.param.TableFieldColumnParam;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationResultVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
-import com.lzx.kaleido.domain.model.vo.code.template.JavaConfigVO;
-import com.lzx.kaleido.domain.model.vo.datasource.TableFieldColumnVO;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
-import com.lzx.kaleido.infra.base.enums.IBaseEnum;
 import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
-import com.lzx.kaleido.infra.base.utils.EasyEnumUtil;
 import com.lzx.kaleido.infra.base.utils.JsonUtil;
 import com.lzx.kaleido.plugins.template.enums.ResourceMode;
 import com.lzx.kaleido.plugins.template.exception.TemplateParseException;
 import com.lzx.kaleido.plugins.template.model.TemplateContext;
 import com.lzx.kaleido.plugins.template.utils.CodeGenerationUtil;
-import com.lzx.kaleido.spi.db.enums.DataType;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -52,43 +44,6 @@ public class CodeGenerationService implements ICodeGeneration {
     @Resource
     private ICodeGenerationTemplateService codeGenerationTemplateService;
     
-    @Resource
-    private IDataSourceService dataSourceService;
-    
-    /**
-     * 代码预览-根据模板Id
-     *
-     * @param templateId
-     * @param generationTableParam
-     * @return
-     */
-    @Deprecated
-    @Override
-    public CodeGenerationResultVO preview(final Long templateId, final CodeGenerationTableParam generationTableParam) {
-        final CodeGenerationTemplateVO templateVO = codeGenerationTemplateService.getDetailById(templateId,
-                CodeTemplateHideEnum.SHOW.getCode());
-        if (templateVO != null) {
-            final BasicConfigVO basicConfig = templateVO.toBasicConfig();
-            final List<CodeGenerationTemplateConfigVO> templateConfigList = templateVO.getTemplateConfigList();
-            final List<CodeGenerationViewVO> codeGenerationViewVOS = new ArrayList<>();
-            for (final CodeGenerationTemplateConfigVO configVO : templateConfigList) {
-                final TemplateParserEnum instance = TemplateParserEnum.getInstance(configVO.getName());
-                if (instance != null) {
-                    final ITemplateProcessor templateParser = instance.getTemplateParser();
-                    final JavaConfigVO javaConfigVO = templateParser.parser(configVO.getTemplateContent());
-                    templateParser.toCodeGenerationTableParam(javaConfigVO);
-                    CodeGenerationViewVO codeGenerationViewVO = instance.getTemplateParser()
-                            .generation(configVO, basicConfig, false, generationTableParam,
-                                    ResourceMode.getInstance(generationTableParam.getTemplateResourceMode()), codeGenerationViewVOS);
-                    if (codeGenerationViewVO != null) {
-                        codeGenerationViewVOS.add(codeGenerationViewVO);
-                    }
-                }
-            }
-            return new CodeGenerationResultVO(templateVO, codeGenerationViewVOS);
-        }
-        return null;
-    }
     
     /**
      * 代码生成或预览
@@ -105,7 +60,7 @@ public class CodeGenerationService implements ICodeGeneration {
             if (templateVO == null) {
                 throw new CommonRuntimeException(ErrorCode.CODE_TEMPLATE_CONFIG_NOT_EXITS);
             }
-            final BasicConfigVO basicConfig = templateVO.toBasicConfig();
+            final BasicConfigVO basicConfig = TemplateConvertUtil.toBasicConfig(templateVO.getBasicConfig());
             final List<CodeGenerationTemplateConfigVO> templateConfigList = templateVO.getTemplateConfigList();
             List<CodeGenerationViewVO> codeGenerationViewVOS = new ArrayList<>();
             codeGenerationList.sort((o1, o2) -> {
@@ -114,24 +69,18 @@ public class CodeGenerationService implements ICodeGeneration {
                 return instance1.getPriority() - instance2.getPriority();
             });
             for (final CodeGenerationTableParam tableParam : codeGenerationList) {
+                tableParam.setDirectUseTemplateConfig(codeGenerationTableParam.isDirectUseTemplateConfig());
+                tableParam.setConnectionId(codeGenerationTableParam.getConnectionId());
                 final CodeGenerationTemplateConfigVO configVO = templateConfigList.stream()
                         .filter(v -> v.getName().equals(tableParam.getConfigName())).findFirst().orElse(null);
                 if (configVO != null) {
                     final TemplateParserEnum parserEnum = TemplateParserEnum.getInstance(configVO.getName());
                     if (parserEnum != null) {
-                        if (CollUtil.isEmpty(tableParam.getTableFieldColumnList()) && (TemplateParserEnum.isEntity(parserEnum.getCodeType())
-                                || TemplateParserEnum.isVo(parserEnum.getCodeType()) || TemplateParserEnum.isXml(
-                                parserEnum.getCodeType()))) {
-                            final List<TableFieldColumnVO> tableFieldColumnList = dataSourceService.getTableFieldColumnList(
-                                    TableFieldColumnParam.builder().connectionId(codeGenerationTableParam.getConnectionId())
-                                            .schemaName(tableParam.getSchemaName()).tableName(tableParam.getTableName())
-                                            .dataBaseName(tableParam.getDataBaseName()).build());
-                            tableParam.setTableFieldColumnList(convertCodeGenerationTableFieldParamList(tableFieldColumnList));
-                        }
                         final CodeGenerationViewVO codeGenerationViewVO = parserEnum.getTemplateParser()
                                 .generation(configVO, basicConfig, !isPreview, tableParam,
                                         ResourceMode.getInstance(tableParam.getTemplateResourceMode()), codeGenerationViewVOS);
                         if (codeGenerationViewVO != null) {
+                            codeGenerationViewVO.setFileSuffix(parserEnum.getFileSuffix());
                             System.out.println(codeGenerationViewVO.getTemplateCode());
                             codeGenerationViewVOS.add(codeGenerationViewVO);
                         }
@@ -162,6 +111,8 @@ public class CodeGenerationService implements ICodeGeneration {
                 config.getName());
     }
     
+
+    
     /**
      * @param configParam
      * @return
@@ -186,21 +137,4 @@ public class CodeGenerationService implements ICodeGeneration {
         return vo;
     }
     
-    
-    /**
-     * @param tableFieldColumnList
-     * @return
-     */
-    private List<CodeGenerationTableFieldParam> convertCodeGenerationTableFieldParamList(List<TableFieldColumnVO> tableFieldColumnList) {
-        if (CollUtil.isNotEmpty(tableFieldColumnList)) {
-            return tableFieldColumnList.stream().map(v -> {
-                final IBaseEnum<Integer> dataTypeEnum = EasyEnumUtil.getEnumByCode(DataType.class, v.getDataType());
-                return new CodeGenerationTableFieldParam().setDataType(v.getDataType()).setColumn(v.getColumn()).setComment(v.getComment())
-                        .setJdbcType(v.getJdbcType()).setJavaType(v.getJavaType()).setJavaTypeSimpleName(v.getJavaTypeSimpleName())
-                        .setPrimaryKey(v.getPrimaryKey()).setProperty(v.getProperty())
-                        .setXmlJdbcType(dataTypeEnum != null ? dataTypeEnum.getName() : v.getJdbcType()).setJdbcTypeCode(v.getDataType());
-            }).collect(Collectors.toList());
-        }
-        return null;
-    }
 }

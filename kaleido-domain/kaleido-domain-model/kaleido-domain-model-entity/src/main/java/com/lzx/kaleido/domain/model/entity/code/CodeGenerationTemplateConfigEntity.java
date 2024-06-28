@@ -57,4 +57,11 @@ public class CodeGenerationTemplateConfigEntity extends BaseEntity {
      */
     @TableField("hide_status")
     private Integer hideStatus;
+    
+    
+    /**
+     * 代码地址
+     */
+    @TableField("code_path")
+    private String codePath;
 }

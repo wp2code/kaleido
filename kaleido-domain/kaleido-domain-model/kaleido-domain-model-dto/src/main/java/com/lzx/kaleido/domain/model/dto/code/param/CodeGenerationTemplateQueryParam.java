@@ -19,7 +19,7 @@ public class CodeGenerationTemplateQueryParam implements Serializable {
     /**
      * 模板语言
      */
-    private String language;
+    private String language = "java";
     
     /**
      * 隐藏状态：0-显示；1-隐藏

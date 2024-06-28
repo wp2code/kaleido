@@ -12,6 +12,7 @@ import com.lzx.kaleido.domain.model.dto.code.CodeApiDTO;
 import com.lzx.kaleido.domain.model.dto.code.CodeClassDTO;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableFieldParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableParam;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaXmlConfigVO;
@@ -35,10 +36,22 @@ public class XmlTemplateProcessorImpl extends AbsTemplateProcessor<JavaXmlConfig
      * @param codeGenerationTableParam
      */
     @Override
-    protected void fillCodeGenerationTableParam(final JavaXmlConfigVO config, BasicConfigVO basicConfig,
-            CodeGenerationTableParam codeGenerationTableParam) {
-        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getMethodList(),
-                (v) -> codeGenerationTableParam.setMethodList((List<String>) v), config.getMethodList());
+    protected void fillCodeGenerationTableParam(final JavaXmlConfigVO config, final BasicConfigVO basicConfig,
+            final CodeGenerationTableParam codeGenerationTableParam, final CodeGenerationTemplateConfigVO configVO) {
+        if (codeGenerationTableParam.isDirectUseTemplateConfig()) {
+            codeGenerationTableParam.setPackageName(config.getPackageName());
+            codeGenerationTableParam.setSourceFolder(config.getSourceFolder());
+            codeGenerationTableParam.setUseMybatisPlus(config.isUseMybatisPlus());
+            if (StrUtil.isNotBlank(configVO.getCodePath())) {
+                codeGenerationTableParam.setCodePath(configVO.getCodePath());
+            }
+            codeGenerationTableParam.setMethodList(config.getMethodList());
+        } else {
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getMethodList(),
+                    (v) -> codeGenerationTableParam.setMethodList((List<String>) v), config.getMethodList());
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getCodePath(),
+                    (v) -> codeGenerationTableParam.setCodePath(v.toString()), config.getCodePath());
+        }
     }
     
     protected String getCodeFileType() {

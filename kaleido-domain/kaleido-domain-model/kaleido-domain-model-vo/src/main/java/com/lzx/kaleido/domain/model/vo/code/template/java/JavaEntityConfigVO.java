@@ -1,9 +1,12 @@
 package com.lzx.kaleido.domain.model.vo.code.template.java;
 
+import cn.hutool.core.collection.CollUtil;
 import com.lzx.kaleido.domain.model.vo.code.template.JavaConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.List;
 
 /**
  * @author lwp
@@ -27,13 +30,13 @@ public class JavaEntityConfigVO extends JavaConfigVO {
     private boolean useMybatisPlus;
     
     /**
-     * 配置类型名称
+     * 默认不生产的字段
      */
-    
+    private List<String> defaultIgFields;
     
     public JavaEntityConfigVO() {
         this.name = NAME;
-        this.aliasName=NAME;
+        this.aliasName = NAME;
         this.useLombok = true;
     }
     
@@ -45,6 +48,9 @@ public class JavaEntityConfigVO extends JavaConfigVO {
         sb.append(useMybatisPlus);
         if (superclass != null) {
             sb.append(superclass);
+        }
+        if (CollUtil.isNotEmpty(defaultIgFields)) {
+            sb.append(defaultIgFields);
         }
         sb.append(super.toString());
         return sb.toString();

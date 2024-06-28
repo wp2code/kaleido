@@ -11,7 +11,27 @@ import java.io.Serializable;
 @Data
 public class CodeGenerationTemplateViewConfigVO implements Serializable {
     
+    /**
+     * 模板名称
+     * <ul>
+     *     <li>Entity</li>
+     *     <li>VO</li>
+     *     <li>Mapper</li>
+     *     <li>Xml</li>
+     *     <li>ServiceApi</li>
+     *     <li>Service</li>
+     *     <li>Controller</li>
+     * </ul>
+     */
     private String name;
     
+    /**
+     * 代码地址
+     */
+    private String codePath;
+    
+    /**
+     * 模板配置
+     */
     private String config;
 }

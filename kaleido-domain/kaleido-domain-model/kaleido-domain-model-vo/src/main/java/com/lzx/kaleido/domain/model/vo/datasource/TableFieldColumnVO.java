@@ -24,4 +24,5 @@ public class TableFieldColumnVO implements Serializable {
     private String javaTypeSimpleName;
     private Boolean primaryKey;
     private Integer dataType;
+    private boolean selected=true;
 }

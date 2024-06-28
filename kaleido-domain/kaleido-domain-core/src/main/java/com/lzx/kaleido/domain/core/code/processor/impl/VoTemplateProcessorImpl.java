@@ -2,7 +2,9 @@ package com.lzx.kaleido.domain.core.code.processor.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.google.common.collect.Maps;
+import com.lzx.kaleido.domain.api.code.ICodeGenerationTemplateConfigService;
 import com.lzx.kaleido.domain.api.constants.CodeTemplateConstants;
 import com.lzx.kaleido.domain.core.code.processor.AbsTemplateProcessor;
 import com.lzx.kaleido.domain.core.enums.TemplateParserEnum;
@@ -10,16 +12,17 @@ import com.lzx.kaleido.domain.core.utils.TemplateConvertUtil;
 import com.lzx.kaleido.domain.model.dto.code.CodeClassDTO;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableFieldParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTableParam;
+import com.lzx.kaleido.domain.model.dto.datasource.param.TableFieldColumnParam;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaVoConfigVO;
-import com.lzx.kaleido.domain.model.vo.code.template.SuperclassVO;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author lwp
@@ -35,16 +38,55 @@ public class VoTemplateProcessorImpl extends AbsTemplateProcessor<JavaVoConfigVO
      * @param codeGenerationTableParam
      */
     @Override
-    protected void fillCodeGenerationTableParam(final JavaVoConfigVO config, BasicConfigVO basicConfig,
-            CodeGenerationTableParam codeGenerationTableParam) {
-        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseLombok(),
-                (v) -> codeGenerationTableParam.setUseLombok(Boolean.parseBoolean(v.toString())), config.isUseLombok());
-        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseSwagger(),
-                (v) -> codeGenerationTableParam.setUseSwagger(Boolean.parseBoolean(v.toString())), config.isUseSwagger());
-        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getSuperclassName(),
-                (v) -> codeGenerationTableParam.setSuperclassName(String.valueOf(v)),
-                Optional.of(config.getSuperclass()).map(SuperclassVO::getName).orElse(null));
+    protected void fillCodeGenerationTableParam(final JavaVoConfigVO config, final BasicConfigVO basicConfig,
+            final CodeGenerationTableParam codeGenerationTableParam, final CodeGenerationTemplateConfigVO configVO) {
+        if (CollUtil.isEmpty(codeGenerationTableParam.getTableFieldColumnList())) {
+            final List<String> defaultIgFields = config.getDefaultIgFields();
+            final ICodeGenerationTemplateConfigService service = SpringUtil.getBean(ICodeGenerationTemplateConfigService.class);
+            final List<CodeGenerationTableFieldParam> codeGenerationTableFieldParamList = service.getTemplateTableFieldColumnList(
+                    new TableFieldColumnParam().setConnectionId(codeGenerationTableParam.getConnectionId())
+                            .setSchemaName(codeGenerationTableParam.getSchemaName()).setTableName(codeGenerationTableParam.getTableName())
+                            .setDataBaseName(codeGenerationTableParam.getDataBaseName()), (v) -> {
+                        final CodeGenerationTableFieldParam vo = new CodeGenerationTableFieldParam();
+                        vo.setComment(v.getComment());
+                        vo.setColumn(v.getColumn());
+                        vo.setJavaType(v.getJavaType());
+                        vo.setJavaTypeSimpleName(v.getJavaTypeSimpleName());
+                        vo.setJdbcType(v.getJdbcType());
+                        vo.setProperty(v.getProperty());
+                        vo.setPrimaryKey(v.getPrimaryKey());
+                        vo.setDataType(v.getDataType());
+                        if (defaultIgFields != null && defaultIgFields.size() > 0) {
+                            vo.setSelected(!defaultIgFields.contains(vo.getColumn()) && !defaultIgFields.contains(vo.getProperty()));
+                        } else {
+                            vo.setSelected(true);
+                        }
+                        return vo;
+                    });
+            codeGenerationTableParam.setTableFieldColumnList(codeGenerationTableFieldParamList);
+        }
+        if (codeGenerationTableParam.isDirectUseTemplateConfig()) {
+            codeGenerationTableParam.setUseLombok(config.isUseLombok());
+            codeGenerationTableParam.setUseSwagger(config.isUseSwagger());
+            codeGenerationTableParam.setSuperclassName(config.getSuperclass() != null ? config.getSuperclass().getName() : null);
+            codeGenerationTableParam.setPackageName(config.getPackageName());
+            codeGenerationTableParam.setSourceFolder(config.getSourceFolder());
+            if (StrUtil.isNotBlank(configVO.getCodePath())) {
+                codeGenerationTableParam.setCodePath(configVO.getCodePath());
+            }
+        } else {
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseLombok(),
+                    (v) -> codeGenerationTableParam.setUseLombok(Boolean.parseBoolean(v.toString())), config.isUseLombok());
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseSwagger(),
+                    (v) -> codeGenerationTableParam.setUseSwagger(Boolean.parseBoolean(v.toString())), config.isUseSwagger());
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getSuperclassName(),
+                    (v) -> codeGenerationTableParam.setSuperclassName(String.valueOf(v)),
+                    config.getSuperclass() != null ? config.getSuperclass().getName() : null);
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getCodePath(),
+                    (v) -> codeGenerationTableParam.setCodePath(v.toString()), config.getCodePath());
+        }
     }
+    
     /**
      * @param tableName
      * @return
@@ -112,7 +154,9 @@ public class VoTemplateProcessorImpl extends AbsTemplateProcessor<JavaVoConfigVO
         } else {
             params.put(CodeTemplateConstants.useLombok, false);
         }
-        final List<CodeGenerationTableFieldParam> tableFieldColumnList = codeGenerationTableParam.getTableFieldColumnList();
+        final List<CodeGenerationTableFieldParam> tableFieldColumnList =
+                CollUtil.isNotEmpty(codeGenerationTableParam.getTableFieldColumnList()) ? codeGenerationTableParam.getTableFieldColumnList()
+                        .stream().filter(CodeGenerationTableFieldParam::isSelected).collect(Collectors.toList()) : null;
         if (CollUtil.isNotEmpty(tableFieldColumnList)) {
             final List<String> fieldPackages = tableFieldColumnList.stream().map(CodeGenerationTableFieldParam::getJavaType)
                     .filter(javaType -> !StrUtil.startWith(javaType, "java.lang")).distinct().toList();
@@ -124,5 +168,4 @@ public class VoTemplateProcessorImpl extends AbsTemplateProcessor<JavaVoConfigVO
         params.put(CodeTemplateConstants.packages, packages);
         return params;
     }
-    
 }
