@@ -24,7 +24,7 @@ public enum ErrorCode implements IBaseEnum<String> {
     CODE_TEMPLATE_CONFIG_NOT_EXITS("CODE_TEMPLATE_CONFIG_NOT_EXITS", "模板配置信息不存在"),
     CODE_TEMPLATE_PARSE_ERROR("CODE_TEMPLATE_PARSE_ERROR", "模板解析错误"),
     CODE_TEMPLATE_CONFIG_ERROR("CODE_TEMPLATE_CONFIG_ERROR", "模板配置错误"),
-    
+    CODE_TEMPLATE_NAME_EXISTS("CODE_TEMPLATE_NAME_EXISTS", "模板名称已存在"),
     ;
     
     ErrorCode(String code, String name) {

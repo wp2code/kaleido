@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: kaleido
   profiles:
     active: @environment@
   main:
@@ -7,9 +9,6 @@ spring:
     multipart:
       max-file-size: -1
       max-request-size: -1
-  jpa:
-    # 展示sql
-    show-sql: true
   messages:
     basename: i18n/messages
     encoding: UTF-8

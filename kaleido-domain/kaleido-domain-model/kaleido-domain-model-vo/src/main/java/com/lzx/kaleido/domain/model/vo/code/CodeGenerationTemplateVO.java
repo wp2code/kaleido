@@ -43,7 +43,7 @@ public class CodeGenerationTemplateVO extends BaseVO {
     private String basicConfig;
     
     /**
-     * 来源类型
+     * 来源类型（0-初始自动创建；1-手动创建；2-复制创建；3-导入创建）
      */
     private Integer sourceType;
     

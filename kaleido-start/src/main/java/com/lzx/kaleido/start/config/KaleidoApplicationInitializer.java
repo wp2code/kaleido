@@ -47,9 +47,8 @@ public class KaleidoApplicationInitializer implements ApplicationListener<Applic
      */
     @Override
     public void onApplicationEvent(final ApplicationStartedEvent event) {
-        initTemplate();
+        new Thread(this::initTemplate).start();
     }
-    
     
     /**
      * 初始化默认模板

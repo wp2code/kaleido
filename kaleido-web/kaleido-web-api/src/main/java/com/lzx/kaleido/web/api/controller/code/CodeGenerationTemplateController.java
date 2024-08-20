@@ -40,7 +40,7 @@ import java.util.List;
 public class CodeGenerationTemplateController {
     
     @Resource
-    private ICodeGenerationTemplateService codeGenerationGroupService;
+    private ICodeGenerationTemplateService codeGenerationTemplateService;
     
     @Resource
     private ICodeGenerationTemplateConfigService codeGenerationTemplateConfigService;
@@ -54,7 +54,7 @@ public class CodeGenerationTemplateController {
     @LogRecord
     @PostMapping("/standard/add")
     public R<Long> addStandardCodeGenerationTemplate(@RequestBody @Validated(AddGroup.class) CodeGenerationTemplateViewVO vo) {
-        final Long id = codeGenerationGroupService.addStandardCodeGenerationTemplate(vo);
+        final Long id = codeGenerationTemplateService.addStandardCodeGenerationTemplate(vo);
         return R.result(id != null, ErrorCode.SAVE_FAILED, id);
     }
     
@@ -66,7 +66,7 @@ public class CodeGenerationTemplateController {
      */
     @PostMapping("/add/copy")
     public R<Long> addWithCopy(@RequestBody CodeGenerationSimpleParam param) {
-        final Long id = codeGenerationGroupService.addTemplateWithCopy(param.getTemplateId(), param.getTemplateName());
+        final Long id = codeGenerationTemplateService.addTemplateWithCopy(param.getTemplateId(), param.getTemplateName());
         return R.result(id != null, ErrorCode.SAVE_FAILED, id);
     }
     
@@ -78,7 +78,7 @@ public class CodeGenerationTemplateController {
      */
     @PostMapping("/templateName/exists")
     public R<Boolean> checkTemplateNameExists(@RequestBody CodeGenerationSimpleParam param) {
-        final boolean isExist = codeGenerationGroupService.checkTemplateName(param.getTemplateId(), param.getTemplateName());
+        final boolean isExist = codeGenerationTemplateService.checkTemplateName(param.getTemplateId(), param.getTemplateName());
         return R.success(isExist);
     }
     
@@ -101,7 +101,7 @@ public class CodeGenerationTemplateController {
      */
     @PostMapping("/list")
     public R<List<CodeGenerationTemplateVO>> queryCodeGenerationTemplate(@RequestBody CodeGenerationTemplateQueryParam param) {
-        return R.success(codeGenerationGroupService.queryByParam(param));
+        return R.success(codeGenerationTemplateService.queryByParam(param));
     }
     
     
@@ -115,7 +115,7 @@ public class CodeGenerationTemplateController {
     @PutMapping("/{id}/update")
     public R<Boolean> updateCodeGenerationTemplate(@PathVariable("id") Long id,
             @RequestBody @Validated(UpdateGroup.class) CodeGenerationTemplateVO vo) {
-        final boolean isSuccess = codeGenerationGroupService.updateById(id, vo);
+        final boolean isSuccess = codeGenerationTemplateService.updateById(id, vo);
         return R.result(isSuccess, ErrorCode.UPDATE_FAILED, isSuccess);
     }
     
@@ -127,19 +127,19 @@ public class CodeGenerationTemplateController {
      */
     @PutMapping("/partition/update")
     public R<Boolean> updateCodeGenerationTemplateOfPartition(@RequestBody @Validated CodeGenerationTemplateUpdateParam vo) {
-        final boolean isSuccess = codeGenerationGroupService.updateCodeGenerationTemplateOfPartition(vo);
+        final boolean isSuccess = codeGenerationTemplateService.updateCodeGenerationTemplateOfPartition(vo);
         return R.result(isSuccess, ErrorCode.UPDATE_FAILED, isSuccess);
     }
     
     /**
      * 更新全局配置
      *
-     * @param vo
+     * @param param
      * @return
      */
     @PutMapping("/updateGlobalConfig")
     public R<Boolean> updateGlobalConfig(@RequestBody CodeGenerationGlobalConfigParam param) {
-        final boolean isSuccess = codeGenerationGroupService.updateGlobalConfig(param);
+        final boolean isSuccess = codeGenerationTemplateService.updateGlobalConfig(param);
         return R.result(isSuccess, ErrorCode.UPDATE_FAILED, isSuccess);
     }
     
@@ -151,7 +151,7 @@ public class CodeGenerationTemplateController {
      */
     @PutMapping("/templateName/update")
     public R<Boolean> updateTemplateNameById(@RequestBody CodeGenerationSimpleParam param) {
-        final boolean isSuccess = codeGenerationGroupService.updateTemplateNameById(param.getTemplateId(), param.getTemplateName());
+        final boolean isSuccess = codeGenerationTemplateService.updateTemplateNameById(param.getTemplateId(), param.getTemplateName());
         return R.result(isSuccess, ErrorCode.UPDATE_FAILED, isSuccess);
     }
     
@@ -164,7 +164,7 @@ public class CodeGenerationTemplateController {
     @LogRecord
     @PutMapping("/default/{id}/update")
     public R<Boolean> updateDefaultTemplate(@PathVariable("id") Long id) {
-        final boolean isSuccess = codeGenerationGroupService.updateDefaultTemplate(id);
+        final boolean isSuccess = codeGenerationTemplateService.updateDefaultTemplate(id);
         return R.result(isSuccess, ErrorCode.UPDATE_FAILED);
     }
     
@@ -177,7 +177,7 @@ public class CodeGenerationTemplateController {
      */
     @PostMapping("/template/info")
     public R<CodeGenerationTemplateVO> getCodeGenerationTemplate(@RequestBody CodeGenerationSimpleParam param) {
-        return R.success(codeGenerationGroupService.getCodeGenerationTemplate(param));
+        return R.success(codeGenerationTemplateService.getCodeGenerationTemplate(param));
     }
     
     /**
@@ -188,7 +188,7 @@ public class CodeGenerationTemplateController {
      */
     @DeleteMapping("/{id}/delete")
     public R<Boolean> deleteCodeGenerationTemplate(@PathVariable("id") Long id) {
-        final boolean isSuccess = codeGenerationGroupService.deleteById(id);
+        final boolean isSuccess = codeGenerationTemplateService.deleteById(id);
         return R.result(isSuccess, ErrorCode.DELETED_FAILED);
     }
     

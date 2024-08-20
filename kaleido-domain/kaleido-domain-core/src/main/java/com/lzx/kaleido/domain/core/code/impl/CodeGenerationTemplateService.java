@@ -20,6 +20,8 @@ import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateQueryPa
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateUpdateParam;
 import com.lzx.kaleido.domain.model.entity.code.CodeGenerationTemplateEntity;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateFileConfigVO;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateFileVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateViewConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateViewVO;
@@ -31,16 +33,15 @@ import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
 import com.lzx.kaleido.infra.base.utils.JsonUtil;
 import com.lzx.kaleido.infra.base.utils.PojoConvertUtil;
 import com.lzx.kaleido.plugins.mp.BaseServiceImpl;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author lwp
@@ -89,6 +90,61 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
     }
     
     /**
+     * 新增导入的代码模板
+     *
+     * @param vo
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long addImportCodeGenerationTemplate(final CodeGenerationTemplateFileVO vo) {
+        vo.fill((basicConfig) -> {
+            if (StrUtil.isBlank(basicConfig)) {
+                CodeGenerationTemplateVO defaultCodeGenerationTemplate = getDefaultCodeGenerationTemplate();
+                if (defaultCodeGenerationTemplate != null) {
+                    return defaultCodeGenerationTemplate.getBasicConfig();
+                }
+            }
+            return basicConfig;
+        });
+        if (!vo.validate((name) -> TemplateParserEnum.getInstance(name) != null)) {
+            throw new CommonRuntimeException(ErrorCode.CODE_TEMPLATE_CONFIG_ERROR);
+        }
+        final CodeGenerationTemplateEntity entity = new CodeGenerationTemplateEntity();
+        entity.setTemplateName(vo.getTemplateName());
+        entity.setLanguage(vo.getLanguage());
+        entity.setIsDefault(CodeTemplateDefaultEnum.NORMAL.getCode());
+        entity.setIsInternal(CodeTemplateInternalEnum.N.getCode());
+        entity.setBasicConfig(vo.getBasicConfig());
+        entity.setSourceType(CodeTemplateSourceTypeEnum.IMPORT_ADD.getCode());
+        if (vo.getSourceTemplateId() != null) {
+            entity.setSource(String.valueOf(vo.getSourceTemplateId()));
+        }
+        if (checkTemplateName(null, vo.getTemplateName())) {
+            throw new CommonRuntimeException(ErrorCode.CODE_TEMPLATE_NAME_EXISTS);
+        }
+        if (this.save(entity)) {
+            final Long templateId = entity.getId();
+            final List<CodeGenerationTemplateFileConfigVO> codeConfigList = vo.getCodeConfigList();
+            final List<CodeGenerationTemplateConfigVO> configList = codeConfigList.stream().map(v -> {
+                final CodeGenerationTemplateConfigVO configVO = new CodeGenerationTemplateConfigVO();
+                configVO.setTemplateId(templateId);
+                configVO.setCodePath(v.getCodePath());
+                configVO.setHideStatus(CodeTemplateHideEnum.SHOW.getCode());
+                configVO.setName(v.getName());
+                configVO.setAlias(v.getAlias());
+                configVO.setTemplateParams(v.getTemplateParams());
+                configVO.setTemplateContent(v.getTemplateContent());
+                return configVO;
+            }).collect(Collectors.toList());
+            if (codeGenerationTemplateConfigService.addCodeGenerationTemplateConfigBatch(configList)) {
+                return templateId;
+            }
+        }
+        throw new CommonRuntimeException(ErrorCode.SAVE_FAILED);
+    }
+    
+    /**
      * @param id
      * @return
      */
@@ -100,7 +156,7 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
             throw new CommonRuntimeException(ErrorCode.SAVE_FAILED);
         }
         if (checkTemplateName(null, templateName)) {
-            throw new CommonRuntimeException(ErrorCode.SAVE_FAILED);
+            throw new CommonRuntimeException(ErrorCode.CODE_TEMPLATE_NAME_EXISTS);
         }
         LocalDateTime now = LocalDateTime.now();
         final CodeGenerationTemplateEntity entity = PojoConvertUtil.vo2Entity(template, CodeGenerationTemplateEntity.class);
@@ -278,7 +334,7 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
     @Override
     public boolean updateTemplateNameById(final Long id, final String templateName) {
         if (checkTemplateName(id, templateName)) {
-            throw new CommonRuntimeException(ErrorCode.UPDATE_FAILED);
+            throw new CommonRuntimeException(ErrorCode.CODE_TEMPLATE_NAME_EXISTS);
         }
         final LambdaUpdateWrapper<CodeGenerationTemplateEntity> updateWrapper = Wrappers.<CodeGenerationTemplateEntity>lambdaUpdate()
                 .eq(CodeGenerationTemplateEntity::getId, id).set(CodeGenerationTemplateEntity::getTemplateName, templateName);
@@ -366,6 +422,16 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
     }
     
     /**
+     * 获取默认模板
+     *
+     * @return
+     */
+    @Override
+    public CodeGenerationTemplateVO getDefaultCodeGenerationTemplate() {
+        return getBaseMapper().getDefaultCodeGenerationTemplate();
+    }
+    
+    /**
      * 删除代码模板
      *
      * @param id
@@ -381,6 +447,17 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
             }
         }
         throw new CommonRuntimeException(ErrorCode.DELETED_FAILED);
+    }
+    
+    /**
+     * 获取导出模板信息
+     *
+     * @param templateId
+     * @return
+     */
+    @Override
+    public CodeGenerationTemplateFileVO getCodeGenerationTemplateFile(final Long templateId) {
+        return this.getBaseMapper().getCodeGenerationTemplateFile(templateId);
     }
     
     /**

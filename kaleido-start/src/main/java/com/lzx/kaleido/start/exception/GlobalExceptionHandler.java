@@ -7,6 +7,7 @@ import com.lzx.kaleido.infra.base.excption.AbsException;
 import com.lzx.kaleido.infra.base.excption.CommonException;
 import com.lzx.kaleido.infra.base.pojo.R;
 import com.lzx.kaleido.infra.base.utils.I18nUtil;
+import java.sql.SQLException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -43,10 +44,25 @@ public class GlobalExceptionHandler {
         return R.fail(exception.getErrorCode(), null);
     }
     
+    /**
+     * @param exception
+     * @return
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public R<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
-        log.error("参数验证失败！",exception);
+        log.error("参数验证失败！", exception);
         return errorResult(exception.getBindingResult());
+
+    }
+    
+    /**
+     * @param exception
+     * @return
+     */
+    @ExceptionHandler(SQLException.class)
+    public R<Object> handleSQLExceptionException(MethodArgumentNotValidException exception) {
+        log.error("SQL执行失败！", exception);
+        return R.fail(ErrorCode.FAILED);
     }
     
     /**
@@ -59,6 +75,10 @@ public class GlobalExceptionHandler {
         return R.fail(ErrorCode.REQUEST_API_NOT_SUPPORTED, null);
     }
     
+    /**
+     * @param e
+     * @return
+     */
     @ExceptionHandler(NoHandlerFoundException.class)
     public R<Object> handleNoHandlerFoundException(NoHandlerFoundException e) {
         log.error("请求接口不存在！{}", e.getRequestURL());

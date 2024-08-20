@@ -4,10 +4,10 @@ import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationGlobalConfigPar
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationSimpleParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateQueryParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateUpdateParam;
+import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateFileVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateViewVO;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.List;
 
 /**
@@ -24,6 +24,13 @@ public interface ICodeGenerationTemplateService {
      */
     Long addStandardCodeGenerationTemplate(final CodeGenerationTemplateViewVO vo);
     
+    /**
+     * 新增导入的代码模板
+     *
+     * @param vo
+     * @return
+     */
+    Long addImportCodeGenerationTemplate(final CodeGenerationTemplateFileVO vo);
     
     /**
      * @param id
@@ -66,7 +73,9 @@ public interface ICodeGenerationTemplateService {
      */
     boolean updateById(@NotNull final Long id, final CodeGenerationTemplateVO vo);
     
-    /**更新部分代码模板
+    /**
+     * 更新部分代码模板
+     *
      * @param param
      * @return
      */
@@ -124,6 +133,12 @@ public interface ICodeGenerationTemplateService {
      */
     CodeGenerationTemplateVO getCodeGenerationTemplate(CodeGenerationSimpleParam param);
     
+    /**
+     * 获取默认模板
+     *
+     * @return
+     */
+    CodeGenerationTemplateVO getDefaultCodeGenerationTemplate();
     
     /**
      * 删除代码模板
@@ -133,5 +148,11 @@ public interface ICodeGenerationTemplateService {
      */
     boolean deleteById(@NotNull final Long id);
     
-    
+    /**
+     * 获取导出模板信息
+     *
+     * @param templateId
+     * @return
+     */
+    CodeGenerationTemplateFileVO getCodeGenerationTemplateFile(@NotNull final Long templateId);
 }

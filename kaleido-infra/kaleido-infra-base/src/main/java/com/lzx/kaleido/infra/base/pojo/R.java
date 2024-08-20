@@ -29,6 +29,7 @@ public class R<T> implements Serializable {
     public static <T> R<T> success(T data) {
         final R<T> r = new R<>();
         r.setCode(ErrorCode.SUCCESS.getCode());
+        r.setMessage(ErrorCode.SUCCESS.getName());
         r.setData(data);
         return r;
     }
@@ -42,6 +43,12 @@ public class R<T> implements Serializable {
         return fail(ErrorCode.FAILED, message);
     }
     
+    /**
+     * @param errorCode
+     * @param message
+     * @param <T>
+     * @return
+     */
     public static <T> R<T> fail(ErrorCode errorCode, String message) {
         final R<T> r = new R<>();
         r.setCode(errorCode.getCode());
@@ -49,6 +56,14 @@ public class R<T> implements Serializable {
         return r;
     }
     
+    /**
+     * @param errorCode
+     * @param <T>
+     * @return
+     */
+    public static <T> R<T> fail(ErrorCode errorCode) {
+        return fail(errorCode,null);
+    }
     /**
      * @param errorCode
      * @param <T>

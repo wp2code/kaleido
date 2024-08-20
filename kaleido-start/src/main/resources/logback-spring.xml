@@ -3,7 +3,7 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     
     <springProperty scope="context" name="APP_NAME" source="project.name"/>
-    <property name="LOG_PATH" value="${user.home}/.chat2db/logs"/>
+    <property name="LOG_PATH" value="${user.home}/.kaleido/logs"/>
     <property name="LOG_FILE" value="${LOG_PATH}/application.log"/>
     
     <property name="EASY_FILE_LOG_PATTERN"

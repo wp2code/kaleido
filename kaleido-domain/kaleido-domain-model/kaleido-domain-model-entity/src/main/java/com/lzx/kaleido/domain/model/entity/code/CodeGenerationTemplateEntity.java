@@ -53,7 +53,7 @@ public class CodeGenerationTemplateEntity extends BaseEntity {
     private Integer isDefault;
     
     /**
-     * 来源类型（0-初始自动创建；1-手动创建；2-复制创建）
+     * 来源类型（0-初始自动创建；1-手动创建；2-复制创建；3-导入创建）
      */
     @TableField("source_type")
     private Integer sourceType;

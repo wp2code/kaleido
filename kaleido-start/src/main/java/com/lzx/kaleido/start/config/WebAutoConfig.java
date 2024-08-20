@@ -1,14 +1,25 @@
 package com.lzx.kaleido.start.config;
 
 import cn.hutool.core.io.FileUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lzx.kaleido.infra.base.utils.JsonUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.sqlite.JDBC;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * @author lwp
@@ -16,7 +27,30 @@ import java.io.File;
  **/
 @Slf4j
 @Configuration
-public class WebAutoConfig {
+@RequiredArgsConstructor
+public class WebAutoConfig implements WebMvcConfigurer, InitializingBean {
+    
+    private final ObjectMapper objectMapper;
+    
+    @Override
+    public void afterPropertiesSet() {
+        if (objectMapper != null) {
+            JsonUtil.setObjectMapper(objectMapper);
+        }
+    }
+    
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**").allowedOriginPatterns("*").allowedMethods("GET", "POST", "PUT", "DELETE").allowedHeaders("*")
+                .allowCredentials(true).allowCredentials(true).maxAge(168000);
+    }
+    
+    @Override
+    public void configureMessageConverters(final List<HttpMessageConverter<?>> converters) {
+        final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter(objectMapper);
+        converters.add(jackson2HttpMessageConverter);
+        converters.add(new StringHttpMessageConverter(StandardCharsets.UTF_8));
+    }
     
     /**
      * @return

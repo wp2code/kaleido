@@ -6,15 +6,17 @@ import cn.hutool.json.JSONUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Setter;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import lombok.Setter;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Json 工具类
@@ -29,6 +31,10 @@ public class JsonUtil {
     @Setter
     private static ObjectMapper objectMapper;
     
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        JsonUtil.objectMapper = objectMapper;
+    }
+    
     /**
      * 是否为json
      *
@@ -37,6 +43,21 @@ public class JsonUtil {
      */
     public boolean isJson(String jsonStr) {
         return JSONUtil.isTypeJSON(jsonStr);
+    }
+    
+    /**
+     * 校验json
+     *
+     * @param jsonStr
+     * @param keys
+     * @return
+     */
+    public boolean validateJson(String jsonStr, String... keys) {
+        if (JSONUtil.isTypeJSON(jsonStr)) {
+            final Map<?, ?> map = toMap(jsonStr);
+            return map != null && Arrays.stream(keys).allMatch(map::containsKey);
+        }
+        return false;
     }
     
     /**
@@ -57,6 +78,7 @@ public class JsonUtil {
         }
         return null;
     }
+    
     
     /**
      * json 转对象
@@ -140,6 +162,33 @@ public class JsonUtil {
             }
         }
         return null;
+    }
+    
+    /**
+     * @param inputStream
+     * @param <T>
+     * @return
+     */
+    public <T> T toBean(InputStream inputStream, Class<T> cls) {
+        try {
+            return getObjectMapperIfAbsent().readValue(inputStream, cls);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    /**
+     * @param inputStream
+     * @param cls
+     * @param <T>
+     * @return
+     */
+    public <T> List<T> toBeanList(InputStream inputStream, Class<T> cls) {
+        try {
+            return getObjectMapperIfAbsent().readValue(inputStream, getCollectionType(List.class, cls));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     /**
