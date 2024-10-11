@@ -11,7 +11,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>kaleido-start</artifactId>
     <dependencies>
-        
         <dependency>
             <groupId>com.lzx</groupId>
             <artifactId>kaleido-web-api</artifactId>
@@ -82,22 +81,58 @@
         </dependency>
     </dependencies>
     <build>
+            <finalName>kaleido-server-start</finalName>
         <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>com.lzx.kaleido.start.StartApplication</mainClass>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>repackage</id>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+            <!--                <groupId>org.springframework.boot</groupId>-->
+            <!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
+            <!--                <configuration>-->
+            <!--                    <mainClass>com.lzx.kaleido.start.StartApplication</mainClass>-->
+            <!--                </configuration>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <id>repackage</id>-->
+            <!--                        <goals>-->
+            <!--                            <goal>repackage</goal>-->
+            <!--                        </goals>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
+                        <plugin>
+                            <!--打包时去除第三方依赖-->
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-maven-plugin</artifactId>
+                            <configuration>
+                                <layout>ZIP</layout>
+                                <includes>
+                                    <include>
+                                        <groupId>non-exists</groupId>
+                                        <artifactId>non-exists</artifactId>
+                                    </include>
+                                </includes>
+                            </configuration>
+                        </plugin>
+                        <!--拷贝第三方依赖文件到指定目录-->
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-dependency-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <id>copy-dependencies</id>
+                                    <phase>package</phase>
+                                    <goals>
+                                        <goal>copy-dependencies</goal>
+                                    </goals>
+                                    <configuration>
+                                        <!--target/lib是依赖jar包的输出目录，根据自己喜好配置-->
+                                        <outputDirectory>target/lib</outputDirectory>
+                                        <excludeTransitive>false</excludeTransitive>
+                                        <stripVersion>false</stripVersion>
+                                        <includeScope>runtime</includeScope>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
         </plugins>
     </build>
 </project>

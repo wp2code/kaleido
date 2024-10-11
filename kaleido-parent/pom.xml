@@ -22,7 +22,7 @@
     <developers>
         <developer>
             <name>wp2code</name>
-            <email>liu_weipinglove@163.com</email>
+            <email>liu_weipingcode@163.com</email>
         </developer>
     </developers>
     <licenses>
@@ -204,29 +204,29 @@
                 <version>3.44.1.0</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/p6spy/p6spy -->
-            <dependency>
-                <groupId>p6spy</groupId>
-                <artifactId>p6spy</artifactId>
-                <version>3.9.1</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>p6spy</groupId>-->
+<!--                <artifactId>p6spy</artifactId>-->
+<!--                <version>3.9.1</version>-->
+<!--            </dependency>-->
             <!-- Sa-Token 权限认证，在线文档：https://sa-token.cc -->
-            <dependency>
-                <groupId>cn.dev33</groupId>
-                <artifactId>sa-token-spring-boot-starter</artifactId>
-                <version>1.37.0</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>cn.dev33</groupId>-->
+<!--                <artifactId>sa-token-spring-boot-starter</artifactId>-->
+<!--                <version>1.37.0</version>-->
+<!--            </dependency>-->
             <!-- Sa-Token 整合 jwt -->
-            <dependency>
-                <groupId>cn.dev33</groupId>
-                <artifactId>sa-token-jwt</artifactId>
-                <version>1.37.0</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>hutool-jwt</artifactId>
-                        <groupId>cn.hutool</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>cn.dev33</groupId>-->
+<!--                <artifactId>sa-token-jwt</artifactId>-->
+<!--                <version>1.37.0</version>-->
+<!--                <exclusions>-->
+<!--                    <exclusion>-->
+<!--                        <artifactId>hutool-jwt</artifactId>-->
+<!--                        <groupId>cn.hutool</groupId>-->
+<!--                    </exclusion>-->
+<!--                </exclusions>-->
+<!--            </dependency>-->
             <!-- https://mvnrepository.com/artifact/org.zalando/logbook-spring-boot-starter -->
             <dependency>
                 <groupId>org.zalando</groupId>
@@ -276,10 +276,6 @@
     <build>
         <resources>
             <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-            <resource>
                 <filtering>true</filtering>
                 <directory>src/main/resources</directory>
                 <includes>
@@ -290,6 +286,8 @@
                     <include>mapper/*</include>
                     <include>**/*.xml</include>
                     <include>*.properties</include>
+                    <include>META-INF/**</include>
+                    <include>templates/**</include>
                 </includes>
             </resource>
         </resources>
@@ -373,15 +371,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.1.2</version>
-                    <configuration>
-                        <includes>
-                            <include>/com/devbox/server/test/**/*.java</include>
-                        </includes>
-                        <excludes>
-                            <include>/com/devbox/server/test/temp/**/*.java</include>
-                        </excludes>
-                        <testFailureIgnore>true</testFailureIgnore>
-                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

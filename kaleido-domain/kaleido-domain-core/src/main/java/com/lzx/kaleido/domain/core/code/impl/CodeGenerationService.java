@@ -81,7 +81,6 @@ public class CodeGenerationService implements ICodeGeneration {
                                         ResourceMode.getInstance(tableParam.getTemplateResourceMode()), codeGenerationViewVOS);
                         if (codeGenerationViewVO != null) {
                             codeGenerationViewVO.setFileSuffix(parserEnum.getFileSuffix());
-                            System.out.println(codeGenerationViewVO.getTemplateCode());
                             codeGenerationViewVOS.add(codeGenerationViewVO);
                         }
                     }
@@ -97,7 +96,7 @@ public class CodeGenerationService implements ICodeGeneration {
         throw new TemplateParseException(ErrorCode.CODE_TEMPLATE_CONFIG_ERROR);
     }
     
-    /**
+        /**
      * 代码生成-预览
      *
      * @param configParam

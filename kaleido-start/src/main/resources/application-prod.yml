@@ -3,7 +3,7 @@ server:
   port: 10272
 spring:
   datasource:
-    # 配置自带数据库的相对路径
+    # 配置自带数据库的相对路径(~/-表示用户路径；./-当前目录)
     url: jdbc:sqlite:~/.kaleido/db/prod
     driver-class-name: org.sqlite.JDBC
 

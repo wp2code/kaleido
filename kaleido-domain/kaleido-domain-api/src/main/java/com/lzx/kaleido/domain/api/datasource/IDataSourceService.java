@@ -10,7 +10,6 @@ import com.lzx.kaleido.domain.model.vo.datasource.DataSourceVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DatabaseVO;
 import com.lzx.kaleido.domain.model.vo.datasource.TableFieldColumnVO;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.List;
 
 /**
@@ -86,6 +85,13 @@ public interface IDataSourceService {
      */
     boolean connectTestDataSource(final DataSourceConnectParam param);
     
+    /**
+     * 校验是否连接
+     *
+     * @param dataSourceId
+     * @return
+     */
+    String checkConnectDataSource(final Long dataSourceId);
     
     /**
      * 打开连接
@@ -99,9 +105,9 @@ public interface IDataSourceService {
      * 关闭连接
      *
      * @param connectionId
-     * @return
+     * @param isCloseCurrent
      */
-    void closeConnectDataSource(final String connectionId);
+    void closeConnectDataSource(final String connectionId,final boolean isCloseCurrent);
     
     
     /**

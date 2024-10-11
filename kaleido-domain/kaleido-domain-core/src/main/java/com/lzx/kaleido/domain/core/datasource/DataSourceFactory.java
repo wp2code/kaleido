@@ -17,11 +17,12 @@ import com.lzx.kaleido.spi.db.model.metaData.Database;
 import com.lzx.kaleido.spi.db.model.metaData.Schema;
 import com.lzx.kaleido.spi.db.model.metaData.Table;
 import com.lzx.kaleido.spi.db.model.metaData.TableColumn;
-
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import lombok.Getter;
 
 /**
  * @author lwp
@@ -29,17 +30,10 @@ import java.util.stream.Collectors;
  **/
 public class DataSourceFactory {
     
+    @Getter
     private final static DataSourceFactory instance = new DataSourceFactory();
     
-    static {
-        ServiceLoaderUtil.register(IDBPlugin.class);
-    }
-    
     private DataSourceFactory() {
-    }
-    
-    public static DataSourceFactory getInstance() {
-        return instance;
     }
     
     /**
@@ -48,6 +42,9 @@ public class DataSourceFactory {
      */
     public IDBPlugin getDataSource(final String dbType) {
         final Collection<IDBPlugin> instances = getInstances();
+        if(CollUtil.isEmpty(instances)){
+            throw new CommonRuntimeException(ErrorCode.CONNECTION_INSTANCE_NULL);
+        }
         return instances.stream().filter(v -> dbType.equalsIgnoreCase(v.getDbType())).findFirst()
                 .orElseThrow(() -> new CommonRuntimeException(ErrorCode.FAILED));
     }
@@ -77,6 +74,18 @@ public class DataSourceFactory {
             }
         }
         throw new CommonException(ErrorCode.CONNECTION_FAILED);
+    }
+    
+    /**
+     * @param id
+     * @return
+     */
+    public ConnectionWrapper getActiveConnection(String id) {
+        final Map<String, ConnectionWrapper> connectionWrapperMap = ConnectionManager.getInstance().getConnectionWrapperMap(id);
+        if (connectionWrapperMap != null && !connectionWrapperMap.isEmpty()) {
+            return connectionWrapperMap.values().stream().findFirst().orElse(null);
+        }
+        return null;
     }
     
     /**

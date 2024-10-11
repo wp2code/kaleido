@@ -13,6 +13,8 @@ import com.lzx.kaleido.domain.model.vo.datasource.TableFieldColumnVO;
 import com.lzx.kaleido.infra.base.constant.Constants;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.pojo.R;
+import java.util.List;
+import javax.annotation.Resource;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,9 +23,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * 数据源管理接口
@@ -123,6 +122,17 @@ public class DataSourceController {
         return R.result(isSuccess, ErrorCode.CONNECTION_FAILED);
     }
     
+    /**
+     * 校验是否连接
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/connect/{id}/checkOpen")
+    public R<String> checkConnectDataSource(@PathVariable("id") Long id) {
+        final String connectionId = dataSourceService.checkConnectDataSource(id);
+        return R.success(connectionId);
+    }
     
     /**
      * 打开连接
@@ -137,14 +147,26 @@ public class DataSourceController {
     }
     
     /**
-     * 关闭连接
+     * 关闭其它连接
      *
      * @param connectionId
      * @return
      */
-    @DeleteMapping("/connect/{connectionId}/close")
-    public R<Boolean> closeConnectDataSource(@PathVariable("connectionId") String connectionId) {
-        dataSourceService.closeConnectDataSource(connectionId);
+    @DeleteMapping("/connect/other/{connectionId}/close")
+    public R<Boolean> closeOtherConnectDataSource(@PathVariable("connectionId") String connectionId) {
+        dataSourceService.closeConnectDataSource(connectionId, false);
+        return R.success(true);
+    }
+    
+    /**
+     * 关闭当前连接
+     *
+     * @param connectionId
+     * @return
+     */
+    @DeleteMapping("/connect/current/{connectionId}/close")
+    public R<Boolean> closeCurrConnectDataSource(@PathVariable("connectionId") String connectionId) {
+        dataSourceService.closeConnectDataSource(connectionId, true);
         return R.success(true);
     }
     

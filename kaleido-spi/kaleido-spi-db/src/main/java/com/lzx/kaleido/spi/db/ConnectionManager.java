@@ -8,7 +8,6 @@ import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
 import com.lzx.kaleido.spi.db.model.ConnectionWrapper;
 import com.lzx.kaleido.spi.db.model.DBConfig;
 import com.lzx.kaleido.spi.db.utils.JdbcUtil;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,6 +87,18 @@ public final class ConnectionManager {
     /**
      * @param connectionId
      */
+    public void removeCurrent(final String connectionId) {
+        Assert.notNull(connectionId);
+        final Map<String, ConnectionWrapper> stringConnectionWrapperMap = activeConnection.get(connectionId);
+        if (stringConnectionWrapperMap != null && !stringConnectionWrapperMap.isEmpty()) {
+            stringConnectionWrapperMap.forEach((kk, vv) -> JdbcUtil.closeConnection(vv.getConnection()));
+            activeConnection.remove(connectionId);
+        }
+    }
+    
+    /**
+     * @param connectionId
+     */
     public void removeOther(final String connectionId) {
         Assert.notNull(connectionId);
         final List<String> removeKeys = new ArrayList<>();
@@ -134,7 +145,7 @@ public final class ConnectionManager {
      * @param connectionId
      * @return
      */
-    private Map<String, ConnectionWrapper> getConnectionWrapperMap(String connectionId) {
+    public Map<String, ConnectionWrapper> getConnectionWrapperMap(String connectionId) {
         return activeConnection.getOrDefault(connectionId, new HashMap<>());
     }
     

@@ -13,6 +13,9 @@
     <version>${revision}</version>
     <name>kaleido</name>
     <description>kaleido</description>
+    <properties>
+        <revision>1.0.0-SNAPSHOT</revision>
+    </properties>
     <modules>
         <module>kaleido-infra</module>
         <module>kaleido-web</module>

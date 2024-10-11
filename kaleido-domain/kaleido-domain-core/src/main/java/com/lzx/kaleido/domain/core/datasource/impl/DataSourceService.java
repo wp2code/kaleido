@@ -30,11 +30,10 @@ import com.lzx.kaleido.spi.db.model.ConnectionInfo;
 import com.lzx.kaleido.spi.db.model.ConnectionWrapper;
 import com.lzx.kaleido.spi.db.model.TableColumnJavaMap;
 import com.lzx.kaleido.spi.db.model.metaData.Database;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 
 /**
@@ -198,6 +197,21 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
     }
     
     /**
+     * 校验是否连接
+     *
+     * @param dataSourceId 连接ID
+     * @return 连接ID
+     */
+    @Override
+    public String checkConnectDataSource(final Long dataSourceId) {
+        final ConnectionWrapper activeConnection = DataSourceFactory.getInstance().getActiveConnection(String.valueOf(dataSourceId));
+        if (activeConnection != null) {
+            return activeConnection.getId();
+        }
+        return StrUtil.EMPTY;
+    }
+    
+    /**
      * 打开连接
      *
      * @param dataSourceId
@@ -235,10 +249,14 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
      * 关闭连接
      *
      * @param connectionId
-     * @return
+     * @param isCloseCurrent
      */
     @Override
-    public void closeConnectDataSource(final String connectionId) {
+    public void closeConnectDataSource(final String connectionId, final boolean isCloseCurrent) {
+        if (isCloseCurrent) {
+            ConnectionManager.getInstance().removeCurrent(connectionId);
+            return;
+        }
         ConnectionManager.getInstance().removeOther(connectionId);
     }
     
