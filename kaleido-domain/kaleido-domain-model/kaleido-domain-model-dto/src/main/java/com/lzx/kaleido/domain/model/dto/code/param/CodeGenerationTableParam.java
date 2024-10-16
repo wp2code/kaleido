@@ -35,6 +35,11 @@ public class CodeGenerationTableParam implements Serializable {
     private String name;
     
     /**
+     * 代码名称后缀
+     */
+    private String nameSuffix;
+    
+    /**
      * 代码模板加载模式
      */
     private String templateResourceMode = "CLASSPATH";

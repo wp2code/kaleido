@@ -3,6 +3,7 @@ package com.lzx.kaleido.domain.api.datasource;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceConnectParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceQueryParam;
+import com.lzx.kaleido.domain.model.dto.datasource.param.TableDDLParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.TableFieldColumnParam;
 import com.lzx.kaleido.domain.model.vo.datasource.ConnectionDataVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceMetaVO;
@@ -68,7 +69,7 @@ public interface IDataSourceService {
     
     
     /**
-     * 获取数量连接信息
+     * 获取数据连接数据
      *
      * @param id
      * @param deepQuery
@@ -77,6 +78,11 @@ public interface IDataSourceService {
      */
     DataSourceMetaVO getDataSourceMeta(@NotNull final Long id, final boolean deepQuery, final boolean autoClose);
     
+    /**
+     * @param param
+     * @return
+     */
+    String getTableDDL(final TableDDLParam param);
     /**
      * 测试连接数据库
      *

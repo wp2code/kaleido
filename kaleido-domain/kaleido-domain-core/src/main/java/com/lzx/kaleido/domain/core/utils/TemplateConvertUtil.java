@@ -5,9 +5,8 @@ import com.google.common.base.CaseFormat;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.infra.base.utils.JsonUtil;
-import lombok.experimental.UtilityClass;
-
 import java.util.function.Consumer;
+import lombok.experimental.UtilityClass;
 
 /**
  * @author lwp
@@ -136,6 +135,9 @@ public class TemplateConvertUtil {
      * @return
      */
     public String firstCharOnlyToUpper(String str) {
+        if (StrUtil.isBlank(str)) {
+            return null;
+        }
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, str);
     }
     

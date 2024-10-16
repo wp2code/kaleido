@@ -17,6 +17,9 @@ public class TemplateParamVO {
     
     private String packageName;
     
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String nameSuffix;
+    
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String name;
     

@@ -15,7 +15,6 @@ import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaMapperConfigVO;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -28,8 +27,6 @@ import java.util.Set;
  * @date 2024-01-18
  **/
 public class MapperTemplateProcessorImpl extends AbsTemplateProcessor<JavaMapperConfigVO> {
-    
-    private static final String _SUFFIX = "Mapper";
     
     @Override
     protected void fillCodeGenerationTableParam(final JavaMapperConfigVO config, final BasicConfigVO basicConfig,
@@ -74,11 +71,13 @@ public class MapperTemplateProcessorImpl extends AbsTemplateProcessor<JavaMapper
     /**
      * @param name
      * @param tableName
+     * @param nameSuffix
      * @return
      */
     @Override
-    protected String getCodeName(String name, final String tableName) {
-        return StrUtil.isNotBlank(name) ? name : "I" + TemplateConvertUtil.toCamelFirstToUpper(tableName) + _SUFFIX;
+    protected String getCodeName(String name, final String tableName, String nameSuffix) {
+        return StrUtil.isNotBlank(name) ? name : "I" + TemplateConvertUtil.toCamelFirstToUpper(tableName) + Optional.ofNullable(nameSuffix)
+                .orElse(TemplateParserEnum.MAPPER.getDefaultNameSuffix());
     }
     
     /**

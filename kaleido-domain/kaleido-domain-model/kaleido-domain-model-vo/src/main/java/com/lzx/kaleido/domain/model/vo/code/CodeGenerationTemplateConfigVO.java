@@ -18,7 +18,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @AutoMap(targetType = CodeGenerationTemplateConfigEntity.class)
-public class CodeGenerationTemplateConfigVO extends BaseVO {
+public class    CodeGenerationTemplateConfigVO extends BaseVO {
     
     /**
      * 模板配置ID

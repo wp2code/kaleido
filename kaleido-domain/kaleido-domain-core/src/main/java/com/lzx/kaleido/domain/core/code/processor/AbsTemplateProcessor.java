@@ -91,7 +91,8 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
             //代码名称
             String codeName = codeGenerationTableParam.getName();
             if (StrUtil.isBlank(codeName) || codeGenerationTableParam.isDirectUseTemplateConfig()) {
-                codeName = this.getCodeName(codeGenerationTableParam.getName(), codeGenerationTableParam.getTableName());
+                codeName = this.getCodeName(codeGenerationTableParam.getName(), codeGenerationTableParam.getTableName(),
+                        codeGenerationTableParam.getNameSuffix());
             }
             //构建模板参数
             final Map<String, Object> params = this.buildTemplateParams(codeName, templateConfig, basicConfig, codeGenerationTableParam,
@@ -132,9 +133,10 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
     /**
      * @param name
      * @param tableName
+     * @param nameSuffix
      * @return
      */
-    protected String getCodeName(String name, String tableName) {
+    protected String getCodeName(String name, String tableName,String nameSuffix) {
         return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.toCamelFirstToUpper(tableName);
     }
     
@@ -199,6 +201,8 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
                 (v) -> codeGenerationTableParam.setTemplateEngineName(v.toString()), TemplateContext.DEFAULT_ENGINE);
         TemplateConvertUtil.setIfAbsent(templateParams.getCodePath(),
                 (v) -> templateParams.setCodePath(v.toString()), basicConfig.getCodePath());
+        TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getNameSuffix(),
+                (v) -> codeGenerationTableParam.setNameSuffix(v.toString()), templateParams.getNameSuffix());
         this.fillCodeGenerationTableParam(templateParams, basicConfig, codeGenerationTableParam, configVO);
     }
     

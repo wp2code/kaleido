@@ -5,6 +5,7 @@ import com.lzx.kaleido.infra.base.utils.PropertyUtil;
 import com.lzx.kaleido.spi.db.IDBManager;
 import com.lzx.kaleido.spi.db.IDBPlugin;
 import com.lzx.kaleido.spi.db.IMetaData;
+import com.lzx.kaleido.spi.db.constants.DBConstant;
 import com.lzx.kaleido.spi.db.model.DBConfig;
 import com.lzx.kaleido.spi.db.model.DriverProperties;
 
@@ -18,7 +19,7 @@ import java.util.Properties;
  **/
 public class PostgresqlDBPlugin implements IDBPlugin {
     
-    private static final String DB_TYPE = "PostgreSQL";
+//    private static final String DB_TYPE = "PostgreSQL";
     
     
     /**
@@ -26,7 +27,7 @@ public class PostgresqlDBPlugin implements IDBPlugin {
      */
     @Override
     public String getDbType() {
-        return DB_TYPE;
+        return DBConstant.PG_DB_TYPE;
     }
     
     /**
@@ -34,7 +35,7 @@ public class PostgresqlDBPlugin implements IDBPlugin {
      */
     @Override
     public DBConfig getDBConfig() {
-        return DBConfig.builder().supportSchema(true).supportDatabase(true).dbType(DB_TYPE).name(DB_TYPE)
+        return DBConfig.builder().supportSchema(true).supportDatabase(true).dbType(DBConstant.PG_DB_TYPE).name(DBConstant.PG_DB_TYPE)
                 .driverPropertiesList(loadDriverProperties()).build();
     }
     
@@ -60,7 +61,7 @@ public class PostgresqlDBPlugin implements IDBPlugin {
      */
     private List<DriverProperties> loadDriverProperties() {
         final Properties properties = PropertyUtil.load("db-driver-pgsql.properties");
-        final String type = properties.getProperty("jdbc.driver.type", DB_TYPE);
+        final String type = properties.getProperty("jdbc.driver.type", DBConstant.PG_DB_TYPE);
         final String urls = properties.getProperty("jdbc.driver.download.url");
         final String driverClass = properties.getProperty("jdbc.driver.class");
         final String driverVersion = properties.getProperty("jdbc.driver.version");

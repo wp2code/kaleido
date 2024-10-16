@@ -12,6 +12,7 @@ import com.lzx.kaleido.domain.core.utils.DataSourceConvertUtil;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceConnectParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceQueryParam;
+import com.lzx.kaleido.domain.model.dto.datasource.param.TableDDLParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.TableFieldColumnParam;
 import com.lzx.kaleido.domain.model.entity.datasource.DataSourceEntity;
 import com.lzx.kaleido.domain.model.vo.datasource.ConnectionDataVO;
@@ -116,6 +117,8 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
     }
     
     /**
+     * 获取表字段信息列表
+     *
      * @param tableFieldColumnParam
      * @return
      */
@@ -142,7 +145,17 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
     }
     
     /**
-     * 获取数量连接信息
+     * @param param
+     * @return
+     */
+    @Override
+    public String getTableDDL(final TableDDLParam param) {
+        return DataSourceFactory.getInstance()
+                .getDDL(param.getConnectionId(), param.getDataBaseName(), param.getSchemaName(), param.getTableName());
+    }
+    
+    /**
+     * 获取数据连接数据
      *
      * @param id
      * @param deepQuery

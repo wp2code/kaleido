@@ -5,6 +5,7 @@ import com.lzx.kaleido.infra.base.utils.PropertyUtil;
 import com.lzx.kaleido.spi.db.IDBManager;
 import com.lzx.kaleido.spi.db.IDBPlugin;
 import com.lzx.kaleido.spi.db.IMetaData;
+import com.lzx.kaleido.spi.db.constants.DBConstant;
 import com.lzx.kaleido.spi.db.model.DBConfig;
 import com.lzx.kaleido.spi.db.model.DriverProperties;
 
@@ -18,14 +19,12 @@ import java.util.Properties;
  **/
 public class MysqlDBPlugin implements IDBPlugin {
     
-    private static final String DB_TYPE = "MySQL";
-    
     /**
      * @return
      */
     @Override
     public String getDbType() {
-        return DB_TYPE;
+        return DBConstant.MYSQL_DB_TYPE;
     }
     
     /**
@@ -33,7 +32,7 @@ public class MysqlDBPlugin implements IDBPlugin {
      */
     @Override
     public DBConfig getDBConfig() {
-        return DBConfig.builder().supportSchema(false).supportDatabase(true).dbType(DB_TYPE).name(DB_TYPE)
+        return DBConfig.builder().supportSchema(false).supportDatabase(true).dbType(DBConstant.MYSQL_DB_TYPE).name(DBConstant.MYSQL_DB_TYPE)
                 .driverPropertiesList(loadDriverProperties()).build();
     }
     
@@ -72,7 +71,7 @@ public class MysqlDBPlugin implements IDBPlugin {
      * @return
      */
     private DriverProperties getDriverProperty(Properties properties, String defaultVersion, String version) {
-        final String type = properties.getProperty("jdbc.driver.type", DB_TYPE);
+        final String type = properties.getProperty("jdbc.driver.type", DBConstant.MYSQL_DB_TYPE);
         final String urls = properties.getProperty("jdbc.driver.%s.download.url".formatted(version), "");
         final String driverClass = properties.getProperty("jdbc.driver.%s.class".formatted(version));
         final String driverVersion = properties.getProperty("jdbc.driver.%s.version".formatted(version));

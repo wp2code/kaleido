@@ -17,6 +17,7 @@ public class CodeGenerationTemplateUpdateParam {
     
     @NotNull(message = "更新模板类型为空")
     private String name;
+    private String nameSuffix;
     
     @NotNull(message = "包路径不能为空")
     private String sourceFolder;

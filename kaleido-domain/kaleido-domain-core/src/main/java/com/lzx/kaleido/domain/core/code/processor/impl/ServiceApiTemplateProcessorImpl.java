@@ -13,10 +13,10 @@ import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaServiceApiConfigVO;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -25,12 +25,10 @@ import java.util.Set;
  **/
 public class ServiceApiTemplateProcessorImpl extends AbsTemplateProcessor<JavaServiceApiConfigVO> {
     
-    private static final String _SUFFIX = "Service";
-    
     @Override
     protected void fillCodeGenerationTableParam(final JavaServiceApiConfigVO config, final BasicConfigVO basicConfig,
-            final CodeGenerationTableParam codeGenerationTableParam,final CodeGenerationTemplateConfigVO configVO) {
-        if(codeGenerationTableParam.isDirectUseTemplateConfig()){
+            final CodeGenerationTableParam codeGenerationTableParam, final CodeGenerationTemplateConfigVO configVO) {
+        if (codeGenerationTableParam.isDirectUseTemplateConfig()) {
             codeGenerationTableParam.setUseMybatisPlus(config.isUseMybatisPlus());
             codeGenerationTableParam.setPackageName(config.getPackageName());
             codeGenerationTableParam.setSourceFolder(config.getSourceFolder());
@@ -38,14 +36,14 @@ public class ServiceApiTemplateProcessorImpl extends AbsTemplateProcessor<JavaSe
             if (StrUtil.isNotBlank(configVO.getCodePath())) {
                 codeGenerationTableParam.setCodePath(configVO.getCodePath());
             }
-        }else{
+        } else {
             TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getSuperclassName(),
                     (v) -> codeGenerationTableParam.setSuperclassName(String.valueOf(v)),
                     config.getSuperclass() != null ? config.getSuperclass().getName() : null);
-            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getCodePath(), (v) -> codeGenerationTableParam.setCodePath(v.toString()),
-                    config.getCodePath());
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getCodePath(),
+                    (v) -> codeGenerationTableParam.setCodePath(v.toString()), config.getCodePath());
         }
-
+        
     }
     
     /**
@@ -70,9 +68,16 @@ public class ServiceApiTemplateProcessorImpl extends AbsTemplateProcessor<JavaSe
         return param;
     }
     
+    /**
+     * @param name
+     * @param tableName
+     * @param nameSuffix
+     * @return
+     */
     @Override
-    protected String getCodeName(String name, final String tableName) {
-        return StrUtil.isNotBlank(name) ? name : "I" + TemplateConvertUtil.toCamelFirstToUpper(tableName) + _SUFFIX;
+    protected String getCodeName(String name, final String tableName, String nameSuffix) {
+        return StrUtil.isNotBlank(name) ? name : "I" + TemplateConvertUtil.toCamelFirstToUpper(tableName) + Optional.ofNullable(nameSuffix)
+                .orElse(TemplateParserEnum.SERVICE_API.getDefaultNameSuffix());
     }
     
     /**

@@ -16,7 +16,6 @@ import com.lzx.kaleido.spi.db.model.metaData.TableIndex;
 import com.lzx.kaleido.spi.db.model.metaData.Type;
 import com.lzx.kaleido.spi.db.sql.SQLExecutor;
 import com.lzx.kaleido.spi.db.utils.JdbcUtil;
-
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +59,20 @@ public abstract class BaseMetaData implements IMetaData {
     @Override
     public List<Schema> schemas(final Connection connection, final String databaseName, final String currConnectionDatabase) {
         return SQLExecutor.getInstance().schemas(connection, null, databaseName);
+    }
+    
+    /**
+     * 表的ddl
+     *
+     * @param connection
+     * @param databaseName
+     * @param schemaName
+     * @param tableName
+     * @return
+     */
+    @Override
+    public String tableDDL(final Connection connection, final String databaseName, final String schemaName, final String tableName) {
+        return SQLExecutor.getInstance().ddl(connection, databaseName, schemaName, tableName);
     }
     
     /**

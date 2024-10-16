@@ -17,13 +17,13 @@ import lombok.EqualsAndHashCode;
 public class CodeGenerationTemplateEntity extends BaseEntity {
     
     /**
-     * 分组ID
+     * 模板ID
      */
     @TableId(value = "id")
     private Long id;
     
     /**
-     * 分组名称
+     * 模板名称
      */
     @TableField("template_name")
     private String templateName;

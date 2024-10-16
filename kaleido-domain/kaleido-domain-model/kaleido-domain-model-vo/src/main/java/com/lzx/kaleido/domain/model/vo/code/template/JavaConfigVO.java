@@ -5,9 +5,8 @@ import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
 import com.lzx.kaleido.infra.base.utils.JsonUtil;
-import lombok.Data;
-
 import java.io.Serializable;
+import lombok.Data;
 
 /**
  * @author lwp
@@ -40,6 +39,11 @@ public class JavaConfigVO implements Serializable {
      * 配置别名
      */
     protected String aliasName;
+    
+    /**
+     * 名称后缀
+     */
+    protected String nameSuffix;
     
     public boolean validate() {
         return StrUtil.isNotBlank(name) && StrUtil.isNotBlank(sourceFolder) && StrUtil.isNotBlank(packageName);

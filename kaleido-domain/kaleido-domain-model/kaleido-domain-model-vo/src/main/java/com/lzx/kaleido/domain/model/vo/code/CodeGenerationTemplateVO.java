@@ -7,10 +7,9 @@ import com.lzx.kaleido.infra.base.pojo.BaseVO;
 import io.github.zhaord.mapstruct.plus.annotations.AutoMap;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
+import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.util.List;
 
 /**
  * @author lwp
@@ -73,7 +72,6 @@ public class CodeGenerationTemplateVO extends BaseVO {
      */
     @Valid
     private List<CodeGenerationTemplateConfigVO> templateConfigList;
-    
     
     @Override
     public String toString() {

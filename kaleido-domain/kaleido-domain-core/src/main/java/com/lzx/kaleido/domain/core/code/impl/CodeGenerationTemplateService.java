@@ -110,6 +110,13 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
         if (!vo.validate((name) -> TemplateParserEnum.getInstance(name) != null)) {
             throw new CommonRuntimeException(ErrorCode.CODE_TEMPLATE_CONFIG_ERROR);
         }
+        final BasicConfigVO basicConfigVO = JsonUtil.toBean(vo.getBasicConfig(), BasicConfigVO.class);
+        if (basicConfigVO == null) {
+            throw new CommonRuntimeException(ErrorCode.CODE_TEMPLATE_PARSE_ERROR);
+        }
+        if (basicConfigVO.isFtmLicense()) {
+            vo.setBasicConfig(JsonUtil.toJson(basicConfigVO));
+        }
         final CodeGenerationTemplateEntity entity = new CodeGenerationTemplateEntity();
         entity.setTemplateName(vo.getTemplateName());
         entity.setLanguage(vo.getLanguage());

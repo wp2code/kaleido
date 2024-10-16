@@ -19,8 +19,6 @@ import com.lzx.kaleido.spi.db.model.metaData.Type;
 import com.lzx.kaleido.spi.db.utils.JdbcUtil;
 import com.lzx.kaleido.spi.db.utils.ResultSetUtil;
 import io.micrometer.common.util.StringUtils;
-import org.springframework.util.CollectionUtils;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -33,6 +31,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.springframework.util.CollectionUtils;
 
 /**
  * @author lwp
@@ -219,6 +218,17 @@ public class SQLExecutor {
         } catch (SQLException e) {
             throw new RuntimeException("Get schemas error", e);
         }
+    }
+    
+    public String ddl(Connection connection, String databaseName, String schemaName, String tableName) {
+        try (ResultSet resultSet = connection.getMetaData().getTables(databaseName, schemaName, tableName, new String[] {"TABLE"})) {
+            if (resultSet.next()) {
+                return resultSet.getString("CREATE_TABLE");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Get schemas error", e);
+        }
+        return null;
     }
     
     /**

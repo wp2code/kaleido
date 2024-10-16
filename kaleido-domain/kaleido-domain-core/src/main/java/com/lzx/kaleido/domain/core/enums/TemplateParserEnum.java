@@ -9,10 +9,9 @@ import com.lzx.kaleido.domain.core.code.processor.impl.ServiceApiTemplateProcess
 import com.lzx.kaleido.domain.core.code.processor.impl.ServiceTemplateProcessorImpl;
 import com.lzx.kaleido.domain.core.code.processor.impl.VoTemplateProcessorImpl;
 import com.lzx.kaleido.domain.core.code.processor.impl.XmlTemplateProcessorImpl;
+import java.util.Arrays;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
-import java.util.Arrays;
 
 /**
  * @author lwp
@@ -22,13 +21,14 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum TemplateParserEnum {
     
-    ENTITY("Entity", Singleton.get(EntityTemplateProcessorImpl.class), 1, "tp_entity.ftlx", "java"),
-    VO("VO", Singleton.get(VoTemplateProcessorImpl.class), 2, "tp_vo.ftlx", "java"),
-    MAPPER("Mapper", Singleton.get(MapperTemplateProcessorImpl.class), 3, "tp_mapper.ftlx", "java"),
-    XML("Xml", Singleton.get(XmlTemplateProcessorImpl.class), 4, "tp_xml.ftlx", "xml"),
-    SERVICE_API("ServiceApi", Singleton.get(ServiceApiTemplateProcessorImpl.class), 5, "tp_service_api.ftlx", "java"),
-    SERVICE("Service", Singleton.get(ServiceTemplateProcessorImpl.class), 6, "tp_service.ftlx", "java"),
-    CONTROLLER("Controller", Singleton.get(ControllerTemplateProcessorImpl.class), 7, "tp_controller.ftlx", "java");
+    ENTITY("Entity", Singleton.get(EntityTemplateProcessorImpl.class), 1, "tp_entity.ftlx", "java", "Entity"),
+    VO("VO", Singleton.get(VoTemplateProcessorImpl.class), 2, "tp_vo.ftlx", "java", "VO"),
+    MAPPER("Mapper", Singleton.get(MapperTemplateProcessorImpl.class), 3, "tp_mapper.ftlx", "java", "Mapper"),
+    XML("Xml", Singleton.get(XmlTemplateProcessorImpl.class), 4, "tp_xml.ftlx", "xml", "Mapper"),
+    SERVICE_API("ServiceApi", Singleton.get(ServiceApiTemplateProcessorImpl.class), 5, "tp_service_api.ftlx", "java", "Service"),
+    SERVICE("Service", Singleton.get(ServiceTemplateProcessorImpl.class), 6, "tp_service.ftlx", "java", "ServiceImpl"),
+    CONTROLLER("Controller", Singleton.get(ControllerTemplateProcessorImpl.class), 7, "tp_controller.ftlx", "java", "Controller"),
+    ;
     
     private final String codeType;
     
@@ -48,6 +48,11 @@ public enum TemplateParserEnum {
      * 文件名称后缀
      */
     private final String fileSuffix;
+    
+    /**
+     * 默认文件名称后缀
+     */
+    private final String defaultNameSuffix;
     
     public static TemplateParserEnum getInstance(String codeType) {
         return Arrays.stream(values()).filter(v -> v.getCodeType().equalsIgnoreCase(codeType)).findFirst().orElse(null);

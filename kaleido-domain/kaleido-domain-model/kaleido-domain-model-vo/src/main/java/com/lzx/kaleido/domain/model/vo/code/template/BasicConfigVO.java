@@ -1,11 +1,11 @@
 package com.lzx.kaleido.domain.model.vo.code.template;
 
+import cn.hutool.core.util.StrUtil;
+import java.io.Serializable;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * @author lwp
@@ -61,5 +61,21 @@ public class BasicConfigVO implements Serializable {
         result = 31 * result + (codePath != null ? codePath.hashCode() : 0);
         result = 31 * result + (license != null ? license.hashCode() : 0);
         return result;
+    }
+    
+    public boolean isFtmLicense() {
+        if (StrUtil.isNotBlank(license)) {
+            boolean isFtm = false;
+            if (!StrUtil.startWith(license, "/*")) {
+                license = "/*" + license;
+                isFtm = true;
+            }
+            if (!StrUtil.endWith(license, "*/")) {
+                license = license + "*/";
+                isFtm = true;
+            }
+            return isFtm;
+        }
+        return false;
     }
 }

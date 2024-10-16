@@ -66,7 +66,7 @@ public class KaleidoApplicationInitializer implements ApplicationListener<Applic
         vo.setTemplateName("默认模板");
         vo.setDigestValue("应用默认配置");
         final BasicConfigVO basicConfig = new BasicConfigVO();
-        basicConfig.setAuthor("XiXi");
+        basicConfig.setAuthor("Kaleido");
         basicConfig.setCodePath(codePath);
         vo.setBasicConfig(JsonUtil.toJson(basicConfig));
         final CodeGenerationTemplateConfigVO entityConfig = buildTemplateConfig(codePath, TemplateParserEnum.ENTITY,
@@ -129,6 +129,7 @@ public class KaleidoApplicationInitializer implements ApplicationListener<Applic
         final TemplateParamVO templateParam = new TemplateParamVO();
         templateParam.setAliasName(parserEnum.getCodeType());
         templateParam.setName(parserEnum.getCodeType());
+        templateParam.setNameSuffix(parserEnum.getDefaultNameSuffix());
         templateParam.setPackageName(DEFAULT_PACKAGE_NAME);
         templateParam.setSourceFolder(DEFAULT_SOURCE_FOLDER);
         templateParam.buildSuperclass(superclass, new ArrayList<>());

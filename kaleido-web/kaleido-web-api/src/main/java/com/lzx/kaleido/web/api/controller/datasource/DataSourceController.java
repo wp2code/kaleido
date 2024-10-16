@@ -4,6 +4,7 @@ import com.lzx.kaleido.domain.api.datasource.IDataSourceService;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceConnectParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.DataSourceQueryParam;
+import com.lzx.kaleido.domain.model.dto.datasource.param.TableDDLParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.TableFieldColumnParam;
 import com.lzx.kaleido.domain.model.vo.datasource.ConnectionDataVO;
 import com.lzx.kaleido.domain.model.vo.datasource.DataSourceMetaVO;
@@ -15,6 +16,7 @@ import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.pojo.R;
 import java.util.List;
 import javax.annotation.Resource;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -223,6 +225,18 @@ public class DataSourceController {
     }
     
     /**
+     * 获取表DDL
+     *
+     * @param param
+     * @return
+     */
+    @PostMapping("/meta/table/ddl")
+    public R<String> getTableDDL(@Validated @RequestBody TableDDLParam param) {
+        String tableDDL = dataSourceService.getTableDDL(param);
+        return R.success(tableDDL);
+    }
+    
+    /**
      * 获取表字段信息列表
      *
      * @param param
@@ -233,4 +247,5 @@ public class DataSourceController {
         final List<TableFieldColumnVO> tableFieldColumnList = dataSourceService.getTableFieldColumnList(param);
         return R.success(tableFieldColumnList);
     }
+    
 }

@@ -5,14 +5,13 @@ import cn.hutool.core.util.StrUtil;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.excption.CommonException;
 import com.lzx.kaleido.spi.db.IDBManager;
+import com.lzx.kaleido.spi.db.constants.DBConstant;
 import com.lzx.kaleido.spi.db.model.ConnectionInfo;
 import com.lzx.kaleido.spi.db.model.ConnectionWrapper;
 import com.lzx.kaleido.spi.db.model.DriverProperties;
 import com.lzx.kaleido.spi.db.sql.DriverManager;
 import com.lzx.kaleido.spi.db.utils.JdbcUtil;
-
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Optional;
 
 /**
@@ -44,14 +43,15 @@ public class BaseDBManager implements IDBManager {
             if (StrUtil.isNotBlank(connectionInfo.getDatabaseName()) || StrUtil.isNotBlank(connectionInfo.getSchemaName())) {
                 connectDatabase(connection, connectionInfo.getSchemaName(), connectionInfo.getDatabaseName());
             }
-            if (StrUtil.isBlank(connectionInfo.getDatabaseName())) {
+            //PostgreSQL不能设置
+            if (StrUtil.isBlank(connectionInfo.getDatabaseName()) && !DBConstant.PG_DB_TYPE.equalsIgnoreCase(connectionInfo.getDbType())) {
                 connectionInfo.setDatabaseName(connection.getCatalog());
             }
             connectionInfo.setConnection(
                     connectionWrapper = new ConnectionWrapper(Optional.ofNullable(connectionInfo.getId()).orElse(IdUtil.fastSimpleUUID()),
                             connection, connectionInfo.getDbType(), connectionInfo.getDatabaseName(),
                             connectionInfo.getPropertiesConfig()));
-        } catch (SQLException | CommonException e) {
+        } catch (Exception e) {
             JdbcUtil.closeConnection(connection);
             throw new CommonException(ErrorCode.CONNECTION_FAILED, e);
         }

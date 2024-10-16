@@ -42,7 +42,7 @@ public class DataSourceFactory {
      */
     public IDBPlugin getDataSource(final String dbType) {
         final Collection<IDBPlugin> instances = getInstances();
-        if(CollUtil.isEmpty(instances)){
+        if (CollUtil.isEmpty(instances)) {
             throw new CommonRuntimeException(ErrorCode.CONNECTION_INSTANCE_NULL);
         }
         return instances.stream().filter(v -> dbType.equalsIgnoreCase(v.getDbType())).findFirst()
@@ -191,6 +191,23 @@ public class DataSourceFactory {
             if (CollUtil.isNotEmpty(columns)) {
                 return metaData.transformJavaProperty(columns);
             }
+        }
+        return null;
+    }
+    
+    /**
+     * @param connectionId
+     * @param dataBaseName
+     * @param schemaName
+     * @param tableName
+     * @return
+     */
+    public String getDDL(final String connectionId, String dataBaseName, final String schemaName, final String tableName) {
+        final ConnectionWrapper connection = ConnectionManager.getInstance().getConnectionThrowException(connectionId, dataBaseName);
+        final IDBPlugin dataSource = getDataSource(connection.getDbType());
+        final IMetaData metaData = dataSource.getMetaData();
+        if (metaData != null) {
+            return metaData.tableDDL(connection.getConnection(), dataBaseName, schemaName, tableName);
         }
         return null;
     }

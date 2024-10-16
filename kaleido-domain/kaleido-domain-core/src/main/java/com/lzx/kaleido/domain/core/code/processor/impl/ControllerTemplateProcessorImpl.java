@@ -15,7 +15,6 @@ import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaControllerConfigVO;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -29,15 +28,14 @@ import java.util.Set;
  **/
 public class ControllerTemplateProcessorImpl extends AbsTemplateProcessor<JavaControllerConfigVO> {
     
-    private static final String _SUFFIX = "Controller";
-    
     
     /**
      * @return
      */
     @Override
-    protected String getCodeName(String name, final String tableName) {
-        return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.toCamelFirstToUpper(tableName) + _SUFFIX;
+    protected String getCodeName(String name, final String tableName, String nameSuffix) {
+        return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.toCamelFirstToUpper(tableName) + Optional.ofNullable(nameSuffix)
+                .orElse(TemplateParserEnum.CONTROLLER.getDefaultNameSuffix());
     }
     
     /**

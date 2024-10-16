@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.lzx.kaleido.domain.api.code.ICodeGenerationTemplateConfigService;
 import com.lzx.kaleido.domain.core.datasource.DataSourceFactory;
 import com.lzx.kaleido.domain.core.enums.TemplateParserEnum;
+import com.lzx.kaleido.domain.core.utils.TemplateConvertUtil;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateUpdateParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.TableFieldColumnParam;
 import com.lzx.kaleido.domain.model.entity.code.CodeGenerationTemplateConfigEntity;
@@ -23,13 +24,12 @@ import com.lzx.kaleido.infra.base.utils.JsonUtil;
 import com.lzx.kaleido.infra.base.utils.PojoConvertUtil;
 import com.lzx.kaleido.plugins.mp.BaseServiceImpl;
 import com.lzx.kaleido.spi.db.model.TableColumnJavaMap;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author lwp
@@ -49,6 +49,9 @@ public class CodeGenerationTemplateConfigService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean addCodeGenerationTemplateConfigBatch(final List<CodeGenerationTemplateConfigVO> voList) {
+        if(CollUtil.isEmpty(voList)){
+            return false;
+        }
         final List<CodeGenerationTemplateConfigEntity> entities = PojoConvertUtil.vo2EntityList(voList,
                 CodeGenerationTemplateConfigEntity.class);
         return this.saveBatch(entities);
@@ -101,6 +104,10 @@ public class CodeGenerationTemplateConfigService
         templateParamVO.setUseMybatisPlus(param.getUseMybatisPlus());
         templateParamVO.setUseSwagger(param.getUseSwagger());
         templateParamVO.setSourceFolder(param.getSourceFolder());
+        if (StrUtil.isNotBlank(param.getNameSuffix())) {
+            param.setNameSuffix(TemplateConvertUtil.firstCharOnlyToUpper(param.getNameSuffix().trim()));
+        }
+        templateParamVO.setNameSuffix(param.getNameSuffix());
         templateParamVO.setResponseGenericClass(param.getResponseGenericClass());
         templateParamVO.setPackageName(param.getPackageName());
         templateParamVO.setDefaultIgFields(param.getDefaultIgFields());
