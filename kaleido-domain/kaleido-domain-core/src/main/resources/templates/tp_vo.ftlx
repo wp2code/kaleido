@@ -12,12 +12,14 @@ import ${pak!};
 <#if useLombok==true>
 @Data
 @Accessors(chain = true)
-@EqualsAndHashCode(callSuper = true)
 </#if>
 <#if useSwagger==true>
 @ApiModel(value = "${comment!}")
 </#if>
 <#if superclassName??>
+  <#if useLombok==true>
+@EqualsAndHashCode(callSuper = true)
+  </#if>
 public class ${name} extends ${superclassName}{
 <#else>
 public class ${name}{

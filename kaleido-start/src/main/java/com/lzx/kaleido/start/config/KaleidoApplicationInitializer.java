@@ -12,17 +12,16 @@ import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.TemplateParamVO;
 import com.lzx.kaleido.infra.base.utils.JsonUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.event.ApplicationStartedEvent;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
 
 /**
  * @author lwp
@@ -33,9 +32,11 @@ import java.util.stream.Stream;
 public class KaleidoApplicationInitializer implements ApplicationListener<ApplicationStartedEvent> {
     
     
-    private final static String DEFAULT_PACKAGE_NAME = "com.lzx.kaleido.test";
+    private final static String DEFAULT_PACKAGE_NAME = "com.lzx.kaleido.demo";
     
     private final static String DEFAULT_SOURCE_FOLDER = "src/main/java";
+    
+    private final static String DEFAULT_RESOURCES_SOURCE_FOLDER = "src/main/resources";
     
     @Resource
     private ICodeGenerationTemplateService codeGenerationGroupService;
@@ -131,7 +132,8 @@ public class KaleidoApplicationInitializer implements ApplicationListener<Applic
         templateParam.setName(parserEnum.getCodeType());
         templateParam.setNameSuffix(parserEnum.getDefaultNameSuffix());
         templateParam.setPackageName(DEFAULT_PACKAGE_NAME);
-        templateParam.setSourceFolder(DEFAULT_SOURCE_FOLDER);
+        templateParam.setSourceFolder(
+                TemplateParserEnum.isXml(parserEnum.getCodeType()) ? DEFAULT_RESOURCES_SOURCE_FOLDER : DEFAULT_SOURCE_FOLDER);
         templateParam.buildSuperclass(superclass, new ArrayList<>());
         if (consumer != null) {
             consumer.accept(templateParam);
