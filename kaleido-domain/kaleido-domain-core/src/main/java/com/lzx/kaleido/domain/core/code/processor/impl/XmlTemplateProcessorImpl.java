@@ -52,7 +52,7 @@ public class XmlTemplateProcessorImpl extends AbsTemplateProcessor<JavaXmlConfig
     }
     
     protected String getCodeFileType() {
-        return ".xml";
+        return "." + TemplateParserEnum.XML.getFileSuffix();
     }
     
     @Override

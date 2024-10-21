@@ -134,6 +134,9 @@ public class MapperTemplateProcessorImpl extends AbsTemplateProcessor<JavaMapper
                             return javaTypeParam.getName();
                         }).orElse("Object");
                     }
+                    if (apiTemplateEnum.isParameterList()) {
+                        packages.add("org.apache.ibatis.annotations.Param");
+                    }
                     if (apiTemplateEnum.isParameterList() || apiTemplateEnum.isReturnList()) {
                         packages.add("java.util.List");
                     }

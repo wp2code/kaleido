@@ -81,6 +81,7 @@ public class CodeGenerationService implements ICodeGeneration {
                                         ResourceMode.getInstance(tableParam.getTemplateResourceMode()), codeGenerationViewVOS);
                         if (codeGenerationViewVO != null) {
                             codeGenerationViewVO.setFileSuffix(parserEnum.getFileSuffix());
+                            System.out.println(codeGenerationViewVO);
                             codeGenerationViewVOS.add(codeGenerationViewVO);
                         }
                     }

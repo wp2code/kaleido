@@ -154,6 +154,39 @@
         </trim>
     </insert>
       </#if>
+      <#if methodModel.apiId=="insertOne">
+    <insert id="insertOne" parameterType="${resultMapType!}">
+        insert into ${tableName} (
+            <#list tableFieldColumnList as model>
+              ${(model.column)!}<#if model_has_next>,</#if>
+            </#list>
+        ) values (
+        <#list tableFieldColumnList as model>
+            ${r"#"}{${(model.property)!}}<#if model_has_next>,</#if>
+        </#list>
+        )
+    </insert>
+      </#if>
+      <#if methodModel.apiId=="insertBatch">
+    <insert id="insertBatch">
+      insert into ${tableName} (
+            <#list tableFieldColumnList as model>
+              ${(model.column)!}<#if model_has_next>,</#if>
+            </#list>
+      ) values (
+      <#list tableFieldColumnList as model>
+        ${r"#"}{${(model.property)!}}<#if model_has_next>,</#if>
+      </#list>
+        )
+        <foreach collection="list" item="item" separator=",">
+        (
+      <#list tableFieldColumnList as model>
+        ${r"#"}{item.${(model.property)!}}<#if model_has_next>,</#if>
+      </#list>
+        )
+        </foreach>
+    </insert>
+      </#if>
     </#if>
   </#list>
 </#if>

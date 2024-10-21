@@ -20,7 +20,8 @@ import com.lzx.kaleido.plugins.template.enums.ResourceMode;
 import com.lzx.kaleido.plugins.template.exception.TemplateParseException;
 import com.lzx.kaleido.plugins.template.model.TemplateContext;
 import com.lzx.kaleido.plugins.template.utils.CodeGenerationUtil;
-
+import com.lzx.kaleido.spi.db.enums.DataType;
+import com.lzx.kaleido.spi.db.utils.JdbcUtil;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -136,7 +137,7 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
      * @param nameSuffix
      * @return
      */
-    protected String getCodeName(String name, String tableName,String nameSuffix) {
+    protected String getCodeName(String name, String tableName, String nameSuffix) {
         return StrUtil.isNotBlank(name) ? name : TemplateConvertUtil.toCamelFirstToUpper(tableName);
     }
     
@@ -199,8 +200,8 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
                 (v) -> codeGenerationTableParam.setSourceFolder(v.toString()), templateParams.getSourceFolder());
         TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getTemplateEngineName(),
                 (v) -> codeGenerationTableParam.setTemplateEngineName(v.toString()), TemplateContext.DEFAULT_ENGINE);
-        TemplateConvertUtil.setIfAbsent(templateParams.getCodePath(),
-                (v) -> templateParams.setCodePath(v.toString()), basicConfig.getCodePath());
+        TemplateConvertUtil.setIfAbsent(templateParams.getCodePath(), (v) -> templateParams.setCodePath(v.toString()),
+                basicConfig.getCodePath());
         TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getNameSuffix(),
                 (v) -> codeGenerationTableParam.setNameSuffix(v.toString()), templateParams.getNameSuffix());
         this.fillCodeGenerationTableParam(templateParams, basicConfig, codeGenerationTableParam, configVO);
@@ -241,10 +242,18 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
     protected List<CodeGenerationTableFieldParam> convertCodeGenerationTableFieldParamList(
             List<TableFieldColumnVO> tableFieldColumnMapList) {
         if (CollUtil.isNotEmpty(tableFieldColumnMapList)) {
-            return tableFieldColumnMapList.stream()
-                    .map(v -> new CodeGenerationTableFieldParam().setJdbcTypeCode(v.getDataType()).setPrimaryKey(v.getPrimaryKey())
-                            .setProperty(v.getProperty()).setJavaType(v.getJavaType()).setColumn(v.getColumn())
-                            .setJavaTypeSimpleName(v.getJavaTypeSimpleName())).collect(Collectors.toList());
+            return tableFieldColumnMapList.stream().map(v -> {
+                CodeGenerationTableFieldParam param = new CodeGenerationTableFieldParam().setJdbcTypeCode(v.getDataType())
+                        .setPrimaryKey(v.getPrimaryKey()).setProperty(v.getProperty()).setJavaType(v.getJavaType()).setColumn(v.getColumn())
+                        .setJavaTypeSimpleName(v.getJavaTypeSimpleName());
+                if (v.getDataType() != null) {
+                    final DataType dataType = JdbcUtil.resolveDataType(v.getJdbcType(), v.getDataType());
+                    if (dataType != null) {
+                        param.setXmlJdbcType(dataType.getName());
+                    }
+                }
+                return param;
+            }).collect(Collectors.toList());
         }
         return null;
     }

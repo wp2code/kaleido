@@ -1,9 +1,8 @@
 package com.lzx.kaleido.domain.core.enums;
 
+import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.util.Arrays;
 
 /**
  * @author lwp
@@ -13,6 +12,7 @@ import java.util.Arrays;
 @AllArgsConstructor
 public enum ApiTemplateEnum {
     insert("insertSelective", "添加", "int", "object", false, false),
+    insertOne("insertOne", "添加单个", "int", "object", false, false),
     insertBatch("insertBatch", "批量添加", "int", "objectList", false, true),
     insertOrUpdate("insertOrUpdateSelective", "添加或更新", "int", "object", false, false),
     insertOrUpdateBatch("insertOrUpdateSelectiveBatch", "批量添加或更新", "int", "objectList", false, true),

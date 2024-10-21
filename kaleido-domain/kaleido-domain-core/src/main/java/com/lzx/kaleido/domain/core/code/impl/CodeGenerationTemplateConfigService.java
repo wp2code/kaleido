@@ -266,7 +266,7 @@ public class CodeGenerationTemplateConfigService
             fieldColumnVO.setProperty(v.getProperty());
             fieldColumnVO.setPrimaryKey(v.getPrimaryKey());
             fieldColumnVO.setDataType(v.getDataType());
-            if (defaultIgFields.size() > 0) {
+            if (!defaultIgFields.isEmpty()) {
                 fieldColumnVO.setSelected(!defaultIgFields.contains(v.getColumn()) && !defaultIgFields.contains(v.getProperty()));
             } else {
                 fieldColumnVO.setSelected(true);
@@ -288,7 +288,7 @@ public class CodeGenerationTemplateConfigService
                 .getTableColumnJavaMapList(tableFieldColumnParam.getConnectionId(), tableFieldColumnParam.getDataBaseName(),
                         tableFieldColumnParam.getSchemaName(), tableFieldColumnParam.getTableName());
         if (CollUtil.isNotEmpty(tableColumnJavaMapList)) {
-            return tableColumnJavaMapList.stream().map(function::apply).collect(Collectors.toList());
+            return tableColumnJavaMapList.stream().map(function).collect(Collectors.toList());
         }
         return null;
     }

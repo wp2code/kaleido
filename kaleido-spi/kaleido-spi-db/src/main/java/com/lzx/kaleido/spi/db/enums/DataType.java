@@ -2,7 +2,8 @@ package com.lzx.kaleido.spi.db.enums;
 
 import com.lzx.kaleido.infra.base.enums.IBaseEnum;
 
-/**
+/** 适配器
+ * 兼容处理
  * @author lwp
  * @date 2023-11-14
  * @see java.sql.Types
@@ -54,5 +55,5 @@ public enum DataType implements IBaseEnum<Integer> {
     DataType(Integer type) {
         this.initEnum(type, this.name());
     }
-
+    
 }

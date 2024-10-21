@@ -8,6 +8,7 @@ import com.lzx.kaleido.infra.base.utils.EasyEnumUtil;
 import com.lzx.kaleido.plugins.mysql.sql.ISQL;
 import com.lzx.kaleido.plugins.mysql.sql.MysqlIndexType;
 import com.lzx.kaleido.spi.db.enums.DataType;
+import com.lzx.kaleido.spi.db.enums.DataTypeAdapter;
 import com.lzx.kaleido.spi.db.jdbc.BaseMetaData;
 import com.lzx.kaleido.spi.db.model.metaData.Database;
 import com.lzx.kaleido.spi.db.model.metaData.Table;
@@ -15,12 +16,9 @@ import com.lzx.kaleido.spi.db.model.metaData.TableColumn;
 import com.lzx.kaleido.spi.db.model.metaData.TableIndex;
 import com.lzx.kaleido.spi.db.model.metaData.TableIndexColumn;
 import com.lzx.kaleido.spi.db.sql.SQLExecutor;
-import com.lzx.kaleido.spi.db.utils.JdbcUtil;
 import com.lzx.kaleido.spi.db.utils.ResultSetUtil;
 import io.micrometer.common.util.StringUtils;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.extern.slf4j.Slf4j;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author lwp
@@ -191,9 +190,14 @@ public class MysqlMetaData extends BaseMetaData {
                 column.setDatabaseName(databaseName);
                 column.setTableName(tableName);
                 final String dataType = resultSet.getString("DATA_TYPE").toUpperCase();
-                final IBaseEnum<Integer> dataTypeEnum = EasyEnumUtil.getEnumByName(DataType.class, dataType);
+                IBaseEnum<Integer> dataTypeEnum = EasyEnumUtil.getEnumByName(DataType.class, dataType);
+                if (dataTypeEnum == null) {
+                    dataTypeEnum = EasyEnumUtil.getEnumByName(DataTypeAdapter.class, dataType);
+                }
                 if (dataTypeEnum != null) {
                     column.setDataType(dataTypeEnum.getCode());
+                } else {
+                    log.error("数据库字段类型{}不适配", dataType);
                 }
                 column.setName(resultSet.getString("COLUMN_NAME"));
                 column.setColumnType(dataType);

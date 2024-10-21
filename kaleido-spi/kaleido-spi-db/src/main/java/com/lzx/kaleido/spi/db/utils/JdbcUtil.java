@@ -122,8 +122,8 @@ public class JdbcUtil {
      * @param type
      * @return
      */
-    public DataType resolveDataType(final String typeName, final int type) {
-        final int typeCode = getTypeByTypeName(typeName, type);
+    public DataType resolveDataType(final String typeName, final Integer type) {
+        final Integer typeCode = getTypeByTypeName(typeName, type);
         return EasyEnumUtil.getEnumByCode(DataType.class, typeCode);
     }
     
@@ -132,7 +132,7 @@ public class JdbcUtil {
      * @param type
      * @return
      */
-    private int getTypeByTypeName(String typeName, int type) {
+    private int getTypeByTypeName(String typeName, Integer type) {
         // [JDBC: SQLite driver uses VARCHAR value type for all LOBs]
         if (type == Types.OTHER || type == Types.VARCHAR) {
             if ("BLOB".equalsIgnoreCase(typeName)) {
