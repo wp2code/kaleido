@@ -1,7 +1,8 @@
 name: Deploy Kaleido
 on:
   push:
-    branches: main
+    tags:
+    - 'v*'
 jobs:
   server-build:
     runs-on: ubuntu-latest
@@ -16,13 +17,16 @@ jobs:
       - name: Kaleido Build with Maven
         run: |
           mvn -B package -Pprod --file pom.xml
+      - name: Get version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.KALEIDO_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          release_name: ${{ steps.get_version.outputs.VERSION }}
           draft: false
           prerelease: false
