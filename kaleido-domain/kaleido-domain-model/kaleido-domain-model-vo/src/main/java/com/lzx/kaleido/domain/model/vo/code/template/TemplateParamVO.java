@@ -41,7 +41,7 @@ public class TemplateParamVO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean useSwagger;
     
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(JsonInclude.Include.USE_DEFAULTS)
     private List<String> methodList;
     
     @JsonInclude(JsonInclude.Include.NON_EMPTY)

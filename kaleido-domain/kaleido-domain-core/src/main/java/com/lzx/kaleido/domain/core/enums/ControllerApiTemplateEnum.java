@@ -1,9 +1,9 @@
 package com.lzx.kaleido.domain.core.enums;
 
+import java.util.Arrays;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.util.Arrays;
 
 /**
  * @author lwp
@@ -12,12 +12,12 @@ import java.util.Arrays;
 @Getter
 @AllArgsConstructor
 public enum ControllerApiTemplateEnum {
-    search("search", "查询", "/search", "objectList", "POST", true, false),
-    searchPage("page", "分页查询", "/page", "objectList", "POST", true, false),
-    detail("detail", "获取详情", "/get/{id}", "object", "GET", false, false),
-    save("save", "保存", "/save", "Boolean", "POST", false, false),
-    update("update", "根据主键更新", "/update/{id}", "Boolean", "PUT", false, false),
-    delete("update", "根据主键删除", "/delete/{id}", "Boolean", "DELETE", false, false),
+    search("search", "查询", "/search", "objectList", "object", "POST", true, false),
+    searchPage("page", "分页查询", "/page/{pageSize}/{pageNumber}", "objectList", "object", "POST", true, false),
+    detail("detail", "获取详情", "/get/{id}", "object", "pk", "GET", false, false),
+    save("save", "保存", "/save", "Boolean", "POST", "object", false, false),
+    update("update", "根据主键更新", "/update/{id}", "Boolean", "object_pk", "PUT", false, false),
+    delete("delete", "根据主键删除", "/delete/{id}", "Boolean", "pk", "DELETE", false, false),
     ;
     
     private final String apiId;
@@ -27,6 +27,8 @@ public enum ControllerApiTemplateEnum {
     private final String path;
     
     private final String returnType;
+    
+    private final String parameterType;
     
     private final String method;
     
@@ -42,4 +44,7 @@ public enum ControllerApiTemplateEnum {
         return searchPage == apiTemplateEnum;
     }
     
+    public static List<String> getAllApi() {
+        return Arrays.stream(values()).map(v -> v.apiId).toList();
+    }
 }

@@ -41,4 +41,5 @@ public class CodeGenerationTemplateUpdateParam {
      * 默认忽略生成的字段
      */
     private List<String> defaultIgFields;
+    private List<String> methodList;
 }

@@ -111,6 +111,7 @@ public class CodeGenerationTemplateConfigService
         templateParamVO.setResponseGenericClass(param.getResponseGenericClass());
         templateParamVO.setPackageName(param.getPackageName());
         templateParamVO.setDefaultIgFields(param.getDefaultIgFields());
+        templateParamVO.setMethodList(param.getMethodList());
         SuperclassVO superclass = templateParamVO.getSuperclass();
         if (StrUtil.isNotBlank(param.getSuperclassName())) {
             if (superclass == null) {

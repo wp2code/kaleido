@@ -6,6 +6,8 @@ import com.lzx.kaleido.domain.api.enums.CodeTemplateDefaultEnum;
 import com.lzx.kaleido.domain.api.enums.CodeTemplateHideEnum;
 import com.lzx.kaleido.domain.api.enums.CodeTemplateInternalEnum;
 import com.lzx.kaleido.domain.api.enums.CodeTemplateSourceTypeEnum;
+import com.lzx.kaleido.domain.core.enums.ApiTemplateEnum;
+import com.lzx.kaleido.domain.core.enums.ControllerApiTemplateEnum;
 import com.lzx.kaleido.domain.core.enums.TemplateParserEnum;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateVO;
@@ -82,24 +84,23 @@ public class KaleidoApplicationInitializer implements ApplicationListener<Applic
                 });
         final CodeGenerationTemplateConfigVO mapperConfig = buildTemplateConfig(codePath, TemplateParserEnum.MAPPER,
                 "com.lzx.kaleido.test.IBaseMapper", (v) -> {
-                    v.setUseMybatisPlus(true);
+                    final List<String> methodList = ApiTemplateEnum.getAllApi();
+                    v.setMethodList(methodList);
+                    v.setUseMybatisPlus(false);
                 });
         final CodeGenerationTemplateConfigVO serviceApiConfig = buildTemplateConfig(codePath, TemplateParserEnum.SERVICE_API,
                 "com.baomidou.mybatisplus.extension.service.IService", null);
         final CodeGenerationTemplateConfigVO serviceConfig = buildTemplateConfig(codePath, TemplateParserEnum.SERVICE,
                 "com.lzx.kaleido.test.BaseService", null);
         final CodeGenerationTemplateConfigVO xmlConfig = buildTemplateConfig(codePath, TemplateParserEnum.XML, null, (v) -> {
-            final List<String> methodList = Stream.of("insertSelective", "insertBatch", "insertOrUpdateSelective",
-                    "insertOrUpdateSelectiveBatch", "deleteByPrimaryKey", "updateByPrimaryKey", "updateByPrimaryKeySelective",
-                    "selectByEntity", "selectByPrimaryKey", "selectPage").collect(Collectors.toList());
+            final List<String> methodList = ApiTemplateEnum.getAllApi();
             v.setMethodList(methodList);
             v.setUseMybatisPlus(false);
         });
         final CodeGenerationTemplateConfigVO controllerConfig = buildTemplateConfig(codePath, TemplateParserEnum.CONTROLLER,
                 "com.lzx.kaleido.test.BaseController", (v) -> {
                     v.setResponseGenericClass("com.lzx.kaleido.test.pojo.R");
-                    final List<String> methodList = Stream.of("search", "page", "detail", "save", "update", "update")
-                            .collect(Collectors.toList());
+                    final List<String> methodList = ControllerApiTemplateEnum.getAllApi();
                     v.setMethodList(methodList);
                     v.setUseMybatisPlus(true);
                     v.setUseSwagger(true);

@@ -25,8 +25,10 @@ public class CodeApiDTO {
     
     private String method;
     
+    private Boolean pageQuery;
+    
     public static CodeApiDTO of(String apiId, String returnType, Boolean returnIsList, String parameterType, Boolean parameterIsList,
-            String describe, String path, String method) {
+            String describe, String path, String method, Boolean pageQuery) {
         final CodeApiDTO codeApiDTO = new CodeApiDTO();
         codeApiDTO.setApiId(apiId);
         codeApiDTO.setReturnType(returnType);
@@ -36,11 +38,12 @@ public class CodeApiDTO {
         codeApiDTO.setDescribe(describe);
         codeApiDTO.setPath(path);
         codeApiDTO.setMethod(method);
+        codeApiDTO.setPageQuery(pageQuery);
         return codeApiDTO;
     }
     
     public static CodeApiDTO of(String apiId, String returnType, Boolean returnIsList, String parameterType, Boolean parameterIsList,
             String describe) {
-        return of(apiId, returnType, returnIsList, parameterType, parameterIsList, describe, null, null);
+        return of(apiId, returnType, returnIsList, parameterType, parameterIsList, describe, null, null, false);
     }
 }

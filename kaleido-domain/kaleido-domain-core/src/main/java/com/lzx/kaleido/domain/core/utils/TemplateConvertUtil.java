@@ -5,6 +5,7 @@ import com.google.common.base.CaseFormat;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.infra.base.utils.JsonUtil;
+import java.util.Collection;
 import java.util.function.Consumer;
 import lombok.experimental.UtilityClass;
 
@@ -30,7 +31,16 @@ public class TemplateConvertUtil {
      * @param consumer
      */
     public void setIfAbsent(Object value, Consumer<Object> consumer, Object... defaultValues) {
-        final boolean isNotValueFlag = value == null || value.toString().length() <= 0 || StrUtil.isBlank(value.toString().trim());
+        boolean isNotValueFlag = true;
+        if (value != null) {
+            if (value instanceof String) {
+                isNotValueFlag = value.toString().isEmpty() || StrUtil.isBlank(value.toString().trim());
+            } else if (value instanceof Collection) {
+                isNotValueFlag = ((Collection<?>) value).isEmpty();
+            } else {
+                isNotValueFlag = false;
+            }
+        }
         if (isNotValueFlag && defaultValues != null && consumer != null) {
             for (final Object defaultValue : defaultValues) {
                 if (defaultValue != null) {

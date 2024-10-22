@@ -67,8 +67,8 @@ public class ControllerTemplateProcessorImpl extends AbsTemplateProcessor<JavaCo
             codeGenerationTableParam.setResponseGenericClass(config.getResponseGenericClass());
             codeGenerationTableParam.setWebMethodList(config.getMethodList());
         } else {
-            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getWebMethodList(),
-                    (v) -> codeGenerationTableParam.setWebMethodList((List<String>) v), config.getMethodList());
+//            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getWebMethodList(),
+//                    (v) -> codeGenerationTableParam.setWebMethodList((List<String>) v), config.getMethodList());
             TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getResponseGenericClass(),
                     (v) -> codeGenerationTableParam.setResponseGenericClass(v.toString()), config.getResponseGenericClass());
             TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseSwagger(),
@@ -132,14 +132,14 @@ public class ControllerTemplateProcessorImpl extends AbsTemplateProcessor<JavaCo
                             packages.add("com.baomidou.mybatisplus.extension.plugins.pagination.Page");
                         }
                     }
-                    final String path = apiTemplateEnum.getPath();
-                    String parameterType = "";
-                    parameterType = "@Validated @RequestBody %s condition".formatted(
+                    String parameterType = apiTemplateEnum.getParameterType();
+                    String parameterTypeValue = "";
+                    parameterTypeValue = "@Validated @RequestBody %s condition".formatted(
                             Optional.ofNullable(voViewVO).map(CodeGenerationViewVO::getName).orElse("Object"));
                     packages.add("org.springframework.web.bind.annotation.RequestBody");
                     packages.add("org.springframework.validation.annotation.Validated");
                     packages.add(TemplateConvertUtil.getFullPackageName(voViewVO));
-                    if (path.contains("{id}")) {
+                    if (parameterType.contains("pk")) {
                         String pkIdType = "Object";
                         if (codeGenerationTableParam.getPrimaryKeyField() != null) {
                             final CodeClassDTO primaryClassParam = new CodeClassDTO(
@@ -147,18 +147,22 @@ public class ControllerTemplateProcessorImpl extends AbsTemplateProcessor<JavaCo
                             packages.add(primaryClassParam.getFullName());
                             pkIdType = primaryClassParam.getName();
                         }
-                        if (StrUtil.isNotBlank(parameterType)) {
-                            parameterType += ",";
+                        if (StrUtil.isNotBlank(parameterTypeValue)) {
+                            parameterTypeValue += ",";
                         }
-                        parameterType += "@PathVariable(value =\"%s\") %s id".formatted("id", pkIdType);
+                        parameterTypeValue += "@PathVariable(value =\"%s\") %s id".formatted("id", pkIdType);
+                        packages.add("org.springframework.web.bind.annotation.PathVariable");
+                    }
+                    if (apiTemplateEnum == ControllerApiTemplateEnum.searchPage) {
+                        parameterTypeValue += ", @PathVariable(value =\"pageSize\") pageSize, @PathVariable(value =\"pageNumber\") pageNumber";
                         packages.add("org.springframework.web.bind.annotation.PathVariable");
                     }
                     packages.add("org.springframework.web.bind.annotation.RequestMethod");
                     apiParamList.add(CodeApiDTO.of(apiTemplateEnum.getApiId(),
                             ftmReturnType(responseGenericClassParam, returnType, apiTemplateEnum.isReturnList(),
-                                    ControllerApiTemplateEnum.isPage(apiTemplateEnum)), apiTemplateEnum.isReturnList(), parameterType,
+                                    ControllerApiTemplateEnum.isPage(apiTemplateEnum)), apiTemplateEnum.isReturnList(), parameterTypeValue,
                             apiTemplateEnum.isParameterList(), apiTemplateEnum.getDescribe(), apiTemplateEnum.getPath(),
-                            "RequestMethod." + apiTemplateEnum.getMethod()));
+                            "RequestMethod." + apiTemplateEnum.getMethod(), false));
                 }
             }
         }

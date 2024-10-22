@@ -42,10 +42,16 @@ public class XmlTemplateProcessorImpl extends AbsTemplateProcessor<JavaXmlConfig
             if (StrUtil.isNotBlank(configVO.getCodePath())) {
                 codeGenerationTableParam.setCodePath(configVO.getCodePath());
             }
-            codeGenerationTableParam.setMethodList(config.getMethodList());
+            if (!config.isUseMybatisPlus()) {
+                codeGenerationTableParam.setMethodList(
+                        CollUtil.isEmpty(config.getMethodList()) ? ApiTemplateEnum.getAllApi() : config.getMethodList());
+            }
         } else {
-            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getMethodList(),
-                    (v) -> codeGenerationTableParam.setMethodList((List<String>) v), config.getMethodList());
+            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseMybatisPlus(),
+                    (v) -> codeGenerationTableParam.setUseMybatisPlus(Boolean.parseBoolean(v.toString())), config.isUseMybatisPlus());
+//            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getMethodList(),
+//                    (v) -> codeGenerationTableParam.setMethodList((List<String>) v), config.getMethodList(),
+//                    !codeGenerationTableParam.getUseMybatisPlus() ? ApiTemplateEnum.getAllApi() : null);
             TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getCodePath(),
                     (v) -> codeGenerationTableParam.setCodePath(v.toString()), config.getCodePath());
         }

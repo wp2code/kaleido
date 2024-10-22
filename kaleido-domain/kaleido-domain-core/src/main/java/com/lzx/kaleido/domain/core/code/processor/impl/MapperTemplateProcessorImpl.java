@@ -40,11 +40,15 @@ public class MapperTemplateProcessorImpl extends AbsTemplateProcessor<JavaMapper
                 codeGenerationTableParam.setCodePath(configVO.getCodePath());
             }
             if (!config.isUseMybatisPlus()) {
-                codeGenerationTableParam.setMethodList(config.getMethodList());
+                codeGenerationTableParam.setMethodList(
+                        CollUtil.isEmpty(config.getMethodList()) ? ApiTemplateEnum.getAllApi() : config.getMethodList());
             }
         } else {
             TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseMybatisPlus(),
                     (v) -> codeGenerationTableParam.setUseMybatisPlus(Boolean.parseBoolean(v.toString())), config.isUseMybatisPlus());
+//            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getMethodList(),
+//                    (v) -> codeGenerationTableParam.setMethodList((List<String>) v), config.getMethodList(),
+//                    !codeGenerationTableParam.getUseMybatisPlus() ? ApiTemplateEnum.getAllApi() : null);
             TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getSuperclassName(),
                     (v) -> codeGenerationTableParam.setSuperclassName(String.valueOf(v)),
                     config.getSuperclass() != null ? config.getSuperclass().getName() : null);
@@ -134,14 +138,15 @@ public class MapperTemplateProcessorImpl extends AbsTemplateProcessor<JavaMapper
                             return javaTypeParam.getName();
                         }).orElse("Object");
                     }
-                    if (apiTemplateEnum.isParameterList()) {
+                    if (apiTemplateEnum.isParameterList() || apiTemplateEnum == ApiTemplateEnum.selectPage) {
                         packages.add("org.apache.ibatis.annotations.Param");
                     }
                     if (apiTemplateEnum.isParameterList() || apiTemplateEnum.isReturnList()) {
                         packages.add("java.util.List");
                     }
                     apiParamList.add(CodeApiDTO.of(apiTemplateEnum.getApiId(), returnType, apiTemplateEnum.isReturnList(), parameterType,
-                            apiTemplateEnum.isParameterList(), apiTemplateEnum.getDescribe()));
+                            apiTemplateEnum.isParameterList(), apiTemplateEnum.getDescribe(), null, null,
+                            apiTemplateEnum == ApiTemplateEnum.selectPage));
                 }
             }
             params.put(CodeTemplateConstants.apiList, apiParamList);

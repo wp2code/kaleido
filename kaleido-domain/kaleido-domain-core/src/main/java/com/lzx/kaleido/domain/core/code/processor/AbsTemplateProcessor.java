@@ -110,7 +110,7 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
             templateCode = CodeGenerationUtil.processTemplateToStr(config.getTemplateContent(), params,
                     codeGenerationTableParam.getTemplateEngineName(), getTemplateNameIfAbsent(codeGenerationTableParam.getTemplateName()),
                     codeGenerationTableParam.getTemplatePath(), resourceMode);
-            return CodeGenerationViewVO.builder().name(codeName).packageName(codeGenerationTableParam.getPackageName())
+            CodeGenerationViewVO vo = CodeGenerationViewVO.builder().name(codeName).packageName(codeGenerationTableParam.getPackageName())
                     .sourceFolder(codeGenerationTableParam.getSourceFolder()).codePath(codeGenerationTableParam.getCodePath())
                     .superclassName(codeGenerationTableParam.getSuperclassName()).codeOutPath(codeOutPath).templateCode(templateCode)
                     .codeType(config.getName()).useLombok(codeGenerationTableParam.getUseLombok())
@@ -118,10 +118,25 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
                     .useSwagger(codeGenerationTableParam.getUseSwagger()).useMybatisPlus(codeGenerationTableParam.getUseMybatisPlus())
                     .tableFieldColumnMap(convertTableFieldColumnList(codeGenerationTableParam.getTableFieldColumnList(), templateConfig))
                     .build();
+            this.afterGeneration(vo, basicConfig, codeGenerationTableParam, refCodeGenerationViewList);
+            return vo;
         } catch (Exception e) {
             log.error("模板解析{}失败！错误信息：{}", config.getName(), ExceptionUtil.getMessage(e));
             throw new TemplateParseException(ErrorCode.CODE_TEMPLATE_PARSE_ERROR);
         }
+    }
+    
+    /**
+     * @param resultVo
+     * @param basicConfig
+     * @param codeGenerationTableParam
+     * @param refCodeGenerationViewList
+     */
+    protected void afterGeneration(final CodeGenerationViewVO resultVo, final BasicConfigVO basicConfig,
+            final CodeGenerationTableParam codeGenerationTableParam, final List<CodeGenerationViewVO> refCodeGenerationViewList) {
+        refCodeGenerationViewList.stream().filter(v -> CollUtil.isNotEmpty(v.getTableFieldColumnMap())).findFirst().ifPresent((v) -> {
+            resultVo.setTableFieldColumnMap(v.getTableFieldColumnMap());
+        });
     }
     
     /**

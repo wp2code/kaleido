@@ -22,8 +22,9 @@ public interface ${name!}{
     *
     * @return  <#if model.returnIsList>List<${model.returnType?no_esc}><#else>${model.returnType?no_esc}</#if>
     */<#if model.parameterIsList>
-   ${model.returnType?no_esc} ${model.apiId}((@Param("list") List<${(model.parameterType)!}> conditionList);<#else><#if model.returnIsList>
-   List<${model.returnType?no_esc}> ${model.apiId}(${(model.parameterType)!} condition); <#else>
+   ${model.returnType?no_esc} ${model.apiId}((@Param("list") List<${(model.parameterType)!}> conditionList);<#else><#if model.returnIsList> <#if model.pageQuery>
+   List<${model.returnType?no_esc}> ${model.apiId}(${(model.parameterType)!} condition, @Param("pageSize") pageSize, @Param("pageNumber") pageNumber); <#else>
+   List<${model.returnType?no_esc}> ${model.apiId}(${(model.parameterType)!} condition); </#if><#else>
    ${model.returnType?no_esc} ${model.apiId}(${(model.parameterType)!} condition);</#if>
      </#if>
 

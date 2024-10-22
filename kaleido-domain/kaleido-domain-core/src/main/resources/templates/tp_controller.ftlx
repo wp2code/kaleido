@@ -35,7 +35,7 @@ public class ${name}{
     @ApiOperation(value = "${model.describe!}")
     </#if>
     @RequestMapping(value = "${model.path!}",method = ${model.method!})
-    public ${model.returnType?no_esc}  ${model.apiId}(${(model.parameterType?no_esc)!}){
+    public ${model.returnType?no_esc} ${model.apiId}(${(model.parameterType?no_esc)!}){
         return null;
     }
   </#list>

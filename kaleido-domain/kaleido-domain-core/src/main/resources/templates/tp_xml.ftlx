@@ -40,6 +40,25 @@
         </where>
     </select>
     </#if>
+    <#if methodModel.apiId=="selectPage">
+    <select id="selectPage" resultMap="BaseResultMap" parameterType="${resultMapType!}">
+        select
+        <include refid="Base_Table_Column"/>
+        from ${tableName}
+        <where>
+            <#list tableFieldColumnList as model>
+                <#if model.javaType=="java.lang.String">
+            <if test="${model.property} != null and ${model.property} != ''">
+                <#else>
+            <if test="${model.property} != null">
+                </#if>
+                and ${model.column} = ${r"#"}{${(model.property)!}},
+            </if>
+            </#list>
+        </where>
+        limit  ${r"#"}{pageSize}  offset  (${r"#"}{pageNumber} - 1) * ${r"#"}{pageSize}
+    </select>
+    </#if>
     <#if tablePK??><#if methodModel.apiId=="selectByPrimaryKey">
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="${tablePK.javaType}">
          select
@@ -167,8 +186,8 @@
         )
     </insert>
       </#if>
-      <#if methodModel.apiId=="insertBatch">
-    <insert id="insertBatch">
+      <#if methodModel.apiId=="insertList">
+    <insert id="insertList">
       insert into ${tableName} (
             <#list tableFieldColumnList as model>
               ${(model.column)!}<#if model_has_next>,</#if>
