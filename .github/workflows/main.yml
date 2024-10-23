@@ -1,6 +1,7 @@
 name: Deploy Kaleido
 on:
   workflow_dispatch:
+    inputs:
 jobs:
   server-build:
     runs-on: ubuntu-latest
@@ -16,8 +17,11 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y zip unzip
       - name: Build with Maven
         run: mvn -B package -Pprod --file pom.xml
-      - name: Rename and Move WAR file to Root Directory
-        run: zip -r  kaleido-start/target/kaleido-server-start.jar kaleido-start/target/lib  kaleido-server
+      - name: Archive File
+        run: |
+          zip -r kaleido-server.zip  kaleido-start/target/kaleido-server-start.jar kaleido-start/target/lib 
+          pwd
+          ls -a
 #      - name: Get Version
 #        id: get_version
 #        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
