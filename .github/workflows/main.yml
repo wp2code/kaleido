@@ -9,7 +9,11 @@ jobs:
         uses: actions/checkout@v2
       - name: Get Version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> "$GITHUB_OUTPUT"
+      - name: Install compress/unzip
+        run: |
+          echo version is ${{steps.get_version.outputs.VERSION}}
+          echo github.ref is $GITHUB_REF
       - name: kaleido Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -21,8 +25,6 @@ jobs:
         run: mvn -B package -Pprod --file pom.xml
       - name: Archive File
         run: |
-          echo `github.ref is $GITHUB_REF`
-          echo `version is ${{steps.get_version.outputs.VERSION}}`
           zip -r kaleido-server.zip  kaleido-start/target/kaleido-server-start.jar kaleido-start/target/lib 
           pwd
           ls -a
