@@ -19,6 +19,7 @@ jobs:
         run: mvn -B package -Pprod --file pom.xml
       - name: Archive File
         run: |
+          echo github.ref is ${github.ref}
           zip -r kaleido-server.zip  kaleido-start/target/kaleido-server-start.jar kaleido-start/target/lib 
           pwd
           ls -a
