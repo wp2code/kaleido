@@ -1,8 +1,6 @@
 name: Deploy Kaleido
 on:
-  push:
-    tags:
-    - 'v*'
+  workflow_dispatch:
 jobs:
   server-build:
     runs-on: ubuntu-latest
@@ -14,19 +12,34 @@ jobs:
         with:
           java-version: 17
           distribution: 'temurin'
-      - name: Kaleido Build with Maven
-        run: |
-          mvn -B package -Pprod --file pom.xml
-      - name: Get version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: install compress/unzip
+        run: sudo apt-get update && sudo apt-get install -y zip unzip
+      - name: Build with Maven
+        run: mvn -B package -Pprod --file pom.xml
+      - name: Rename and Move WAR file to Root Directory
+        run: zip -r  kaleido-start/target/kaleido-server-start.jar kaleido-start/target/lib  kaleido-server
+#      - name: Get Version
+#        id: get_version
+#        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.KALEIDO_TOKEN }}
         with:
-          tag_name: ${{ steps.get_version.outputs.VERSION }}
-          release_name: ${{ steps.get_version.outputs.VERSION }}
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+#          tag_name: ${{ steps.get_version.outputs.VERSION }}
+#          release_name: ${{ steps.get_version.outputs.VERSION }}
           draft: false
           prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+            GITHUB_TOKEN: ${{ secrets.KALEIDO_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./kaleido-server.zip
+          asset_name: kaleido-server.zip
+          asset_content_type: application/zip
