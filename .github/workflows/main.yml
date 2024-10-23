@@ -9,7 +9,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Get Version
         id: get_version
-        run: echo "VERSION=$GITHUB_REF | cut -d / -f3" >> "$GITHUB_OUTPUT"
+        run: echo VERSION=$(($GITHUB_REF | cut -d / -f3)) >> "$GITHUB_OUTPUT"
       - name: ECho Version
         run: |
           echo version is ${{steps.get_version.outputs.VERSION}}
