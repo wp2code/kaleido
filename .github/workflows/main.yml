@@ -29,6 +29,8 @@ jobs:
         run: mvn -B package -Pprod --file pom.xml
       - name: Archive File
         run: |
+          rm -fr ${{ env.server_name }}
+          mkdir ${{ env.server_name }}
           mv -t ${{ env.server_name }}  ./kaleido-start/target/kaleido-server-start.jar ./kaleido-start/target/lib
           zip -r ${{ env.server_name }}.zip  ${{ env.server_name }} 
           ls -a
