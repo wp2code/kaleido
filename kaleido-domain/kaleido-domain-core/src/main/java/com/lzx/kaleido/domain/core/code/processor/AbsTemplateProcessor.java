@@ -117,6 +117,7 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
                     .implInterfaceName(codeGenerationTableParam.getImplInterfaceName()).namespace(codeGenerationTableParam.getNamespace())
                     .useSwagger(codeGenerationTableParam.getUseSwagger()).useMybatisPlus(codeGenerationTableParam.getUseMybatisPlus())
                     .tableFieldColumnMap(convertTableFieldColumnList(codeGenerationTableParam.getTableFieldColumnList(), templateConfig))
+                    .methodList(codeGenerationTableParam.getMethodList()).webMethodList(codeGenerationTableParam.getWebMethodList())
                     .build();
             this.afterGeneration(vo, basicConfig, codeGenerationTableParam, refCodeGenerationViewList);
             return vo;
