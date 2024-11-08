@@ -66,8 +66,8 @@ public class KaleidoApplicationInitializer implements ApplicationListener<Applic
         vo.setIsInternal(CodeTemplateInternalEnum.Y.getCode());
         vo.setIsDefault(CodeTemplateDefaultEnum.DEFAULT.getCode());
         vo.setLanguage("java");
-        vo.setTemplateName("默认模板");
-        vo.setDigestValue("应用默认配置");
+        vo.setTemplateName("系统模板");
+        vo.setDigestValue("应用系统配置");
         final BasicConfigVO basicConfig = new BasicConfigVO();
         basicConfig.setAuthor("Kaleido");
         basicConfig.setCodePath(codePath);

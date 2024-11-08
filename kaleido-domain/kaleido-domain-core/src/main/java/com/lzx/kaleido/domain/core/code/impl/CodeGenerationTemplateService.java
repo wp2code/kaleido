@@ -357,28 +357,18 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateDefaultTemplate(final Long id) {
-        final LambdaQueryWrapper<CodeGenerationTemplateEntity> queryWrapper = Wrappers.<CodeGenerationTemplateEntity>lambdaQuery()
-                .eq(CodeGenerationTemplateEntity::getIsDefault, CodeTemplateDefaultEnum.DEFAULT.getCode())
-                .select(CodeGenerationTemplateEntity::getId);
-        final List<CodeGenerationTemplateEntity> list = this.list(queryWrapper);
-        boolean isDefault = false;
-        if (CollUtil.isNotEmpty(list) && (isDefault = list.stream().anyMatch(v -> !Objects.equals(v.getId(), id)))) {
-            final LambdaUpdateWrapper<CodeGenerationTemplateEntity> updateWrapper = Wrappers.<CodeGenerationTemplateEntity>lambdaUpdate()
-                    .eq(CodeGenerationTemplateEntity::getIsDefault, CodeTemplateDefaultEnum.DEFAULT.getCode())
-                    .set(CodeGenerationTemplateEntity::getIsDefault, CodeTemplateDefaultEnum.NORMAL.getCode());
-            if (!this.update(updateWrapper)) {
-                throw new CommonRuntimeException(ErrorCode.UPDATE_FAILED);
+        LambdaUpdateWrapper<CodeGenerationTemplateEntity> updateWrapper = Wrappers.<CodeGenerationTemplateEntity>lambdaUpdate()
+                .set(CodeGenerationTemplateEntity::getIsDefault, CodeTemplateDefaultEnum.DEFAULT.getCode())
+                .eq(CodeGenerationTemplateEntity::getId, id);
+        if (this.update(updateWrapper)) {
+            LambdaUpdateWrapper<CodeGenerationTemplateEntity> updateWrapper2 = Wrappers.<CodeGenerationTemplateEntity>lambdaUpdate()
+                    .set(CodeGenerationTemplateEntity::getIsDefault, CodeTemplateDefaultEnum.NORMAL.getCode())
+                    .ne(CodeGenerationTemplateEntity::getId, id);
+            if (this.update(updateWrapper2)) {
+                return true;
             }
         }
-        if (!isDefault) {
-            final CodeGenerationTemplateEntity entity = new CodeGenerationTemplateEntity();
-            entity.setId(id);
-            entity.setIsDefault(CodeTemplateDefaultEnum.DEFAULT.getCode());
-            if (!this.updateById(entity)) {
-                throw new CommonRuntimeException(ErrorCode.UPDATE_FAILED);
-            }
-        }
-        return true;
+        throw new CommonRuntimeException(ErrorCode.UPDATE_FAILED);
     }
     
     /**
