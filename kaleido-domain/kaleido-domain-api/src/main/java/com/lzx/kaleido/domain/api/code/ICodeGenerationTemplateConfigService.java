@@ -6,7 +6,6 @@ import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.datasource.TableFieldColumnVO;
 import com.lzx.kaleido.infra.base.pojo.spi.ITableColumnJava;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.List;
 import java.util.function.Function;
 
@@ -125,4 +124,12 @@ public interface ICodeGenerationTemplateConfigService {
      */
     List<TableFieldColumnVO> getTemplateTableFieldColumnList(final Long templateId, final String name,
             final TableFieldColumnParam tableFieldColumnParam);
+    
+    /**
+     * 获取默认需要生成的模板配置
+     *
+     * @param templateId
+     * @return
+     */
+    List<String> getDefaultGenerateTemplateConfigList(final Long templateId);
 }

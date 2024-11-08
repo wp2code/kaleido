@@ -133,6 +133,7 @@ public class KaleidoApplicationInitializer implements ApplicationListener<Applic
         templateParam.setName(parserEnum.getCodeType());
         templateParam.setNameSuffix(parserEnum.getDefaultNameSuffix());
         templateParam.setPackageName(DEFAULT_PACKAGE_NAME);
+        templateParam.setDefaultGenerate(true);
         templateParam.setSourceFolder(
                 TemplateParserEnum.isXml(parserEnum.getCodeType()) ? DEFAULT_RESOURCES_SOURCE_FOLDER : DEFAULT_SOURCE_FOLDER);
         templateParam.buildSuperclass(superclass, new ArrayList<>());

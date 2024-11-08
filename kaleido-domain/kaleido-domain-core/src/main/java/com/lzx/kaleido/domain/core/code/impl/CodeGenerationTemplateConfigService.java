@@ -49,7 +49,7 @@ public class CodeGenerationTemplateConfigService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean addCodeGenerationTemplateConfigBatch(final List<CodeGenerationTemplateConfigVO> voList) {
-        if(CollUtil.isEmpty(voList)){
+        if (CollUtil.isEmpty(voList)) {
             return false;
         }
         final List<CodeGenerationTemplateConfigEntity> entities = PojoConvertUtil.vo2EntityList(voList,
@@ -104,6 +104,7 @@ public class CodeGenerationTemplateConfigService
         templateParamVO.setUseMybatisPlus(param.getUseMybatisPlus());
         templateParamVO.setUseSwagger(param.getUseSwagger());
         templateParamVO.setSourceFolder(param.getSourceFolder());
+        templateParamVO.setDefaultGenerate(param.getDefaultGenerate());
         if (StrUtil.isNotBlank(param.getNameSuffix())) {
             param.setNameSuffix(TemplateConvertUtil.firstCharOnlyToUpper(param.getNameSuffix().trim()));
         }
@@ -274,6 +275,24 @@ public class CodeGenerationTemplateConfigService
             }
             return fieldColumnVO;
         });
+    }
+    
+    /**
+     * 获取默认需要生成的模板配置
+     *
+     * @param templateId
+     * @return
+     */
+    @Override
+    public List<String> getDefaultGenerateTemplateConfigList(final Long templateId) {
+        List<CodeGenerationTemplateConfigVO> list = getByTemplateId(templateId, null, null);
+        if (CollUtil.isNotEmpty(list)) {
+            return list.stream().filter(v -> {
+                final TemplateParamVO templateParamVO = JsonUtil.toBean(v.getTemplateParams(), TemplateParamVO.class);
+                return templateParamVO != null && Boolean.TRUE.equals(templateParamVO.getDefaultGenerate());
+            }).map(CodeGenerationTemplateConfigVO::getName).collect(Collectors.toList());
+        }
+        return List.of();
     }
     
     /**

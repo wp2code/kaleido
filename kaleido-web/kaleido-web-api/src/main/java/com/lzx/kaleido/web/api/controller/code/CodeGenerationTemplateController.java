@@ -5,7 +5,6 @@ import com.lzx.kaleido.domain.api.code.ICodeGenerationTemplateConfigService;
 import com.lzx.kaleido.domain.api.code.ICodeGenerationTemplateService;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationGlobalConfigParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationSimpleParam;
-import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateExportParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateQueryParam;
 import com.lzx.kaleido.domain.model.dto.code.param.CodeGenerationTemplateUpdateParam;
 import com.lzx.kaleido.domain.model.dto.datasource.param.TableFieldColumnParam;
@@ -17,17 +16,17 @@ import com.lzx.kaleido.infra.base.annotations.validation.UpdateGroup;
 import com.lzx.kaleido.infra.base.constant.Constants;
 import com.lzx.kaleido.infra.base.enums.ErrorCode;
 import com.lzx.kaleido.infra.base.pojo.R;
+import java.util.List;
+import javax.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * 代码模板管理接口
@@ -80,17 +79,6 @@ public class CodeGenerationTemplateController {
     public R<Boolean> checkTemplateNameExists(@RequestBody CodeGenerationSimpleParam param) {
         final boolean isExist = codeGenerationTemplateService.checkTemplateName(param.getTemplateId(), param.getTemplateName());
         return R.success(isExist);
-    }
-    
-    
-    /**
-     * 模板导出
-     *
-     * @param vo
-     */
-    @PostMapping("/export")
-    public void export(@RequestBody CodeGenerationTemplateExportParam vo) {
-        //TODO
     }
     
     /**
@@ -214,11 +202,24 @@ public class CodeGenerationTemplateController {
      * @param param
      * @return
      */
-    @PostMapping("{templateId}/{name}/table/column/fields")
+    @PostMapping("/{templateId}/{name}/table/column/fields")
     public R<List<TableFieldColumnVO>> getTemplateTableFieldColumnList(@PathVariable("templateId") Long templateId,
             @PathVariable("name") String name, @RequestBody TableFieldColumnParam param) {
         final List<TableFieldColumnVO> templateTableFieldColumnList = codeGenerationTemplateConfigService.getTemplateTableFieldColumnList(
                 templateId, name, param);
         return R.success(templateTableFieldColumnList);
+    }
+    
+    /**
+     * 获取默认需要生成的模板配置
+     *
+     * @param templateId
+     * @return
+     */
+    @GetMapping("/{templateId}/generate/default/list")
+    public R<List<String>> getDefaultGenerateTemplateConfigList(@PathVariable("templateId") Long templateId) {
+        List<String> defaultGenerateTemplateConfigList = codeGenerationTemplateConfigService.getDefaultGenerateTemplateConfigList(
+                templateId);
+        return R.success(defaultGenerateTemplateConfigList);
     }
 }

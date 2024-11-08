@@ -1,14 +1,13 @@
 package com.lzx.kaleido.infra.base.enums;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author lwp
@@ -49,7 +48,7 @@ public enum JavaTypeEnum implements Serializable {
     
     
     public static <T> List<T> convert(Function<JavaTypeEnum, T> function, Predicate<JavaTypeEnum> predicate) {
-        return Arrays.stream(JavaTypeEnum.values()).filter(predicate::test).map(function::apply).collect(Collectors.toList());
+        return Arrays.stream(JavaTypeEnum.values()).filter(predicate).map(function).collect(Collectors.toList());
     }
     
 }

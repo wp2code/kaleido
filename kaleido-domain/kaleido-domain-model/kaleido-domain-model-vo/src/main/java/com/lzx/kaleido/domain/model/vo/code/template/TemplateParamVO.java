@@ -2,9 +2,8 @@ package com.lzx.kaleido.domain.model.vo.code.template;
 
 import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
-
 import java.util.List;
+import lombok.Data;
 
 /**
  * @author lwp
@@ -41,11 +40,15 @@ public class TemplateParamVO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean useSwagger;
     
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean defaultGenerate;
+    
     @JsonInclude(JsonInclude.Include.USE_DEFAULTS)
     private List<String> methodList;
     
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String responseGenericClass;
+    
     /**
      * 忽略生成的字段
      */

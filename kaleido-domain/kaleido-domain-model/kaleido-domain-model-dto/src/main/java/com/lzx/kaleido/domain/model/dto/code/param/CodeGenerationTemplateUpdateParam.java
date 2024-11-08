@@ -34,6 +34,7 @@ public class CodeGenerationTemplateUpdateParam {
     private Boolean useMybatisPlus;
     
     private Boolean useSwagger;
+    private Boolean defaultGenerate;
     
     private String responseGenericClass;
     
