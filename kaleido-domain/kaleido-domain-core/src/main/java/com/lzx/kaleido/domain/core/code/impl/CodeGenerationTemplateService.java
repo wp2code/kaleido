@@ -237,7 +237,6 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
     @Override
     public boolean checkInitDefaultTemplate() {
         final LambdaQueryWrapper<CodeGenerationTemplateEntity> wrapper = Wrappers.<CodeGenerationTemplateEntity>lambdaQuery()
-                .eq(CodeGenerationTemplateEntity::getIsDefault, CodeTemplateDefaultEnum.DEFAULT.getCode())
                 .eq(CodeGenerationTemplateEntity::getSourceType, CodeTemplateSourceTypeEnum.INIT_ADD.getCode())
                 .eq(CodeGenerationTemplateEntity::getIsInternal, CodeTemplateInternalEnum.Y.getCode());
         return this.getBaseMapper().exists(wrapper);
