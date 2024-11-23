@@ -33,15 +33,16 @@ import com.lzx.kaleido.infra.base.excption.CommonRuntimeException;
 import com.lzx.kaleido.infra.base.utils.JsonUtil;
 import com.lzx.kaleido.infra.base.utils.PojoConvertUtil;
 import com.lzx.kaleido.plugins.mp.BaseServiceImpl;
+import javax.annotation.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author lwp
@@ -254,10 +255,9 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
         if (param == null) {
             return false;
         }
-        final Map<Long, List<String>> applyTemplateParamMap =
-                CollUtil.isNotEmpty(param.getApplyTemplateList()) ? param.getApplyTemplateList().stream()
-                        .collect(Collectors.toMap(ApplyTemplateParam::getTemplateId, ApplyTemplateParam::getCodeTypeList, (k1, k2) -> k1))
-                        : new HashMap<>();
+        final Map<Long, List<String>> applyTemplateParamMap = CollUtil.isEmpty(param.getApplyTemplateList()) ? new HashMap<>()
+                : param.getApplyTemplateList().stream()
+                        .collect(Collectors.toMap(ApplyTemplateParam::getTemplateId, ApplyTemplateParam::getCodeTypeList, (k1, k2) -> k1));
         final LambdaQueryWrapper<CodeGenerationTemplateEntity> wrapper = Wrappers.<CodeGenerationTemplateEntity>lambdaQuery()
                 .in(CollUtil.isNotEmpty(applyTemplateParamMap.keySet()), CodeGenerationTemplateEntity::getId,
                         applyTemplateParamMap.keySet());
@@ -265,7 +265,7 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
         if (CollUtil.isNotEmpty(list)) {
             for (final CodeGenerationTemplateEntity entity : list) {
                 final BasicConfigVO dbBasicConfig = TemplateConvertUtil.toBasicConfig(entity.getBasicConfig());
-                if (!StrUtil.equals(dbBasicConfig.getCodePath(), param.getCodePath())) {
+                if (StrUtil.isNotBlank(param.getCodePath()) && !StrUtil.equals(dbBasicConfig.getCodePath(), param.getCodePath())) {
                     final List<String> codeTypeList = applyTemplateParamMap.get(entity.getId());
                     //统一修改代码地址
                     if (!codeGenerationTemplateConfigService.updateCodePathByTemplateId(entity.getId(), param.getCodePath(),
@@ -273,8 +273,11 @@ public class CodeGenerationTemplateService extends BaseServiceImpl<ICodeGenerati
                         throw new CommonRuntimeException(ErrorCode.UPDATE_FAILED);
                     }
                 }
-                if (!StrUtil.equals(entity.toString(), param.toString())) {
-                    final BasicConfigVO vo = new BasicConfigVO(param.getAuthor(), param.getCodePath(), param.getLicense());
+                if (!StrUtil.equals(dbBasicConfig.getAuthor(), param.getAuthor()) || !StrUtil.equals(dbBasicConfig.getLicense(),
+                        param.getAuthor()) || (StrUtil.isNotBlank(param.getCodePath()) && StrUtil.equals(dbBasicConfig.getCodePath(),
+                        param.getCodePath()))) {
+                    final BasicConfigVO vo = new BasicConfigVO(param.getAuthor(),
+                            StrUtil.isBlank(param.getCodePath()) ? dbBasicConfig.getCodePath() : param.getCodePath(), param.getLicense());
                     entity.setBasicConfig(JsonUtil.toJson(vo));
                     if (!this.updateById(entity)) {
                         throw new CommonRuntimeException(ErrorCode.UPDATE_FAILED);
