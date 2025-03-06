@@ -59,6 +59,133 @@
         limit  ${r"#"}{pageSize}  offset  (${r"#"}{pageNumber} - 1) * ${r"#"}{pageSize}
     </select>
     </#if>
+    <#if methodModel.apiId=="insertSelective">
+        <#if tablePK??>
+    <insert id="insertSelective" parameterType="${resultMapType!}" useGeneratedKeys="true" keyProperty="${tablePK.column}">
+        <#else>
+    <insert id="insertSelective" parameterType="${resultMapType!}">
+        </#if>
+        insert into ${tableName}
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <#list tableFieldColumnList as model>
+                <#if model.javaType=="java.lang.String">
+            <if test="${model.property} != null and ${model.property} != ''">
+                <#else>
+            <if test="${model.property} != null">
+                </#if>
+              ${(model.column)!},
+            </if>
+            </#list>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <#list tableFieldColumnList as model>
+                <#if model.javaType=="java.lang.String">
+            <if test="${model.property} != null and ${model.property} != ''">
+                <#else>
+            <if test="${model.property} != null">
+                </#if>
+              ${r"#"}{${(model.property)!}},
+            </if>
+            </#list>
+        </trim>
+    </insert>
+    </#if>
+    <#if methodModel.apiId=="insertOne">
+      <#if tablePK??>
+    <insert id="insertOne" parameterType="${resultMapType!}" useGeneratedKeys="true" keyProperty="${tablePK.column}">
+      <#else>
+    <insert id="insertOne" parameterType="${resultMapType!}">
+      </#if>
+      insert into ${tableName} (
+            <#list tableFieldColumnList as model>
+              ${(model.column)!}<#if model_has_next>,</#if>
+            </#list>
+      ) values (
+        <#list tableFieldColumnList as model>
+        ${r"#"}{${(model.property)!}}<#if model_has_next>,</#if>
+      </#list>
+        )
+    </insert>
+    </#if>
+    <#if methodModel.apiId=="insertList">
+    <insert id="insertList">
+        insert into ${tableName} (
+            <#list tableFieldColumnList as model>
+              ${(model.column)!}<#if model_has_next>,</#if>
+            </#list>
+        ) values (
+      <#list tableFieldColumnList as model>
+        ${r"#"}{${(model.property)!}}<#if model_has_next>,</#if>
+      </#list>
+        )
+        <foreach collection="list" item="item" separator=",">
+            (
+      <#list tableFieldColumnList as model>
+        ${r"#"}{item.${(model.property)!}}<#if model_has_next>,</#if>
+      </#list>
+            )
+        </foreach>
+    </insert>
+    </#if>
+    <#if methodModel.apiId=="insertOrUpdateSelective">
+      <#if tablePK??>
+    <insert id="insertOrUpdateSelective" parameterType="${resultMapType!}" useGeneratedKeys="true" keyProperty="${tablePK.column}">
+      <#else>
+    <insert id="insertOrUpdateSelective" parameterType="${resultMapType!}">
+      </#if>
+        insert into ${tableName}
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <#list tableFieldColumnList as model>
+                <#if model.javaType=="java.lang.String">
+            <if test="${model.property} != null and ${model.property} != ''">
+                <#else>
+            <if test="${model.property} != null">
+                </#if>
+              ${(model.column)!},
+            </if>
+            </#list>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <#list tableFieldColumnList as model>
+                <#if model.javaType=="java.lang.String">
+            <if test="${model.property} != null and ${model.property} != ''">
+                <#else>
+            <if test="${model.property} != null">
+                </#if>
+              ${r"#"}{${(model.property)!}},
+            </if>
+            </#list>
+        </trim>
+      <#if dbType=="MySQL">
+        ON DUPLICATE KEY UPDATE
+        <trim suffixOverrides=",">
+            <#list tableFieldColumnList as model>
+                <#if model.javaType=="java.lang.String">
+            <if test="${model.property} != null and ${model.property} != ''">
+                <#else>
+            <if test="${model.property} != null">
+                </#if>
+              ${(model.column)!}=VALUES(${(model.column)!}),
+            </if>
+            </#list>
+        </trim>
+      </#if>
+      <#if tablePK.column?? && dbType=="PostgreSQL">
+       ON CONFLICT (${tablePK.column}) DO UPDATE SET
+        <trim suffixOverrides=",">
+            <#list tableFieldColumnList as model>
+                <#if model.javaType=="java.lang.String">
+            <if test="${model.property} != null and ${model.property} != ''">
+                <#else>
+            <if test="${model.property} != null">
+                </#if>
+              ${(model.column)!}=excluded.${(model.column)!},
+            </if>
+            </#list>
+        </trim>
+      </#if>
+    </insert>
+    </#if>
     <#if tablePK??><#if methodModel.apiId=="selectByPrimaryKey">
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="${tablePK.javaType}">
          select
@@ -100,111 +227,6 @@
           </set>
           where ${tablePK.column} = ${r"#"}{${(tablePK.property)!}}
     </update>
-      </#if>
-      <#if methodModel.apiId=="insertSelective">
-    <insert id="insertSelective" parameterType="${resultMapType!}">
-        <selectKey resultType="${tablePK.javaType}" keyProperty="${tablePK.column}" order="AFTER">
-            SELECT LAST_INSERT_ID()
-        </selectKey>
-        insert into ${tableName}
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <#list tableFieldColumnList as model>
-                <#if model.javaType=="java.lang.String">
-            <if test="${model.property} != null and ${model.property} != ''">
-                <#else>
-            <if test="${model.property} != null">
-                </#if>
-              ${(model.column)!},
-            </if>
-            </#list>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <#list tableFieldColumnList as model>
-                <#if model.javaType=="java.lang.String">
-            <if test="${model.property} != null and ${model.property} != ''">
-                <#else>
-            <if test="${model.property} != null">
-                </#if>
-              ${r"#"}{${(model.property)!}},
-            </if>
-            </#list>
-        </trim>
-    </insert>
-      </#if>
-      <#if methodModel.apiId=="insertOrUpdateSelective">
-    <insert id="insertOrUpdateSelective" parameterType="${resultMapType!}">
-        <selectKey resultType="${tablePK.javaType}" keyProperty="${tablePK.column}" order="AFTER">
-            SELECT LAST_INSERT_ID()
-        </selectKey>
-        insert into ${tableName}
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <#list tableFieldColumnList as model>
-                <#if model.javaType=="java.lang.String">
-            <if test="${model.property} != null and ${model.property} != ''">
-                <#else>
-            <if test="${model.property} != null">
-                </#if>
-              ${(model.column)!},
-            </if>
-            </#list>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <#list tableFieldColumnList as model>
-                <#if model.javaType=="java.lang.String">
-            <if test="${model.property} != null and ${model.property} != ''">
-                <#else>
-            <if test="${model.property} != null">
-                </#if>
-              ${r"#"}{${(model.property)!}},
-            </if>
-            </#list>
-        </trim>
-        ON DUPLICATE KEY UPDATE
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <#list tableFieldColumnList as model>
-                <#if model.javaType=="java.lang.String">
-            <if test="${model.property} != null and ${model.property} != ''">
-                <#else>
-            <if test="${model.property} != null">
-                </#if>
-              ${(model.column)!}=VALUES(${(model.column)!}),
-            </if>
-            </#list>
-        </trim>
-    </insert>
-      </#if>
-      <#if methodModel.apiId=="insertOne">
-    <insert id="insertOne" parameterType="${resultMapType!}">
-        insert into ${tableName} (
-            <#list tableFieldColumnList as model>
-              ${(model.column)!}<#if model_has_next>,</#if>
-            </#list>
-        ) values (
-        <#list tableFieldColumnList as model>
-            ${r"#"}{${(model.property)!}}<#if model_has_next>,</#if>
-        </#list>
-        )
-    </insert>
-      </#if>
-      <#if methodModel.apiId=="insertList">
-    <insert id="insertList">
-      insert into ${tableName} (
-            <#list tableFieldColumnList as model>
-              ${(model.column)!}<#if model_has_next>,</#if>
-            </#list>
-      ) values (
-      <#list tableFieldColumnList as model>
-        ${r"#"}{${(model.property)!}}<#if model_has_next>,</#if>
-      </#list>
-        )
-        <foreach collection="list" item="item" separator=",">
-        (
-      <#list tableFieldColumnList as model>
-        ${r"#"}{item.${(model.property)!}}<#if model_has_next>,</#if>
-      </#list>
-        )
-        </foreach>
-    </insert>
       </#if>
     </#if>
   </#list>

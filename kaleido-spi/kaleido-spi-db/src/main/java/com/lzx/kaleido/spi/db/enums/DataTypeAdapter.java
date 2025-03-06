@@ -8,6 +8,7 @@ import com.lzx.kaleido.infra.base.enums.IBaseEnum;
  **/
 public enum DataTypeAdapter implements IBaseEnum<Integer> {
     DATETIME(java.sql.Types.TIMESTAMP),
+    TEXT(java.sql.Types.LONGVARCHAR),
     ;
     
     DataTypeAdapter(Integer type) {

@@ -13,6 +13,7 @@ public class CodeTemplateConstants {
     public final static String useMybatisPlus = "useMybatisPlus";
     
     public final static String tableName = "tableName";
+    public final static String dbType = "dbType";
     
     public final static String schemaName = "schemaName";
     

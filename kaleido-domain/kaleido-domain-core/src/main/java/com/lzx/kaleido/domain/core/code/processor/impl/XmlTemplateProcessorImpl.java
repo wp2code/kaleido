@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Maps;
 import com.lzx.kaleido.domain.api.constants.CodeTemplateConstants;
 import com.lzx.kaleido.domain.core.code.processor.AbsTemplateProcessor;
+import com.lzx.kaleido.domain.core.datasource.DataSourceFactory;
 import com.lzx.kaleido.domain.core.enums.ApiTemplateEnum;
 import com.lzx.kaleido.domain.core.enums.TemplateParserEnum;
 import com.lzx.kaleido.domain.core.utils.TemplateConvertUtil;
@@ -16,6 +17,9 @@ import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaXmlConfigVO;
+import com.lzx.kaleido.spi.db.constants.DBConstant;
+import com.lzx.kaleido.spi.db.model.ConnectionWrapper;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,9 +53,9 @@ public class XmlTemplateProcessorImpl extends AbsTemplateProcessor<JavaXmlConfig
         } else {
             TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseMybatisPlus(),
                     (v) -> codeGenerationTableParam.setUseMybatisPlus(Boolean.parseBoolean(v.toString())), config.isUseMybatisPlus());
-//            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getMethodList(),
-//                    (v) -> codeGenerationTableParam.setMethodList((List<String>) v), config.getMethodList(),
-//                    !codeGenerationTableParam.getUseMybatisPlus() ? ApiTemplateEnum.getAllApi() : null);
+            //            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getMethodList(),
+            //                    (v) -> codeGenerationTableParam.setMethodList((List<String>) v), config.getMethodList(),
+            //                    !codeGenerationTableParam.getUseMybatisPlus() ? ApiTemplateEnum.getAllApi() : null);
             TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getCodePath(),
                     (v) -> codeGenerationTableParam.setCodePath(v.toString()), config.getCodePath());
         }
@@ -121,6 +125,13 @@ public class XmlTemplateProcessorImpl extends AbsTemplateProcessor<JavaXmlConfig
         if (StrUtil.isBlank(codeGenerationTableParam.getNamespace())) {
             codeGenerationTableParam.setNamespace(namespace);
         }
+        String connectionId = codeGenerationTableParam.getConnectionId();
+        String dbType = null;
+        ConnectionWrapper activeConnection = DataSourceFactory.getInstance().getActiveConnection(connectionId);
+        if (activeConnection != null) {
+            dbType = activeConnection.getDbType();
+        }
+        params.put(CodeTemplateConstants.dbType, Optional.ofNullable(dbType).orElse(DBConstant.MYSQL_DB_TYPE));
         final String schemaName = codeGenerationTableParam.getSchemaName();
         params.put(CodeTemplateConstants.tableName,
                 StrUtil.isNotBlank(schemaName) ? schemaName + "." + codeGenerationTableParam.getTableName()
