@@ -156,7 +156,7 @@
             </if>
             </#list>
         </trim>
-      <#if dbType=="MySQL">
+        <#if tablePK?exists && tablePK.column?exists && (dbType == "MySQL")>
         ON DUPLICATE KEY UPDATE
         <trim suffixOverrides=",">
             <#list tableFieldColumnList as model>
@@ -170,7 +170,7 @@
             </#list>
         </trim>
       </#if>
-      <#if tablePK.column?? && dbType=="PostgreSQL">
+      <#if tablePK?exists && tablePK.column?exists && (dbType == "PostgreSQL")>
        ON CONFLICT (${tablePK.column}) DO UPDATE SET
         <trim suffixOverrides=",">
             <#list tableFieldColumnList as model>
