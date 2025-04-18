@@ -1,9 +1,11 @@
 package com.lzx.kaleido.domain.core.enums;
 
-import java.util.Arrays;
-import java.util.List;
+import cn.hutool.core.collection.CollUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author lwp
@@ -16,7 +18,7 @@ public enum ApiTemplateEnum {
     insertOne("insertOne", "添加单个", "int", "object", false, false),
     insertList("insertList", "批量添加", "int", "objectList", false, true),
     insertOrUpdate("insertOrUpdateSelective", "添加或更新", "int", "object", false, false),
-//    insertOrUpdateBatch("insertOrUpdateSelectiveBatch", "批量添加或更新", "int", "objectList", false, true),
+    //    insertOrUpdateBatch("insertOrUpdateSelectiveBatch", "批量添加或更新", "int", "objectList", false, true),
     delete("deleteByPrimaryKey", "根据主键删除", "int", "pk", false, false),
     update("updateByPrimaryKey", "根据主键更新", "int", "object", false, false),
     updateNotNull("updateByPrimaryKeySelective", "更新不为空的数据", "int", "object", false, false),
@@ -43,5 +45,18 @@ public enum ApiTemplateEnum {
     
     public static List<String> getAllApi() {
         return Arrays.stream(values()).map(v -> v.apiId).toList();
+    }
+    
+    /**
+     * @param methodList
+     * @return
+     */
+    public static boolean containsObjectMethod(List<String> methodList) {
+        if (CollUtil.isEmpty(methodList)) {
+            return false;
+        }
+        final List<String> objectMethod = Arrays.stream(ApiTemplateEnum.values()).filter(v -> v.parameterType.startsWith("object"))
+                .map(v -> v.apiId).toList();
+        return methodList.stream().anyMatch(objectMethod::contains);
     }
 }

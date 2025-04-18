@@ -15,6 +15,7 @@ import com.lzx.kaleido.domain.model.vo.code.CodeGenerationTemplateConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.CodeGenerationViewVO;
 import com.lzx.kaleido.domain.model.vo.code.template.BasicConfigVO;
 import com.lzx.kaleido.domain.model.vo.code.template.java.JavaMapperConfigVO;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -40,15 +41,14 @@ public class MapperTemplateProcessorImpl extends AbsTemplateProcessor<JavaMapper
                 codeGenerationTableParam.setCodePath(configVO.getCodePath());
             }
             if (!config.isUseMybatisPlus()) {
-                codeGenerationTableParam.setMethodList(
-                        CollUtil.isEmpty(config.getMethodList()) ? ApiTemplateEnum.getAllApi() : config.getMethodList());
+                codeGenerationTableParam.setMethodList(config.getMethodList());
             }
         } else {
             TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getUseMybatisPlus(),
                     (v) -> codeGenerationTableParam.setUseMybatisPlus(Boolean.parseBoolean(v.toString())), config.isUseMybatisPlus());
-//            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getMethodList(),
-//                    (v) -> codeGenerationTableParam.setMethodList((List<String>) v), config.getMethodList(),
-//                    !codeGenerationTableParam.getUseMybatisPlus() ? ApiTemplateEnum.getAllApi() : null);
+            //            TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getMethodList(),
+            //                    (v) -> codeGenerationTableParam.setMethodList((List<String>) v), config.getMethodList(),
+            //                    !codeGenerationTableParam.getUseMybatisPlus() ? ApiTemplateEnum.getAllApi() : null);
             TemplateConvertUtil.setIfAbsent(codeGenerationTableParam.getSuperclassName(),
                     (v) -> codeGenerationTableParam.setSuperclassName(String.valueOf(v)),
                     config.getSuperclass() != null ? config.getSuperclass().getName() : null);
@@ -109,7 +109,8 @@ public class MapperTemplateProcessorImpl extends AbsTemplateProcessor<JavaMapper
         if (CollUtil.isNotEmpty(refCodeGenerationViewList)) {
             entityViewVO = refCodeGenerationViewList.stream().filter(v -> TemplateParserEnum.isEntity(v.getCodeType())).findFirst()
                     .orElse(null);
-            if (entityViewVO != null && codeGenerationTableParam.getUseMybatisPlus()) {
+            if (entityViewVO != null && (codeGenerationTableParam.getUseMybatisPlus() || ApiTemplateEnum.containsObjectMethod(
+                    codeGenerationTableParam.getMethodList()))) {
                 params.put(CodeTemplateConstants.genericsClass, entityViewVO.getName());
                 packages.add(TemplateConvertUtil.getFullPackageName(entityViewVO));
             }

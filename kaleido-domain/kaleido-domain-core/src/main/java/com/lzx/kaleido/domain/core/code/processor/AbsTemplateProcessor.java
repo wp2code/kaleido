@@ -22,6 +22,7 @@ import com.lzx.kaleido.plugins.template.model.TemplateContext;
 import com.lzx.kaleido.plugins.template.utils.CodeGenerationUtil;
 import com.lzx.kaleido.spi.db.enums.DataType;
 import com.lzx.kaleido.spi.db.utils.JdbcUtil;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +87,9 @@ public abstract class AbsTemplateProcessor<T extends JavaConfigVO> implements IT
             final T templateConfig = JsonUtil.toBean(templateParams, this.getTypeArgumentClass());
             if (templateConfig == null) {
                 throw new CommonRuntimeException(ErrorCode.CODE_TEMPLATE_PARSE_ERROR);
+            }
+            if (StrUtil.isBlank(codeGenerationTableParam.getCodePath())) {
+                codeGenerationTableParam.setCodePath(config.getCodePath());
             }
             //设置模板参数
             this.autoFillCodeGenerationTableParam(templateConfig, basicConfig, codeGenerationTableParam, config);
