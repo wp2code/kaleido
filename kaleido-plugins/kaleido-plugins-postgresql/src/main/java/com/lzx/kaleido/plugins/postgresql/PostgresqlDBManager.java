@@ -42,7 +42,10 @@ public class PostgresqlDBManager extends BaseDBManager {
      */
     @Override
     public String getJdbcUrl(final String fmtUrl, final ConnectionInfo connectionInfo) {
-        return fmtUrl.formatted(connectionInfo.getUrl(), connectionInfo.getPort(),
-                Optional.ofNullable(connectionInfo.getDatabaseName()).orElse("postgres"));
+        String url = connectionInfo.getUrl();
+        if (StrUtil.isNotBlank(connectionInfo.getSchemaName())) {
+            url = url + "&currentSchema=" + connectionInfo.getSchemaName();
+        }
+        return fmtUrl.formatted(url, connectionInfo.getPort(), Optional.ofNullable(connectionInfo.getDatabaseName()).orElse("postgres"));
     }
 }

@@ -13,6 +13,7 @@ import com.lzx.kaleido.spi.db.model.metaData.TableColumn;
 import com.lzx.kaleido.spi.db.model.metaData.TableIndex;
 import com.lzx.kaleido.spi.db.model.metaData.TableIndexColumn;
 import com.lzx.kaleido.spi.db.sql.SQLExecutor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
  * @author lwp
  * @date 2023-11-17
  **/
+@Slf4j
 public class PostgresqlMetaData extends BaseMetaData {
     
     private final List<String> systemSchemas = Arrays.asList("pg_toast", "pg_temp_1", "pg_toast_temp_1", "pg_catalog",
@@ -228,14 +230,21 @@ public class PostgresqlMetaData extends BaseMetaData {
      */
     @Override
     public String tableDDL(Connection connection, String databaseName, String schemaName, String tableName) {
-        SQLExecutor.getInstance().execute(connection, ISQL.FUNCTION_SQL.replaceFirst("tableSchema", schemaName), resultSet -> null);
-        String ddlSql = "select showcreatetable('" + schemaName + "','" + tableName + "') as sql";
-        return SQLExecutor.getInstance().execute(connection, ddlSql, resultSet -> {
-            if (resultSet.next()) {
-                return resultSet.getString("sql");
-            }
+        try {
+            SQLExecutor.getInstance().execute(connection, "SET search_path TO %s;".formatted(schemaName), resultSet -> null);
+            SQLExecutor.getInstance().execute(connection, ISQL.DROP_TYPE_SQL.formatted(schemaName, "tabledefs"), resultSet -> null);
+            SQLExecutor.getInstance().execute(connection, ISQL.TABLE_DEF_FUNCTION_SQL, resultSet -> null);
+            String ddlSql = String.format("select * from pg_get_tabledef('%s','%s',false,'COMMENTS') as ddl;", schemaName, tableName);
+            return SQLExecutor.getInstance().execute(connection, ddlSql, resultSet -> {
+                if (resultSet.next()) {
+                    return resultSet.getString("ddl");
+                }
+                return null;
+            });
+        } catch (Exception ex) {
+            log.error("Get table dll error ", ex);
             return null;
-        });
+        }
     }
     
     
