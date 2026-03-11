@@ -24,4 +24,12 @@
     <developerConnection>scm:git:https://github.com/wp2code/kaleido.git/kaleido/kaleido-test</developerConnection>
     <url>https://github.com/wp2code/kaleido/kaleido/kaleido-test</url>
   </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>1.18.1</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
 </project>

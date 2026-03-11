@@ -13,9 +13,10 @@ public interface IResultSetValueHandler {
     
     /**
      * @param rs
-     * @param index
+     * @param tableColumn
      * @param limitSize
      * @return
+     * @throws SQLException
      */
     String getString(ResultSet rs, TableColumn tableColumn, boolean limitSize) throws SQLException;
 }

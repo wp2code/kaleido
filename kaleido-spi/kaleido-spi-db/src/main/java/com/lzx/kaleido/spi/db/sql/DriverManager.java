@@ -8,7 +8,6 @@ import com.lzx.kaleido.spi.db.model.DriverInfo;
 import com.lzx.kaleido.spi.db.model.DriverProperties;
 import com.lzx.kaleido.spi.db.utils.JdbcJarUtil;
 import com.lzx.kaleido.spi.db.utils.JdbcUtil;
-
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -25,15 +24,11 @@ import java.util.concurrent.ConcurrentHashMap;
  **/
 public class DriverManager {
     
-    /**
-     *
-     */
-    private static final Map<String, DriverInfo> DRIVER_ENTRY_MAP = new ConcurrentHashMap();
+    private static final Map<String, DriverInfo> DRIVER_ENTRY_MAP = new ConcurrentHashMap<>();
     
-    /**
-     *
-     */
-    private static final Map<String, ClassLoader> CLASS_LOADER_MAP = new ConcurrentHashMap();
+    private static final Map<String, ClassLoader> CLASS_LOADER_MAP = new ConcurrentHashMap<>();
+    
+    private static final Object lock = new Object();
     
     /**
      * @param url
@@ -93,7 +88,7 @@ public class DriverManager {
         if (DRIVER_ENTRY_MAP.containsKey(driverProperties.getUniqueId())) {
             return DRIVER_ENTRY_MAP.get(driverProperties.getUniqueId());
         }
-        synchronized (driverProperties) {
+        synchronized (lock) {
             try {
                 ClassLoader classLoader = getClassLoader(driverProperties);
                 final Class<?> cls = classLoader.loadClass(driverProperties.getJdbcDriverClass());
@@ -136,8 +131,8 @@ public class DriverManager {
                 URLClassLoader classLoader;
                 try {
                     final URL[] urls = new URL[1];
-                    File driverFile = new File(JdbcJarUtil.getFullPath(driverProperties.getDownloadUrls(), driverProperties.getType(),
-                            driverProperties.getVersion()));
+                    File driverFile = new File(
+                            JdbcJarUtil.getFullPath(driverProperties.getDownloadUrls(), driverProperties.getType(), driverProperties.getVersion()));
                     urls[0] = driverFile.toURI().toURL();
                     classLoader = new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
                     classLoader.loadClass(driverProperties.getJdbcDriverClass());
