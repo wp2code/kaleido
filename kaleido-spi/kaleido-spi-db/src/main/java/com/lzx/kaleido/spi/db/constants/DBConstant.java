@@ -7,4 +7,5 @@ package com.lzx.kaleido.spi.db.constants;
 public interface DBConstant {
     String MYSQL_DB_TYPE = "MySQL";
     String PG_DB_TYPE = "PostgreSQL";
+    String DM_DB_TYPE = "DM";
 }

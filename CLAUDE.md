@@ -6,6 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Kaleido is a Spring Boot-based **code generation server** that connects to databases (MySQL, PostgreSQL), reads table structures, and generates source code using FreeMarker templates. It is the backend counterpart to [kaleido-client](https://github.com/wp2code/kaleido-client).
 
+## The model response is in Chinese
 ## Build Commands
 
 ```bash

@@ -45,6 +45,12 @@
     </dependency>
     <dependency>
       <groupId>com.lzx</groupId>
+      <artifactId>kaleido-plugins-dm</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.lzx</groupId>
       <artifactId>kaleido-domain-core</artifactId>
       <version>1.0.0-SNAPSHOT</version>
       <scope>compile</scope>

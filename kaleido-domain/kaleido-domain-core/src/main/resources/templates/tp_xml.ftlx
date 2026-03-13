@@ -34,7 +34,7 @@
                 <#else>
             <if test="${model.property} != null">
                 </#if>
-                and ${model.column} = ${r"#"}{${(model.property)!}},
+                and ${model.column} = ${r"#"}{${(model.property)!}}
             </if>
             </#list>
         </where>
@@ -52,7 +52,7 @@
                 <#else>
             <if test="${model.property} != null">
                 </#if>
-                and ${model.column} = ${r"#"}{${(model.property)!}},
+                and ${model.column} = ${r"#"}{${(model.property)!}}
             </if>
             </#list>
         </where>
@@ -113,11 +113,7 @@
             <#list tableFieldColumnList as model>
               ${(model.column)!}<#if model_has_next>,</#if>
             </#list>
-        ) values (
-      <#list tableFieldColumnList as model>
-        ${r"#"}{${(model.property)!}}<#if model_has_next>,</#if>
-      </#list>
-        )
+        ) values
         <foreach collection="list" item="item" separator=",">
             (
       <#list tableFieldColumnList as model>
@@ -185,6 +181,51 @@
         </trim>
       </#if>
     </insert>
+    <#if tablePK?exists && tablePK.column?exists && (dbType == "DM")>
+    <insert id="insertOrUpdateSelective" parameterType="${resultMapType!}">
+        MERGE INTO ${tableName} T1
+        USING (SELECT ${r"#"}{${tablePK.property}} AS ${tablePK.column} FROM DUAL) T2
+        ON (T1.${tablePK.column} = T2.${tablePK.column})
+        WHEN MATCHED THEN UPDATE
+        <trim prefix="SET" suffixOverrides=",">
+            <#list tableFieldColumnList as model>
+                <#if !model.primaryKey>
+                    <#if model.javaType=="java.lang.String">
+            <if test="${model.property} != null and ${model.property} != ''">
+                    <#else>
+            <if test="${model.property} != null">
+                    </#if>
+              T1.${(model.column)!} = ${r"#"}{${(model.property)!}},
+            </if>
+                </#if>
+            </#list>
+        </trim>
+        WHEN NOT MATCHED THEN INSERT
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <#list tableFieldColumnList as model>
+                <#if model.javaType=="java.lang.String">
+            <if test="${model.property} != null and ${model.property} != ''">
+                <#else>
+            <if test="${model.property} != null">
+                </#if>
+              ${(model.column)!},
+            </if>
+            </#list>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <#list tableFieldColumnList as model>
+                <#if model.javaType=="java.lang.String">
+            <if test="${model.property} != null and ${model.property} != ''">
+                <#else>
+            <if test="${model.property} != null">
+                </#if>
+              ${r"#"}{${(model.property)!}},
+            </if>
+            </#list>
+        </trim>
+    </insert>
+    </#if>
     </#if>
     <#if tablePK??><#if methodModel.apiId=="selectByPrimaryKey">
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="${tablePK.javaType}">

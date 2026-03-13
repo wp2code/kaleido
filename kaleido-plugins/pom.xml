@@ -17,6 +17,7 @@
         <module>kaleido-plugins-mapstruct</module>
         <module>kaleido-plugins-mp</module>
         <module>kaleido-plugins-template</module>
+        <module>kaleido-plugins-dm</module>
     </modules>
     <dependencyManagement>
         <dependencies>
@@ -28,6 +29,11 @@
             <dependency>
                 <groupId>com.lzx</groupId>
                 <artifactId>kaleido-plugins-postgresql</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lzx</groupId>
+                <artifactId>kaleido-plugins-dm</artifactId>
                 <version>${revision}</version>
             </dependency>
         </dependencies>

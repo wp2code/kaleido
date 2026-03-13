@@ -43,8 +43,10 @@ public class BaseDBManager implements IDBManager {
             if (StrUtil.isNotBlank(connectionInfo.getDatabaseName()) || StrUtil.isNotBlank(connectionInfo.getSchemaName())) {
                 connectDatabase(connection, connectionInfo.getSchemaName(), connectionInfo.getDatabaseName());
             }
-            //PostgreSQL不能设置
-            if (StrUtil.isBlank(connectionInfo.getDatabaseName()) && !DBConstant.PG_DB_TYPE.equalsIgnoreCase(connectionInfo.getDbType())) {
+            //PostgreSQL、DM 不通过 getCatalog() 获取数据库名
+            if (StrUtil.isBlank(connectionInfo.getDatabaseName())
+                    && !DBConstant.PG_DB_TYPE.equalsIgnoreCase(connectionInfo.getDbType())
+                    && !DBConstant.DM_DB_TYPE.equalsIgnoreCase(connectionInfo.getDbType())) {
                 connectionInfo.setDatabaseName(connection.getCatalog());
             }
             connectionInfo.setConnection(

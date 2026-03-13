@@ -150,8 +150,7 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
      */
     @Override
     public String getTableDDL(final TableDDLParam param) {
-        return DataSourceFactory.getInstance()
-                .getDDL(param.getConnectionId(), param.getDataBaseName(), param.getSchemaName(), param.getTableName());
+        return DataSourceFactory.getInstance().getDDL(param.getConnectionId(), param.getDataBaseName(), param.getSchemaName(), param.getTableName());
     }
     
     /**
@@ -295,7 +294,7 @@ public class DataSourceService extends BaseServiceImpl<IDataSourceMapper, DataSo
             connectionInfo.setConnection(connectionWrapper);
             final List<DatabaseVO> dateBaseList = DataSourceConvertUtil.convertDataBaseList(
                     DataSourceFactory.getInstance().getDateBaseList(connectionInfo), connectionInfo, true, false);
-            return CollUtil.isNotEmpty(dateBaseList) ? dateBaseList.stream().filter(v -> v.getName().equals(dataBaseName)).findFirst()
+            return CollUtil.isNotEmpty(dateBaseList) ? dateBaseList.stream().filter(v -> dataBaseName.equalsIgnoreCase(v.getName())).findFirst()
                     .orElse(null) : null;
         } catch (Exception e) {
             log.error("打开{}数据库失败！异常：{}", dataBaseName, ExceptionUtil.getMessage(e));

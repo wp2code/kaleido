@@ -1,8 +1,7 @@
 package com.lzx.kaleido.spi.db.model;
 
-import lombok.Data;
-
 import java.io.Serializable;
+import lombok.Data;
 
 /**
  * @author lwp
@@ -42,11 +41,11 @@ public class ConnectionInfo implements Serializable {
      */
     private DBConfig propertiesConfig;
     
-    public static ConnectionInfo of(final String id, final String dbName, final String type, final String name, final Integer port,
-            final String url, final String userName, final String password, final String extend) {
+    public static ConnectionInfo of(final String id, final String dbName, final String type, final String name, final Integer port, final String url,
+            final String userName, final String password, final String extend) {
         final ConnectionInfo connectionInfo = new ConnectionInfo();
         connectionInfo.setId(id);
-        connectionInfo.setDatabaseName(dbName);
+        connectionInfo.setDatabaseName(dbName == null ? "" : dbName);
         connectionInfo.setDbType(type);
         connectionInfo.setName(name);
         connectionInfo.setPort(port);

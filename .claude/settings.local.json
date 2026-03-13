@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /d/wp2code/github/kaleido/kaleido-start -type f -name \"*.java\" 2>/dev/null | head -20)",
+      "Bash(grep -r \"MySQL\\\\|PostgreSQL\" /d/wp2code/github/kaleido --include=\"*.ftlx\" --include=\"*.ftl\" 2>/dev/null | head -30)",
+      "Bash(find /d/wp2code/github/kaleido -name \"*.ftlx\" -o -name \"*.ftl\" 2>/dev/null | head -20)"
+    ]
+  }
+}

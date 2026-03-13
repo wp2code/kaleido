@@ -25,6 +25,10 @@
         </dependency>
         <dependency>
             <groupId>com.lzx</groupId>
+            <artifactId>kaleido-plugins-dm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.lzx</groupId>
             <artifactId>kaleido-domain-core</artifactId>
         </dependency>
         <dependency>
